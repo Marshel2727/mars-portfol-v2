@@ -1,0 +1,9 @@
+# Mengabaikan file rahasia
+.env
+
+# Mengabaikan environment Python
+venv/
+__pycache__/
+
+# (Opsional) Mengabaikan folder upload jika kamu tidak ingin gambar dummy masuk GitHub
+app/static/uploads/
