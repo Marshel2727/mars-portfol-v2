@@ -1,7 +1,7 @@
 from flask import Blueprint,request
 from app.service.skill_service import get_all_skill,get_skill_by_id,create_skill,update_skill,delete_skill
 from app.utils.response import error_response, success_response
-from app.utils.icon_upload import save_image
+from app.utils.icon_upload import save_image, delete_image
 from flask_jwt_extended import jwt_required,get_jwt
 
 
@@ -14,7 +14,7 @@ def fetch_all_skills():
     return success_response(data=skills)
 
 @skill_bp.route('/<int:id>', methods=['GET'])
-def fetch_project_by_id(id):
+def fetch_skill_by_id(id):
     
     skill = get_skill_by_id(id)
 
@@ -61,6 +61,10 @@ def edit_skill(id):
     if claims.get('role') != 'admin':
         return error_response(message='Akses ditolak! Hanya admin yang boleh mengakses.', status_code=403)
     
+    old_skill = get_skill_by_id(id)
+    if not old_skill:
+        return error_response(message='Skill tidak ditemukan.', status_code=400)
+    
     name = request.form.get('name')
     level = request.form.get('level')
 
@@ -70,10 +74,12 @@ def edit_skill(id):
     if level:
         data['level'] = level
     
-    if 'image' in request.files:
-        file = request.files.get('image')
+    if 'icon_url' in request.files:
+        file = request.files.get('icon_url')
         new_icon = save_image(file)
         if new_icon:
+            if old_skill.get('icon_url'):
+                delete_image(old_skill['icon_url'])
             data['icon_url'] = new_icon
     
     updated_skill = update_skill(id, data)
@@ -90,8 +96,15 @@ def remove_skill(id):
     if claims.get('role') != 'admin':
         return error_response(message='Akses ditolak! Hanya admin yang boleh mengakses.', status_code=403)
     
+    skill_to_delete = get_skill_by_id(id)
+    if not skill_to_delete:
+        return error_response(message='Skill tidak ditemukan.', status_code=404)
+    old_icon_url = skill_to_delete.get('icon_url')
+    
     success = delete_skill(id)
 
     if success:
+        if old_icon_url:
+            delete_image(old_icon_url)
         return success_response(message='Skill berhasil dihapus.')
     return error_response(message='Skill tidak ditemukan.')

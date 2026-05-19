@@ -2,7 +2,7 @@ from app import db
 from datetime import datetime
 
 class Message(db.Model):
-    __tablename__='Messages'
+    __tablename__='messages'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150))
@@ -21,5 +21,5 @@ class Message(db.Model):
             'email': self.email,
             'content': self.content,
             'is_read': self.is_read,
-            'created_at': self.created_at.iosformat() if self.created_at else None
+            'created_at': self.created_at.isoformat() if self.created_at else None
         }

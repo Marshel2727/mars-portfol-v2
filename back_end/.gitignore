@@ -4,6 +4,10 @@
 # Mengabaikan environment Python
 venv/
 __pycache__/
+*.pyc
 
-# (Opsional) Mengabaikan folder upload jika kamu tidak ingin gambar dummy masuk GitHub
-app/static/uploads/
+# Mengabaikan isi folder upload tapi tetap track folder-nya
+app/static/uploads/projects/*
+app/static/uploads/skills/*
+!app/static/uploads/projects/.gitkeep
+!app/static/uploads/skills/.gitkeep

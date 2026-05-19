@@ -19,6 +19,7 @@ def create_project(data):
     
     new_project = Project(
         title = data.get('title'),
+        sub_title = data.get('sub_title'),
         description = data.get('description'),
         image_url = data.get('image_url'),
         demo_url = data.get('demo_url'),
@@ -39,6 +40,8 @@ def update_project(project_id, data):
     
     if 'title' in data:
         project.title = data['title']
+    if 'sub_title' in data:
+        project.sub_title = data['sub_title']
     if 'description' in data:
         project.description = data['description']
     if 'image_url' in data:

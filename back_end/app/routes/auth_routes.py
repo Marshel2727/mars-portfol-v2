@@ -1,10 +1,16 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt
 from app.service.auth_service import register_user,verify_login
 
 auth_bp = Blueprint('auth_bp', __name__, url_prefix=('/api/auth'))
 
 @auth_bp.route('/register', methods=['POST'])
+#@jwt_required()
 def register():
+#    claims = get_jwt()
+#    if claims.get('role') != 'admin':
+#       return jsonify({"status": "error", "message": "Akses ditolak! Hanya admin yang bisa membuat akun baru."}), 403
+
     data = request.get_json()
 
     if not data or not data.get('username') or  not data.get('email') or not data.get('password'):

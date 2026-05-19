@@ -16,7 +16,7 @@ def success_response(data=None, message=None, status_code=200):
 def error_response(message=None, status_code=400):
     
     response = {
-        'status': 'Success'
+        'status': 'error'
     }
 
     if message is not None:

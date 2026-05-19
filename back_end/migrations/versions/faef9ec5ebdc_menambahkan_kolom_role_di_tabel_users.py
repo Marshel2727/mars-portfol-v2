@@ -21,6 +21,7 @@ def upgrade():
     op.create_table('projects',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=100), nullable=False),
+    sa.Column('sub_title', sa.String(length=150), nullable=True),
     sa.Column('description', sa.Text(), nullable=False),
     sa.Column('image_url', sa.String(length=150), nullable=False),
     sa.Column('demo_url', sa.String(length=150), nullable=True),

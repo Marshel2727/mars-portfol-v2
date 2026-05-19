@@ -1,0 +1,47 @@
+# ========================
+# Sensitive / Secret Files
+# ========================
+back_end/.env
+front_end/.env.local
+front_end/.env
+
+# ========================
+# Docker Backups
+# ========================
+docker-backups/
+
+# ========================
+# Python - Backend
+# ========================
+back_end/venv/
+back_end/__pycache__/
+back_end/**/__pycache__/
+back_end/**/*.pyc
+back_end/**/*.pyo
+
+# ========================
+# Node.js - Frontend
+# ========================
+front_end/node_modules/
+front_end/.next/
+front_end/out/
+front_end/build/
+front_end/.pnp
+front_end/.pnp.*
+front_end/.yarn/*
+!front_end/.yarn/patches
+!front_end/.yarn/plugins
+!front_end/.yarn/releases
+!front_end/.yarn/versions
+front_end/npm-debug.log*
+front_end/yarn-debug.log*
+front_end/yarn-error.log*
+front_end/.pnpm-debug.log*
+front_end/*.tsbuildinfo
+front_end/next-env.d.ts
+
+# ========================
+# Misc
+# ========================
+.DS_Store
+*.pem

@@ -27,3 +27,18 @@ def save_image(image_file):
 
         return f"/static/uploads/projects/{unique_filename}"
     return None
+
+def delete_image(file_url):
+    """Fungsi untuk menghapus file gambar fisik proyek dari hard drive"""
+    if not file_url:
+        return
+
+    # Menghapus tanda '/' di depan agar path tidak error
+    relative_path = file_url.lstrip('/')
+    
+    # Menggabungkan dengan folder 'app'
+    file_path = os.path.join('app', relative_path)
+
+    # Mengecek dan menghapus file jika ada
+    if os.path.exists(file_path):
+        os.remove(file_path)
