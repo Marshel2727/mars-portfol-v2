@@ -1,0 +1,63 @@
+services:
+  db:
+    image: mysql:8.4
+    container_name: mars_mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mars_root_password
+      MYSQL_DATABASE: mars_portfol
+      MYSQL_USER: mars_user
+      MYSQL_PASSWORD: mars_password
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./back_end
+      dockerfile: Dockerfile
+    container_name: mars_backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: ./back_end/.env
+    environment:
+      FLASK_ENV: production
+      FLASK_APP: main.py
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: mars_portfol
+      DB_USER: mars_user
+      DB_PASSWORD: mars_password
+      FRONTEND_URL: "http://129.212.229.36,http://129.212.229.36:80,http://129.212.229.36:3000"
+    command: sh -c "flask db upgrade && gunicorn -w 4 -b 0.0.0.0:5000 main:app"
+    volumes:
+      - backend_uploads:/app/app/static/uploads
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./front_end
+      dockerfile: Dockerfile
+    container_name: mars_frontend
+    ports:
+      - "80:3000"
+    depends_on:
+      - backend
+    env_file: ./front_end/.env.local
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  backend_uploads:
