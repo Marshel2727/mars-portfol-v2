@@ -39,7 +39,7 @@ services:
       DB_USER: mars_user
       DB_PASSWORD: mars_password
       FRONTEND_URL: "http://marshelportfolio.me,http://www.marshelportfolio.me,http://168.144.33.247,http://168.144.33.247:80"
-    command: sh -c "flask db upgrade && gunicorn -w 1 -b 0.0.0.0:5000 main:app"
+    command: sh -c "flask db upgrade && gunicorn -w 1 --timeout 120 --access-logfile - -b 0.0.0.0:5000 main:app"
     volumes:
       - backend_uploads:/app/app/static/uploads
     restart: unless-stopped
