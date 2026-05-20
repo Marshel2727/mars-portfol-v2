@@ -38,7 +38,7 @@ services:
       DB_NAME: mars_portfol
       DB_USER: mars_user
       DB_PASSWORD: mars_password
-      FRONTEND_URL: "http://marshelportfolio.me,http://www.marshelportfolio.me,http://168.144.33.247,http://168.144.33.247:80"
+      FRONTEND_URL: "https://marshelportfolio.me,https://www.marshelportfolio.me,http://marshelportfolio.me,http://www.marshelportfolio.me,http://168.144.33.247,http://168.144.33.247:80"
     command: sh -c "flask db upgrade && gunicorn -w 1 -b 0.0.0.0:5000 main:app"
     volumes:
       - backend_uploads:/app/app/static/uploads
@@ -49,13 +49,25 @@ services:
       context: ./front_end
       dockerfile: Dockerfile
     container_name: mars_frontend
-    ports:
-      - "80:3000"
+    expose:
+      - "3000"
     depends_on:
       - backend
     env_file: ./front_end/.env.local
     environment:
       - NODE_ENV=production
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: mars_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
     restart: unless-stopped
 
 volumes:
