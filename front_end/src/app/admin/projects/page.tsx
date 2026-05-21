@@ -1,39 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { getAllProjects } from "@/services/project";
 import { Project } from "@/types";
 import ProjectForm from "@/components/admin/projects/ProjectForm";
 import ProjectList from "@/components/admin/projects/ProjectList";
 
 export default function ProjectAdminPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: projects = [], isLoading, mutate } = useSWR("admin/projects", getAllProjects);
 
   // Saklar untuk mengontrol apakah modal form terbuka atau tertutup
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
 
-  const loadProjects = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAllProjects();
-      setProjects(data);
-    } catch (error) {
-      console.error("Gagal memuat project", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadProjects();
-  }, []);
-
   const handleSuccessForm = () => {
     setProjectToEdit(null);
     setIsFormOpen(false); // Tutup form setelah berhasil simpan
-    loadProjects();
+    mutate();
   };
 
   const handleCancelForm = () => {
@@ -77,7 +61,7 @@ export default function ProjectAdminPage() {
       <ProjectList
         projects={projects}
         isLoading={isLoading}
-        onRefresh={loadProjects}
+        onRefresh={mutate}
         onEdit={handleEditProject}
       />
     </div>

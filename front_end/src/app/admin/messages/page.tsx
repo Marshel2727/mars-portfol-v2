@@ -1,33 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { getAllMessages } from "@/services/messages";
-import { Message } from "@/types";
 import MessagesList from "@/components/admin/messages/MessageList";
 
-
 export default function MessageAdminPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: rawMessages = [], isLoading, mutate } = useSWR("admin/messages", getAllMessages);
 
-  const loadMessages = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getAllMessages();
-      const sortedMessages = data.sort((a, b) => 
-        new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-      );
-      setMessages(sortedMessages);
-    } catch (error) {
-      console.error("Gagal mengambil pesan:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadMessages();
-  }, []);
+  // Sorting pesan terbaru ke terlama
+  const messages = [...rawMessages].sort((a, b) => 
+    new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+  );
   
   return (
     <div className="space-y-8">
@@ -42,7 +25,7 @@ export default function MessageAdminPage() {
       <MessagesList 
         messages={messages} 
         isLoading={isLoading} 
-        onRefresh={loadMessages} 
+        onRefresh={mutate} 
       />
     </div>
   );
