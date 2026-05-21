@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { Project } from "@/types";
 import { getAllProjects } from "@/services/project";
 import Link from "next/link";
@@ -9,24 +10,10 @@ import { motion } from "framer-motion";
 import { getImageUrl } from "@/lib/utils";
 
 export default function GallerySection({ projectId }: { projectId: number }) {
-  const [project, setProject] = useState<Project | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const allProjects = await getAllProjects();
-        const foundProject = allProjects.find((p) => p.id === projectId);
-        setProject(foundProject || null);
-      } catch (error) {
-        console.error("Gagal mengambil data proyek:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchProject();
-  }, [projectId]);
+  const { data: rawProjects, isLoading } = useSWR("/projects/", () => getAllProjects());
+  const project = Array.isArray(rawProjects) ? (rawProjects.find((p) => p.id === projectId) || null) : null;
 
   useEffect(() => {
     if (lightboxIndex !== null) {
