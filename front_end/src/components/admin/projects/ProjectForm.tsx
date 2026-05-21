@@ -76,15 +76,15 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-3xl rounded-xl border border-gray-700 bg-gray-800 p-6 shadow-2xl">
-        <div className="mb-6 flex items-center justify-between border-b border-gray-700 pb-4">
+      <div className="w-full max-w-3xl rounded-xl border border-gray-750 bg-gray-900 p-6 shadow-2xl">
+        <div className="mb-6 flex items-center justify-between border-b border-gray-800 pb-4">
           <h2 className="text-2xl font-bold text-white">
             {projectToEdit ? "✏️ Edit Proyek" : "✨ Tambah Proyek Baru"}
           </h2>
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-full p-1.5 text-gray-400 hover:bg-gray-700/50 hover:text-red-500 transition-colors focus:outline-none"
+            className="rounded-full p-1.5 text-gray-400 hover:bg-gray-800 hover:text-red-500 transition-colors focus:outline-none"
             aria-label="Tutup"
           >
             <svg
@@ -106,7 +106,7 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
               <label className="mb-1 block text-sm font-medium text-gray-300">Judul Proyek *</label>
               <input
                 type="text" value={fields.title} onChange={setField("title")} required
-                className="w-full rounded bg-gray-900 p-2 text-white border border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div>
@@ -120,14 +120,14 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
                 id="image-upload" type="file"
                 accept="image/png, image/jpeg, image/jpg, image/gif"
                 onChange={(e) => setImage(e.target.files?.[0] || null)}
-                className="w-full rounded bg-gray-900 p-1.5 text-white border border-gray-600 file:mr-4 file:rounded file:border-0 file:bg-teal-600 file:px-4 file:py-1 file:text-white hover:file:bg-teal-700 focus:outline-none"
+                className="w-full rounded bg-gray-950 p-1.5 text-white border border-gray-800 file:mr-4 file:rounded file:border-0 file:bg-teal-600 file:px-4 file:py-1 file:text-white hover:file:bg-teal-700 focus:outline-none"
               />
             </div>
             <div className="md:col-span-2">
               <label className="mb-1 block text-sm font-medium text-gray-300">Deskripsi Proyek *</label>
               <textarea
                 value={fields.description} onChange={setField("description")} required rows={4}
-                className="w-full rounded bg-gray-900 p-2 text-white border border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div>
@@ -136,7 +136,7 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
               </label>
               <input
                 type="url" placeholder="https://..." value={fields.demoUrl} onChange={setField("demoUrl")}
-                className="w-full rounded bg-gray-900 p-2 text-white border border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div>
@@ -145,7 +145,7 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
               </label>
               <input
                 type="url" placeholder="https://github.com/..." value={fields.githubUrl} onChange={setField("githubUrl")}
-                className="w-full rounded bg-gray-900 p-2 text-white border border-gray-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
               />
             </div>
           </div>

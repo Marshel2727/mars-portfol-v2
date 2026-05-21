@@ -61,7 +61,7 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
                       className="h-12 w-12 rounded object-cover shadow-sm border border-gray-600"
                     />
                   </td>
-                  <td className="px-4 py-3 font-medium text-white whitespace-nowrap">{project.title}</td>
+                  <td className="px-4 py-3 font-medium text-white max-w-xs break-words">{project.title}</td>
                   <td className="px-4 py-3">
                     <div className="line-clamp-2 max-w-xs text-sm text-gray-300 font-normal">
                       {project.description}
