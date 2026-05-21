@@ -1,6 +1,7 @@
 "use client"; // Wajib karena framer-motion butuh akses ke browser API
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -43,12 +44,12 @@ export default function Hero() {
         transition={{ duration: 0.5, delay: 0.6 }}
         className="flex flex-col sm:flex-row gap-4"
       >
-        <a href="#projects" className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-full font-semibold transition shadow-lg shadow-teal-500/30">
+        <Link href="/projects" className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-200 shadow-lg shadow-teal-500/30 hover:scale-105">
           Lihat Karya Saya
-        </a>
-        <a href="#contact" className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-full font-semibold transition border border-gray-700">
+        </Link>
+        <Link href="/contact" className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-200 border border-gray-700 hover:scale-105">
           Hubungi Saya
-        </a>
+        </Link>
       </motion.div>
 
     </main>

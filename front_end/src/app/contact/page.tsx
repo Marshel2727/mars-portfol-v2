@@ -1,18 +1,18 @@
 "use client";
 
 import Navbar from "@/components/publick/layout/Navbar";
-import Hero from "@/components/publick/layout/Hero";
+import ContactSection from "@/components/publick/ContactSection";
 import Footer from "@/components/publick/layout/Footer";
 import PageTransition from "@/components/publick/layout/PageTransition";
 
-export default function Home() {
+export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans flex flex-col">
       <Navbar />
-      
-      <main className="flex-1 flex flex-col justify-center">
+
+      <main className="pt-20 flex-1 flex flex-col justify-center">
         <PageTransition>
-          <Hero />
+          <ContactSection />
         </PageTransition>
       </main>
 
