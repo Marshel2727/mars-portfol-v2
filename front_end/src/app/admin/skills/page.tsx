@@ -11,29 +11,57 @@ import SkillList from "@/components/admin/skills/SkillList";
 export default function SkillAdminPage() {
   const { data: rawSkills, isLoading, mutate } = useSWR("/skills/", () => getAllSkill());
   const skills = Array.isArray(rawSkills) ? rawSkills : [];
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [skillToEdit, setSkillToEdit] = useState<Skill | null>(null);
 
-  const handleSuccess = () => {
-    setSkillToEdit(null); // Tutup mode edit (kembali ke form kosong)
-    mutate();             // Refresh tabel data terbaru
+  const handleAddNewSkill = () => {
+    setSkillToEdit(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEditSkill = (skill: Skill) => {
+    setSkillToEdit(skill);
+    setIsFormOpen(true);
+  };
+
+  const handleSuccessForm = () => {
+    setSkillToEdit(null);
+    setIsFormOpen(false);
+    mutate();
+  };
+
+  const handleCancelForm = () => {
+    setSkillToEdit(null);
+    setIsFormOpen(false);
   };
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold text-white text-center">Kelola Skill</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-white">Kelola Skill</h1>
+        
+        {/* Tombol untuk memunculkan form tambah skill */}
+        <button 
+          onClick={handleAddNewSkill}
+          className="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-md font-medium transition"
+        >
+          + Tambah Skill
+        </button>
+      </div>
 
-      <SkillForm
-        skillToEdit={skillToEdit}
-        // isLoading={isLoading} <-- Form biasanya tidak butuh ini dari bos, dia punya isSubmitting sendiri
-        onCancel={() => setSkillToEdit(null)} // ✅ PERBAIKAN: Typo "Cancle" diperbaiki
-        onSuccess={handleSuccess}             // ✅ PERBAIKAN: Fungsi sukses dimasukkan!
-      />
+      {isFormOpen && (
+        <SkillForm
+          skillToEdit={skillToEdit}
+          onCancel={handleCancelForm}
+          onSuccess={handleSuccessForm}
+        />
+      )}
 
       <SkillList
         skills={skills}
         isLoading={isLoading}
         onRefresh={mutate}
-        onEdit={(skill) => setSkillToEdit(skill)} // ✅ PERBAIKAN: Mengganti parameter "skils" jadi "skill"
+        onEdit={handleEditSkill}
       />
     </div>
   );
