@@ -5,12 +5,12 @@ import { getAllMessages } from "@/services/messages";
 import MessagesList from "@/components/admin/messages/MessageList";
 
 export default function MessageAdminPage() {
-  const { data: rawMessages = [], isLoading, mutate } = useSWR("admin/messages", getAllMessages);
+  const { data: rawMessages, error, isLoading, mutate } = useSWR("/messages/", () => getAllMessages());
 
   // Sorting pesan terbaru ke terlama
-  const messages = [...rawMessages].sort((a, b) => 
-    new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-  );
+  const messages = Array.isArray(rawMessages)
+    ? [...rawMessages].sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())
+    : [];
   
   return (
     <div className="space-y-8">
@@ -20,6 +20,12 @@ export default function MessageAdminPage() {
           Daftar pesan dan pertanyaan yang dikirimkan oleh pengunjung melalui formulir kontak.
         </p>
       </div>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-md text-sm">
+          Gagal memuat pesan: {error.message || "Pastikan Anda sudah login sebagai Admin."}
+        </div>
+      )}
 
       {/* Menampilkan tabel pesan */}
       <MessagesList 

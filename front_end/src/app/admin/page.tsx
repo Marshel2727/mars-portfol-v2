@@ -7,9 +7,13 @@ import { getAllMessages } from "@/services/messages";
 import StatCard from "@/components/ui/StatCard";
 
 export default function AdminDashboard() {
-  const { data: projects = [], isLoading: loadingProjects } = useSWR("admin/projects", getAllProjects);
-  const { data: skills = [], isLoading: loadingSkills } = useSWR("admin/skills", getAllSkill);
-  const { data: messages = [], isLoading: loadingMessages } = useSWR("admin/messages", getAllMessages);
+  const { data: rawProjects, isLoading: loadingProjects } = useSWR("/projects/", () => getAllProjects());
+  const { data: rawSkills, isLoading: loadingSkills } = useSWR("/skills/", () => getAllSkill());
+  const { data: rawMessages, isLoading: loadingMessages } = useSWR("/messages/", () => getAllMessages());
+
+  const projects = Array.isArray(rawProjects) ? rawProjects : [];
+  const skills = Array.isArray(rawSkills) ? rawSkills : [];
+  const messages = Array.isArray(rawMessages) ? rawMessages : [];
 
   const isLoading = loadingProjects || loadingSkills || loadingMessages;
 

@@ -9,7 +9,8 @@ import SkillForm from "@/components/admin/skills/SkillForm";
 import SkillList from "@/components/admin/skills/SkillList";
 
 export default function SkillAdminPage() {
-  const { data: skills = [], isLoading, mutate } = useSWR("admin/skills", getAllSkill);
+  const { data: rawSkills, isLoading, mutate } = useSWR("/skills/", () => getAllSkill());
+  const skills = Array.isArray(rawSkills) ? rawSkills : [];
   const [skillToEdit, setSkillToEdit] = useState<Skill | null>(null);
 
   const handleSuccess = () => {

@@ -8,7 +8,8 @@ import ProjectForm from "@/components/admin/projects/ProjectForm";
 import ProjectList from "@/components/admin/projects/ProjectList";
 
 export default function ProjectAdminPage() {
-  const { data: projects = [], isLoading, mutate } = useSWR("admin/projects", getAllProjects);
+  const { data: rawProjects, isLoading, mutate } = useSWR("/projects/", () => getAllProjects());
+  const projects = Array.isArray(rawProjects) ? rawProjects : [];
 
   // Saklar untuk mengontrol apakah modal form terbuka atau tertutup
   const [isFormOpen, setIsFormOpen] = useState(false);
