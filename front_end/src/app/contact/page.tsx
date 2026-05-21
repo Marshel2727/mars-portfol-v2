@@ -7,7 +7,7 @@ import PageTransition from "@/components/publick/layout/PageTransition";
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans flex flex-col">
+    <div className="h-screen bg-gray-900 text-white font-sans flex flex-col overflow-y-auto lg:overflow-hidden">
       <Navbar />
 
       <main className="pt-20 flex-1 flex flex-col justify-center">

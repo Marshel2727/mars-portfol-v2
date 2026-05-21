@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <main id="about" className="flex flex-col items-center justify-center px-8 text-center pt-32 pb-20 min-h-screen overflow-hidden">
+    <main id="about" className="flex flex-col items-center justify-center px-8 text-center py-10 md:py-0 overflow-hidden">
       
       {/* Animasi Label Muncul dari atas */}
       <motion.div 
