@@ -37,7 +37,7 @@ const getLevelBadgeStyles = (level: string): string => {
 
 export default function SkillsSection({ skills }: { skills: Skill[] }) {
   return (
-    <section id="skills" className="py-24 bg-gray-900 border-y border-gray-800 overflow-hidden">
+    <section id="skills" className="py-24 bg-gray-800/50 border-t border-gray-800">
       <div className="max-w-6xl mx-auto px-8">
         
         {/* Animasi Judul */}
