@@ -21,7 +21,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="my-4 ml-4 flex h-[calc(100vh-32px)] w-72 flex-col rounded-3xl bg-gray-900 text-gray-100 shadow-2xl">
+    <aside className="my-4 ml-4 flex h-[calc(100vh-32px)] w-72 shrink-0 flex-col rounded-3xl bg-gray-900 text-gray-100 shadow-2xl">
       <div className="border-b border-gray-800 p-6 text-center text-2xl font-bold tracking-tighter">
         PORTOFOLIO
       </div>
