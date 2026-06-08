@@ -107,7 +107,7 @@ export default function AdminDashboard() {
         <StatCard title="Pesan Masuk" value={messages.length} isLoading={isLoading} />
       </div>
 
-      <div className="mt-12 p-6 bg-gray-800/40 rounded-2xl border border-gray-700/50 backdrop-blur-md max-w-md mx-auto text-center shadow-xl">
+      <div className="mt-12 p-6 bg-gray-800/40 rounded-2xl border border-gray-700/50 backdrop-blur-md max-w-md mx-auto text-center shadow-xl md:hidden">
         <h2 className="text-xl font-semibold text-gray-100 mb-2">Notifikasi HP Admin</h2>
         <p className="text-sm text-gray-400 mb-6 leading-relaxed">
           Terima pemberitahuan instan langsung di HP Anda saat pengunjung mengirimkan pesan baru pada form kontak portofolio.
