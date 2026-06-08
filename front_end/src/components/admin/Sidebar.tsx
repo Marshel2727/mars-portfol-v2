@@ -11,29 +11,44 @@ const menuItems = [
   { name: "Message", path: "/admin/messages" },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
   const handleLogout = () => {
     logout();
+    onClose?.();
     router.push("/login");
   };
 
   return (
-    <aside className="my-4 ml-4 flex h-[calc(100vh-32px)] w-72 shrink-0 flex-col rounded-3xl bg-gray-900 text-gray-100 shadow-2xl">
-      <div className="border-b border-gray-800 p-6 text-center text-2xl font-bold tracking-tighter">
+    <aside className="my-0 ml-0 md:my-4 md:ml-4 flex h-screen md:h-[calc(100vh-32px)] w-72 shrink-0 flex-col bg-gray-900 text-gray-100 shadow-2xl rounded-none md:rounded-3xl">
+      <div className="border-b border-gray-800 p-6 text-center text-2xl font-bold tracking-tighter relative">
         PORTOFOLIO
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-1/2 -translate-y-1/2 md:hidden p-2 text-gray-400 hover:text-gray-100"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 space-y-2 p-4">
         {menuItems.map((item) => {
-          // ✅ BUG FIX: Mengganti == dengan === (strict equality)
           const isActive = pathname === item.path;
           return (
             <Link
               key={item.name}
               href={item.path}
+              onClick={() => onClose?.()}
               className={`block rounded px-4 py-3 transition-colors ${
                 isActive ? "bg-teal-600 font-semibold" : "hover:bg-gray-800"
               }`}
