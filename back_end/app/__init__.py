@@ -33,6 +33,7 @@ def create_app():
      from .models.skill import Skill
      from .models.message import Message
      from .models.project_image import ProjectImage
+     from .models.push_subscription import PushSubscription
 
      from .routes.project_routes import project_bp
      app.register_blueprint(project_bp)

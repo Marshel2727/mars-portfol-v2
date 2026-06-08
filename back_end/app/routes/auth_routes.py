@@ -35,3 +35,21 @@ def login():
     
     response_data, status_code = verify_login(data.get('email'), data.get('password'))
     return jsonify(response_data), status_code
+
+@auth_bp.route('/subscribe', methods=['POST'])
+@jwt_required()
+def subscribe():
+    from flask_jwt_extended import get_jwt_identity
+    from app.service.auth_service import subscribe_push
+
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "status": "error",
+            "message": "Data subscription wajib disertakan!"
+        }), 400
+
+    response_data, status_code = subscribe_push(user_id, data)
+    return jsonify(response_data), status_code

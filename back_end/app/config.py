@@ -22,6 +22,11 @@ class Config():
 
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'rahasia-super-aman-portofolio-mars')
 
+    # VAPID Keys for PWA Push Notifications
+    VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')
+    VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY')
+    VAPID_CLAIM_EMAIL = os.getenv('VAPID_CLAIM_EMAIL', 'mailto:marshelportfolio@gmail.com')
+
 #untuk mengecek apakah data base sudah terkoneksi
 def db_connection():
     uri = Config.SQLALCHEMY_DATABASE_URI
