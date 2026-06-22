@@ -5,6 +5,7 @@ import { getAllProjects } from "@/services/project";
 import { getAllSkill } from "@/services/Skils";
 import Navbar from "@/components/publick/layout/Navbar";
 import SkillsSection from "@/components/publick/SkillsSection";
+import ProjectTimeline from "@/components/publick/ProjectTimeline";
 import ProjectsSection from "@/components/publick/ProjectsSection";
 import Footer from "@/components/publick/layout/Footer";
 import PageTransition from "@/components/publick/layout/PageTransition";
@@ -23,6 +24,7 @@ export default function ProjectsPage() {
       <main className="pt-20 flex-1">
         <PageTransition>
           <SkillsSection skills={skills} />
+          <ProjectTimeline projects={projects} />
           <ProjectsSection projects={projects} />
         </PageTransition>
       </main>
