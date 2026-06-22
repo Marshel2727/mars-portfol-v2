@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Marshel | Portfolio",
-  description: "Portfolio pribadi Marshel — Full Stack Developer. Menampilkan proyek, keahlian, dan cara menghubungi saya.",
+  description: "Portfolio Marshel, mahasiswa Teknik Komputer yang berfokus pada Full-Stack Web Development, REST API, dashboard, dan integrasi Internet of Things.",
   manifest: "/manifest.json",
 };
 
