@@ -3,8 +3,26 @@ export interface Skill {
     name: string;
     level: string;
     icon_url: string;
+    category: string;
+    projects?: ProjectReference[];
     created_at?: string;
     updated_at?: string;
+}
+
+export interface SkillReference {
+  id: number;
+  name: string;
+  level: string;
+  category: string;
+  icon_url: string;
+}
+
+export interface ProjectReference {
+  id: number;
+  title: string;
+  category: string;
+  tech_tags: string[];
+  image_url: string;
 }
 
 export interface ProjectImage {
@@ -18,10 +36,14 @@ export interface ProjectImage {
 export interface Project {
   id: number;
   title: string;
+  sub_title?: string;
   description: string;
   image_url: string;
   demo_url?: string;
   github_url?: string;
+  category: string;
+  tech_tags: string[];
+  skills?: SkillReference[];
   created_at?: string;
   // Tambahkan baris ini untuk menampung data galeri dari backend
   gallery?: ProjectImage[]; 

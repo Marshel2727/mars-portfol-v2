@@ -1,5 +1,37 @@
 from app import db
 from app.models.project import Project
+from app.models.skill import Skill
+
+
+def _normalize_tags(tags):
+    if not isinstance(tags, list):
+        return []
+
+    normalized = []
+    seen = set()
+    for tag in tags:
+        value = str(tag).strip()
+        key = value.casefold()
+        if value and key not in seen:
+            normalized.append(value)
+            seen.add(key)
+    return normalized
+
+
+def _get_skills(skill_ids):
+    if not isinstance(skill_ids, list):
+        return []
+
+    normalized_ids = []
+    for skill_id in skill_ids:
+        try:
+            normalized_ids.append(int(skill_id))
+        except (TypeError, ValueError):
+            continue
+
+    if not normalized_ids:
+        return []
+    return Skill.query.filter(Skill.id.in_(normalized_ids)).all()
 
 def get_all_projects():
     
@@ -23,8 +55,11 @@ def create_project(data):
         description = data.get('description'),
         image_url = data.get('image_url'),
         demo_url = data.get('demo_url'),
-        github_url = data.get('github_url')
+        github_url = data.get('github_url'),
+        category = data.get('category') or 'Lainnya',
+        tech_tags = _normalize_tags(data.get('tech_tags', []))
     )
+    new_project.skills = _get_skills(data.get('skill_ids', []))
 
     db.session.add(new_project)
     db.session.commit()
@@ -50,6 +85,12 @@ def update_project(project_id, data):
         project.demo_url = data['demo_url']
     if 'github_url' in data:
         project.github_url = data['github_url']
+    if 'category' in data:
+        project.category = data['category'] or 'Lainnya'
+    if 'tech_tags' in data:
+        project.tech_tags = _normalize_tags(data['tech_tags'])
+    if 'skill_ids' in data:
+        project.skills = _get_skills(data['skill_ids'])
     
     db.session.commit()
 

@@ -27,17 +27,29 @@ export default function ProjectsSection({ projects }: { projects: Project[] }) {
               transition={{ duration: 0.6, delay: index * 0.2 }}
               className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-teal-500/50 transition flex flex-col group"
             >
-              <div className="overflow-hidden">
+              <div className="relative overflow-hidden">
                 <img
                   src={getImageUrl(project.image_url)}
                   alt={project.title}
                   className="w-full h-48 object-cover border-b border-gray-700 transition-transform duration-500 group-hover:scale-105"
                 />
+                <span className="absolute left-4 top-4 rounded bg-gray-950/90 px-2.5 py-1 text-xs font-semibold text-teal-300 backdrop-blur-sm">
+                  {project.category || "Lainnya"}
+                </span>
               </div>
               <div className="p-6 flex-1 flex flex-col">
                 <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition-colors">
                   {project.title}
                 </h3>
+                {project.tech_tags?.length > 0 && (
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {project.tech_tags.slice(0, 5).map((tag) => (
+                      <span key={tag} className="rounded border border-gray-700 bg-gray-900 px-2 py-1 text-xs text-gray-300">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <p className="text-gray-400 text-sm mb-6 flex-1 line-clamp-3">{project.description}</p>
 
                 <div className="mt-auto pt-4 border-t border-gray-700/50 flex items-center justify-between">
@@ -98,7 +110,30 @@ export default function ProjectsSection({ projects }: { projects: Project[] }) {
 
             <div className="p-6 sm:p-8 overflow-y-auto flex-1">
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">{selectedProject.title}</h2>
+              <div className="mb-5 flex flex-wrap items-center gap-2">
+                <span className="rounded bg-teal-500/10 px-2.5 py-1 text-xs font-semibold text-teal-300 ring-1 ring-inset ring-teal-500/30">
+                  {selectedProject.category || "Lainnya"}
+                </span>
+                {selectedProject.tech_tags?.map((tag) => (
+                  <span key={tag} className="rounded border border-gray-700 px-2.5 py-1 text-xs text-gray-300">
+                    {tag}
+                  </span>
+                ))}
+              </div>
               <p className="text-gray-300 leading-relaxed mb-8 whitespace-pre-wrap">{selectedProject.description}</p>
+
+              {selectedProject.skills && selectedProject.skills.length > 0 && (
+                <div className="mb-8 border-t border-gray-800 pt-5">
+                  <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">Skill yang Digunakan</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProject.skills.map((skill) => (
+                      <span key={skill.id} className="rounded bg-gray-800 px-3 py-1.5 text-sm text-gray-200">
+                        {skill.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-4 mt-auto">
                 {selectedProject.demo_url && (

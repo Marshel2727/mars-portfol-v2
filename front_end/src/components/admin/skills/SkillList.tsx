@@ -50,7 +50,9 @@ export default function SkillList({ skills, isLoading, onRefresh, onEdit }: Skil
               <tr>
                 <th className="px-4 py-3">Ikon</th>
                 <th className="px-4 py-3">Nama Skill</th>
+                <th className="px-4 py-3">Kategori</th>
                 <th className="px-4 py-3">Level</th>
+                <th className="px-4 py-3">Project Terkait</th>
                 <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
@@ -65,10 +67,14 @@ export default function SkillList({ skills, isLoading, onRefresh, onEdit }: Skil
                     />
                   </td>
                   <td className="px-4 py-3 font-medium text-white">{skill.name}</td>
+                  <td className="px-4 py-3 text-gray-300">{skill.category || "Lainnya"}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2.5 py-1 rounded text-xs border ${getLevelColor(skill.level)}`}>
                       {skill.level}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-400">
+                    {skill.projects?.length ? `${skill.projects.length} project` : "Belum ditautkan"}
                   </td>
                   <td className="px-4 py-3 text-center space-x-4">
                     <button

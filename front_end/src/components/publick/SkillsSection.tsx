@@ -2,6 +2,7 @@
 
 import { Skill } from "../../types";
 import { motion } from "framer-motion";
+import { getImageUrl } from "@/lib/utils";
 
 // Helper function to map skill level to a segmented value (1 to 4)
 const getSkillLevelValue = (level: string): number => {
@@ -36,6 +37,12 @@ const getLevelBadgeStyles = (level: string): string => {
 };
 
 export default function SkillsSection({ skills }: { skills: Skill[] }) {
+  const groupedSkills = skills.reduce<Record<string, Skill[]>>((groups, skill) => {
+    const category = skill.category?.trim() || "Lainnya";
+    groups[category] = [...(groups[category] || []), skill];
+    return groups;
+  }, {});
+
   return (
     <section id="skills" className="py-24 bg-gray-800/50 border-t border-gray-800">
       <div className="max-w-6xl mx-auto px-8">
@@ -64,52 +71,76 @@ export default function SkillsSection({ skills }: { skills: Skill[] }) {
         {skills.length === 0 ? (
           <p className="text-center text-gray-500">Belum ada skill yang ditambahkan.</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 justify-center">
-            {skills.map((skill, index) => (
-              <motion.div 
-                key={skill.id}
-                initial={{ opacity: 0, scale: 0.8, y: 30 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="flex flex-col items-center p-6 bg-gray-950/40 rounded-2xl border border-gray-800 hover:border-teal-500/50 transition-all duration-300 group shadow-lg hover:shadow-[0_10px_30px_rgba(20,184,166,0.05)] hover:-translate-y-1.5"
-              >
-                {/* Icon Container */}
-                <div className="h-16 w-16 flex items-center justify-center bg-white p-2.5 rounded-2xl shadow-inner mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                  <img 
-                    src={`${process.env.NEXT_PUBLIC_BASE_URL}${skill.icon_url}`} 
-                    alt={skill.name} 
-                    className="h-full w-full object-contain" 
-                  />
-                </div>
-                
-                {/* Skill Name */}
-                <span className="font-bold text-white text-base group-hover:text-teal-400 transition-colors text-center truncate w-full">
-                  {skill.name}
-                </span>
-
-                {/* Segmented Level Indicator Blocks */}
-                <div className="flex gap-1.5 mt-4 mb-3">
-                  {[1, 2, 3, 4].map((step) => {
-                    const isFilled = step <= getSkillLevelValue(skill.level);
-                    return (
-                      <span
-                        key={step}
-                        className={`h-1.5 w-6 rounded-full transition-all duration-300 ${
-                          isFilled 
-                            ? "bg-gradient-to-r from-teal-500 to-emerald-400 shadow-[0_0_8px_rgba(20,184,166,0.3)]" 
-                            : "bg-gray-800"
-                        }`}
-                      />
-                    );
-                  })}
+          <div className="space-y-14">
+            {Object.entries(groupedSkills).map(([category, categorySkills], categoryIndex) => (
+              <div key={category}>
+                <div className="mb-6 flex items-center gap-4">
+                  <h3 className="text-xl font-bold text-white">{category}</h3>
+                  <span className="rounded bg-gray-900 px-2 py-1 text-xs font-semibold text-gray-400">
+                    {categorySkills.length} skill
+                  </span>
+                  <span className="h-px flex-1 bg-gray-700" />
                 </div>
 
-                {/* Highly Prominent Badge */}
-                <span className={`text-xs font-extrabold px-3 py-1 rounded-full border mt-1 shadow-sm transition-all duration-300 group-hover:scale-105 ${getLevelBadgeStyles(skill.level)}`}>
-                  {skill.level}
-                </span>
-              </motion.div>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {categorySkills.map((skill, index) => (
+                    <motion.div
+                      key={skill.id}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.45, delay: (categoryIndex + index) * 0.04 }}
+                      className="flex min-h-48 flex-col rounded-lg border border-gray-800 bg-gray-950/40 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-teal-500/50"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white p-2 shadow-inner">
+                          <img
+                            src={getImageUrl(skill.icon_url)}
+                            alt={skill.name}
+                            className="h-full w-full object-contain"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="block truncate text-base font-bold text-white">{skill.name}</span>
+                          <span className={`mt-2 inline-block rounded border px-2.5 py-1 text-xs font-bold ${getLevelBadgeStyles(skill.level)}`}>
+                            {skill.level}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="my-4 flex gap-1.5" aria-label={`Level ${skill.level}`}>
+                        {[1, 2, 3, 4].map((step) => (
+                          <span
+                            key={step}
+                            className={`h-1.5 flex-1 rounded-full ${
+                              step <= getSkillLevelValue(skill.level) ? "bg-teal-500" : "bg-gray-800"
+                            }`}
+                          />
+                        ))}
+                      </div>
+
+                      <div className="mt-auto border-t border-gray-800 pt-3">
+                        <p className="mb-2 text-xs font-semibold uppercase text-gray-500">Digunakan pada project</p>
+                        {skill.projects && skill.projects.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {skill.projects.map((project) => (
+                              <a
+                                key={project.id}
+                                href="#projects"
+                                className="rounded bg-gray-800 px-2 py-1 text-xs text-gray-300 transition-colors hover:bg-teal-500/15 hover:text-teal-300"
+                              >
+                                {project.title}
+                              </a>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-600">Belum ditautkan.</span>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}

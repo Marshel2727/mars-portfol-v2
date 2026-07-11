@@ -1,4 +1,6 @@
-from flask import Blueprint,request
+import json
+
+from flask import Blueprint, request
 from app.service.skill_service import get_all_skill,get_skill_by_id,create_skill,update_skill,delete_skill
 from app.utils.response import error_response, success_response
 from app.utils.icon_upload import save_image, delete_image
@@ -6,6 +8,17 @@ from flask_jwt_extended import jwt_required,get_jwt
 
 
 skill_bp = Blueprint('skill_bp', __name__, url_prefix='/api/skills')
+
+
+def _parse_project_ids(raw_value):
+    try:
+        value = json.loads(raw_value or '[]')
+    except json.JSONDecodeError as exc:
+        raise ValueError('project_ids harus berupa daftar JSON yang valid') from exc
+
+    if not isinstance(value, list):
+        raise ValueError('project_ids harus berupa daftar')
+    return value
 
 @skill_bp.route('/', methods=['GET'])
 def fetch_all_skills():
@@ -31,9 +44,15 @@ def add_skill():
     
     name = request.form.get('name')
     level = request.form.get('level')
+    category = request.form.get('category', '').strip() or 'Lainnya'
 
     if not name:
         return error_response(message="Nama wajib diisi.")
+
+    try:
+        project_ids = _parse_project_ids(request.form.get('project_ids'))
+    except ValueError as exc:
+        return error_response(message=str(exc), status_code=400)
     
     image_file = request.files.get('icon_url')
     
@@ -48,7 +67,9 @@ def add_skill():
     data = {
         'name': name,
         'level': level,
-        'icon_url': icon_url
+        'icon_url': icon_url,
+        'category': category,
+        'project_ids': project_ids
     }
 
     new_skill = create_skill(data)
@@ -67,12 +88,20 @@ def edit_skill(id):
     
     name = request.form.get('name')
     level = request.form.get('level')
+    category = request.form.get('category')
 
     data = {}
     if name:
         data['name'] = name
     if level:
         data['level'] = level
+    if category:
+        data['category'] = category.strip() or 'Lainnya'
+    if 'project_ids' in request.form:
+        try:
+            data['project_ids'] = _parse_project_ids(request.form.get('project_ids'))
+        except ValueError as exc:
+            return error_response(message=str(exc), status_code=400)
     
     if 'icon_url' in request.files:
         file = request.files.get('icon_url')

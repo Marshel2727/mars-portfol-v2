@@ -47,6 +47,7 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
               <tr>
                 <th className="px-4 py-3 font-semibold">Gambar</th>
                 <th className="px-4 py-3 font-semibold">Judul</th>
+                <th className="px-4 py-3 font-semibold">Kategori & Teknologi</th>
                 <th className="px-4 py-3 font-semibold">Deskripsi</th>
                 <th className="px-4 py-3 text-center font-semibold">Aksi</th>
               </tr>
@@ -62,6 +63,18 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
                     />
                   </td>
                   <td className="px-4 py-3 font-medium text-white max-w-xs break-words">{project.title}</td>
+                  <td className="px-4 py-3">
+                    <span className="mb-2 inline-block rounded bg-teal-500/10 px-2 py-1 text-xs font-semibold text-teal-300">
+                      {project.category || "Lainnya"}
+                    </span>
+                    <div className="flex max-w-xs flex-wrap gap-1">
+                      {project.tech_tags?.map((tag) => (
+                        <span key={tag} className="rounded border border-gray-700 px-1.5 py-0.5 text-xs text-gray-400">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="line-clamp-2 max-w-xs text-sm text-gray-300 font-normal">
                       {project.description}

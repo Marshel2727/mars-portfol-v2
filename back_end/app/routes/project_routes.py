@@ -1,4 +1,6 @@
-from flask import Blueprint,request
+import json
+
+from flask import Blueprint, request
 from app.service.project_service import (
     get_all_projects,
     get_project_by_id,
@@ -12,6 +14,17 @@ from flask_jwt_extended import jwt_required, get_jwt_identity,get_jwt
 
 
 project_bp = Blueprint('project_bp', __name__, url_prefix='/api/projects')
+
+
+def _parse_json_list(raw_value, field_name):
+    try:
+        value = json.loads(raw_value or '[]')
+    except json.JSONDecodeError as exc:
+        raise ValueError(f'{field_name} harus berupa daftar JSON yang valid') from exc
+
+    if not isinstance(value, list):
+        raise ValueError(f'{field_name} harus berupa daftar')
+    return value
 
 @project_bp.route('/', methods=['GET'])
 def fetch_all_projects():
@@ -40,9 +53,16 @@ def add_project():
     description = request.form.get('description')
     demo_url = request.form.get('demo_url')
     github_url = request.form.get('github_url')
+    category = request.form.get('category', '').strip() or 'Lainnya'
 
     if not title or not description:
         return error_response(message='title dan description wajib di isi')
+
+    try:
+        tech_tags = _parse_json_list(request.form.get('tech_tags'), 'tech_tags')
+        skill_ids = _parse_json_list(request.form.get('skill_ids'), 'skill_ids')
+    except ValueError as exc:
+        return error_response(message=str(exc), status_code=400)
     
     image_file = request.files.get('image')
 
@@ -60,7 +80,10 @@ def add_project():
         'description': description,
         'demo_url': demo_url,
         'github_url': github_url,
-        'image_url': image_url
+        'image_url': image_url,
+        'category': category,
+        'tech_tags': tech_tags,
+        'skill_ids': skill_ids
     }
     
     new_project = create_project(data)
@@ -77,9 +100,17 @@ def edit_project(id):
     if not old_project:
         return error_response(message='Project tidak ditemukan', status_code=404)
 
-    allowed_keys = ['title', 'sub_title', 'description', 'demo_url', 'github_url']
+    allowed_keys = ['title', 'sub_title', 'description', 'demo_url', 'github_url', 'category']
 
     data = {key: value for key, value in request.form.items() if key in allowed_keys and value}
+
+    try:
+        if 'tech_tags' in request.form:
+            data['tech_tags'] = _parse_json_list(request.form.get('tech_tags'), 'tech_tags')
+        if 'skill_ids' in request.form:
+            data['skill_ids'] = _parse_json_list(request.form.get('skill_ids'), 'skill_ids')
+    except ValueError as exc:
+        return error_response(message=str(exc), status_code=400)
 
     if 'image' in request.files:
         file = request.files['image']
