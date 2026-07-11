@@ -7,6 +7,42 @@ import Link from "next/link";
 // ✅ DRY: Mengimpor getImageUrl dari lib/utils.ts, menghapus definisi lokal
 import { getImageUrl } from "@/lib/utils";
 
+const renderProjectDescription = (description: string) => {
+  const blocks = description
+    .split(/\r?\n\s*\r?\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  return blocks.map((block, index) => {
+    const isBullet = /^(?:\u2022|-)\s+/.test(block);
+    const content = block.replace(/^(?:\u2022|-)\s+/, "");
+    const isHeading = !isBullet && block.endsWith(":") && block.length < 100;
+
+    if (isHeading) {
+      return (
+        <h4 key={`${index}-${block}`} className="pt-2 text-base font-bold text-white">
+          {block.slice(0, -1)}
+        </h4>
+      );
+    }
+
+    if (isBullet) {
+      return (
+        <div key={`${index}-${content}`} className="flex items-start gap-3 text-gray-300">
+          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-400" />
+          <p className="min-w-0 text-base leading-7">{content}</p>
+        </div>
+      );
+    }
+
+    return (
+      <p key={`${index}-${block}`} className="whitespace-pre-line text-base leading-7 text-gray-300">
+        {block}
+      </p>
+    );
+  });
+};
+
 export default function ProjectsSection({ projects }: { projects: Project[] }) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -84,76 +120,96 @@ export default function ProjectsSection({ projects }: { projects: Project[] }) {
             className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={() => setSelectedProject(null)}
           />
-          <div className="relative bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in duration-200">
-            <button
-              onClick={() => setSelectedProject(null)}
-              className="absolute top-4 right-4 z-50 rounded-full bg-black/60 p-2 text-white hover:bg-red-500 hover:text-white transition-all duration-200 backdrop-blur-md hover:scale-110 focus:outline-none"
-              aria-label="Tutup"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <img
-              src={getImageUrl(selectedProject.image_url)}
-              alt={selectedProject.title}
-              className="w-full h-64 sm:h-80 object-cover border-b border-gray-800"
-            />
-
-            <div className="p-6 sm:p-8 overflow-y-auto flex-1">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">{selectedProject.title}</h2>
-              <div className="mb-5 flex flex-wrap items-center gap-2">
-                <span className="rounded bg-teal-500/10 px-2.5 py-1 text-xs font-semibold text-teal-300 ring-1 ring-inset ring-teal-500/30">
-                  {selectedProject.category || "Lainnya"}
-                </span>
-                {selectedProject.tech_tags?.map((tag) => (
-                  <span key={tag} className="rounded border border-gray-700 px-2.5 py-1 text-xs text-gray-300">
-                    {tag}
-                  </span>
-                ))}
+          <div className="relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <header className="flex shrink-0 items-center justify-between gap-4 border-b border-gray-800 px-5 py-4 sm:px-7">
+              <div className="min-w-0">
+                <p className="mb-1 text-xs font-semibold uppercase text-teal-400">Detail Project</p>
+                <h2 className="break-words text-xl font-bold text-white sm:text-2xl">{selectedProject.title}</h2>
               </div>
-              <p className="text-gray-300 leading-relaxed mb-8 whitespace-pre-wrap">{selectedProject.description}</p>
+              <button
+                onClick={() => setSelectedProject(null)}
+                className="shrink-0 rounded-full p-2 text-gray-300 transition-colors hover:bg-gray-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                aria-label="Tutup"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </header>
 
-              {selectedProject.skills && selectedProject.skills.length > 0 && (
-                <div className="mb-8 border-t border-gray-800 pt-5">
-                  <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">Skill yang Digunakan</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedProject.skills.map((skill) => (
-                      <span key={skill.id} className="rounded bg-gray-800 px-3 py-1.5 text-sm text-gray-200">
-                        {skill.name}
+            <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-7">
+              <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] lg:gap-9">
+                <aside className="space-y-6 lg:sticky lg:top-0">
+                  <img
+                    src={getImageUrl(selectedProject.image_url)}
+                    alt={selectedProject.title}
+                    className="aspect-video w-full rounded-lg border border-gray-800 object-cover lg:aspect-[4/3]"
+                  />
+
+                  <div>
+                    <h3 className="mb-3 text-xs font-semibold uppercase text-gray-500">Kategori & Teknologi</h3>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded bg-teal-500/10 px-2.5 py-1 text-xs font-semibold text-teal-300 ring-1 ring-inset ring-teal-500/30">
+                        {selectedProject.category || "Lainnya"}
                       </span>
-                    ))}
+                      {selectedProject.tech_tags?.map((tag) => (
+                        <span key={tag} className="rounded border border-gray-700 px-2.5 py-1 text-xs text-gray-300">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
 
-              <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                {selectedProject.demo_url && (
-                  <a
-                    href={selectedProject.demo_url} target="_blank" rel="noreferrer"
-                    className="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-center py-3 rounded-lg font-semibold transition shadow-lg shadow-teal-500/20"
-                  >
-                    Kunjungi Live Demo
-                  </a>
-                )}
+                  {selectedProject.skills && selectedProject.skills.length > 0 && (
+                    <div className="border-t border-gray-800 pt-5">
+                      <h3 className="mb-3 text-xs font-semibold uppercase text-gray-500">Skill yang Digunakan</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProject.skills.map((skill) => (
+                          <span key={skill.id} className="rounded bg-gray-800 px-3 py-1.5 text-sm text-gray-200">
+                            {skill.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </aside>
+
+                <article className="min-w-0 border-t border-gray-800 pt-7 lg:border-l lg:border-t-0 lg:pl-9 lg:pt-0">
+                  <h3 className="mb-5 text-lg font-bold text-white">Tentang Project</h3>
+                  <div className="max-w-3xl space-y-5">
+                    {renderProjectDescription(selectedProject.description)}
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            {(selectedProject.demo_url || selectedProject.github_url) && (
+              <footer className="flex shrink-0 flex-col justify-end gap-3 border-t border-gray-800 bg-gray-900 px-5 py-4 sm:flex-row sm:px-7">
                 {selectedProject.github_url && (
                   <a
                     href={selectedProject.github_url} target="_blank" rel="noreferrer"
-                    className="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white text-center py-3 rounded-lg font-semibold transition"
+                    className="rounded-lg border border-gray-600 bg-gray-800 px-6 py-3 text-center font-semibold text-white transition hover:bg-gray-700 sm:min-w-48"
                   >
                     Lihat Kode di GitHub
                   </a>
                 )}
-              </div>
-            </div>
+                {selectedProject.demo_url && (
+                  <a
+                    href={selectedProject.demo_url} target="_blank" rel="noreferrer"
+                    className="rounded-lg bg-teal-600 px-6 py-3 text-center font-semibold text-white shadow-lg shadow-teal-500/20 transition hover:bg-teal-700 sm:min-w-48"
+                  >
+                    Kunjungi Live Demo
+                  </a>
+                )}
+              </footer>
+            )}
           </div>
         </div>
       )}
