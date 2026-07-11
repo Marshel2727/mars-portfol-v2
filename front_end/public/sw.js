@@ -1,10 +1,46 @@
-const CACHE_NAME = 'marshel-portfolio-cache-v1';
+const CACHE_NAME = 'marshel-portfolio-cache-v2';
 const urlsToCache = [
-  '/',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
 ];
+
+const isCacheableResponse = (response) => (
+  response && response.status === 200 && response.type === 'basic'
+);
+
+const networkFirst = async (request) => {
+  try {
+    const response = await fetch(request);
+    if (isCacheableResponse(response)) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) return cachedResponse;
+    throw error;
+  }
+};
+
+const staleWhileRevalidate = async (event) => {
+  const cachedResponse = await caches.match(event.request);
+  const networkResponse = fetch(event.request).then(async (response) => {
+    if (isCacheableResponse(response)) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(event.request, response.clone());
+    }
+    return response;
+  });
+
+  if (cachedResponse) {
+    event.waitUntil(networkResponse.catch(() => undefined));
+    return cachedResponse;
+  }
+
+  return networkResponse;
+};
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -35,31 +71,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse);
-            });
-          }
-        }).catch(() => {});
-        return cachedResponse;
-      }
-
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
-        }
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-        return response;
-      }).catch(() => {});
-    })
+  const url = new URL(event.request.url);
+  const isPrivateRoute = url.pathname.startsWith('/admin') || url.pathname.startsWith('/login');
+  const isStaticAsset = (
+    url.pathname.startsWith('/_next/static/') ||
+    ['font', 'image', 'script', 'style'].includes(event.request.destination)
   );
+
+  if (isPrivateRoute) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(networkFirst(event.request));
+    return;
+  }
+
+  if (isStaticAsset) {
+    event.respondWith(staleWhileRevalidate(event));
+  }
 });
 
 // PWA Push Notification Listeners
@@ -70,7 +101,7 @@ self.addEventListener('push', (event) => {
     if (event.data) {
       data = event.data.json();
     }
-  } catch (e) {
+  } catch {
     if (event.data) {
       data.body = event.data.text();
     }
@@ -114,4 +145,3 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
-

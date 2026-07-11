@@ -4,6 +4,7 @@ from flask import Blueprint, request
 from app.service.skill_service import get_all_skill,get_skill_by_id,create_skill,update_skill,delete_skill
 from app.utils.response import error_response, success_response
 from app.utils.icon_upload import save_image, delete_image
+from app.utils.cache import public_cache
 from flask_jwt_extended import jwt_required,get_jwt
 
 
@@ -21,12 +22,14 @@ def _parse_project_ids(raw_value):
     return value
 
 @skill_bp.route('/', methods=['GET'])
+@public_cache(seconds=60)
 def fetch_all_skills():
     skills = get_all_skill()
 
     return success_response(data=skills)
 
 @skill_bp.route('/<int:id>', methods=['GET'])
+@public_cache(seconds=60)
 def fetch_skill_by_id(id):
     
     skill = get_skill_by_id(id)

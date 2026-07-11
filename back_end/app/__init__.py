@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request
 from .config import Config,db_connection
 from  flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -21,12 +21,26 @@ def create_app():
           methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
 
      app.config.from_object(Config)
+     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
      #fungsi ini di panggil untuk test koneksi data base
      db_connection()
 
      db.init_app(app)
      migrate.init_app(app, db)
      jwt.init_app(app)
+
+     @app.after_request
+     def prevent_sensitive_response_caching(response):
+          is_sensitive_path = request.path.startswith(('/api/auth', '/api/messages'))
+          is_authenticated = bool(request.headers.get('Authorization'))
+          is_mutation = request.method not in ('GET', 'HEAD', 'OPTIONS')
+
+          if is_sensitive_path or is_authenticated or is_mutation:
+               response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, private'
+               response.headers['Pragma'] = 'no-cache'
+               response.headers['Expires'] = '0'
+
+          return response
 
      from .models.project import Project
      from .models.user import User

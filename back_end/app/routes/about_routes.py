@@ -4,12 +4,14 @@ from flask_jwt_extended import get_jwt, jwt_required
 from app.service.about_service import get_about_profile, update_about_profile
 from app.utils.about_upload import delete_profile_image, save_profile_image
 from app.utils.response import error_response, success_response
+from app.utils.cache import public_cache
 
 
 about_bp = Blueprint('about_bp', __name__, url_prefix='/api/about')
 
 
 @about_bp.route('/', methods=['GET'])
+@public_cache(seconds=60)
 def fetch_about_profile():
     return success_response(data=get_about_profile())
 

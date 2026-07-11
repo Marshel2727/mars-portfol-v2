@@ -10,6 +10,7 @@ from app.service.project_service import (
     )
 from app.utils.upload import save_image, delete_image
 from app.utils.response import success_response, error_response
+from app.utils.cache import public_cache
 from flask_jwt_extended import jwt_required, get_jwt_identity,get_jwt
 
 
@@ -27,6 +28,7 @@ def _parse_json_list(raw_value, field_name):
     return value
 
 @project_bp.route('/', methods=['GET'])
+@public_cache(seconds=60)
 def fetch_all_projects():
     
     projects = get_all_projects()
@@ -34,6 +36,7 @@ def fetch_all_projects():
     return success_response(data=projects)
 
 @project_bp.route('/<int:id>', methods=['GET'])
+@public_cache(seconds=60)
 def fetch_project_by_id(id):
     project = get_project_by_id(id)
 
