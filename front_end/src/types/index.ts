@@ -66,3 +66,17 @@ export interface User {
     created_at?: string;
     updated_at?: string;
 }
+
+export interface AboutProfile {
+  id: number;
+  full_name: string;
+  headline: string;
+  bio: string;
+  education?: string;
+  location?: string;
+  current_focus?: string;
+  cv_url?: string;
+  profile_image_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}

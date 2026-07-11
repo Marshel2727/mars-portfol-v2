@@ -34,6 +34,7 @@ def create_app():
      from .models.message import Message
      from .models.project_image import ProjectImage
      from .models.push_subscription import PushSubscription
+     from .models.about_profile import AboutProfile
 
      from .routes.project_routes import project_bp
      app.register_blueprint(project_bp)
@@ -49,5 +50,8 @@ def create_app():
 
      from .routes.project_image_routes import project_image_bp
      app.register_blueprint(project_image_bp)
+
+     from .routes.about_routes import about_bp
+     app.register_blueprint(about_bp)
 
      return app

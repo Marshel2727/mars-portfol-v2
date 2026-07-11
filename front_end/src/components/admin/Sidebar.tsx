@@ -6,6 +6,7 @@ import { logout } from "@/services/auth";
 
 const menuItems = [
   { name: "DashBoard", path: "/admin" },
+  { name: "About Profile", path: "/admin/about" },
   { name: "Projects", path: "/admin/projects" },
   { name: "Skills", path: "/admin/skills" },
   { name: "Message", path: "/admin/messages" },
