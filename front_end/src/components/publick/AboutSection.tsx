@@ -32,7 +32,7 @@ export default function AboutSection({ profile }: { profile?: AboutProfile }) {
           transition={{ duration: 0.55 }}
           className="relative mx-auto w-full max-w-sm lg:max-w-none"
         >
-          <div className="relative transition-transform duration-300 ease-out lg:origin-right lg:[transform:perspective(1000px)_rotateY(-4deg)] lg:hover:[transform:perspective(1000px)_rotateY(0deg)]">
+          <div className="relative transition-transform duration-300 ease-out lg:origin-right lg:[transform:perspective(1000px)_rotateY(3deg)] lg:hover:[transform:perspective(1000px)_rotateY(0deg)]">
             <img
               src={imageUrl}
               alt={`Foto profil ${content.full_name}`}
