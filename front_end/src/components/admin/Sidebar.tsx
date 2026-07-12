@@ -27,7 +27,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   };
 
   return (
-    <aside className="my-0 ml-0 md:my-4 md:ml-4 flex h-screen md:h-[calc(100vh-32px)] w-72 shrink-0 flex-col bg-gray-900 text-gray-100 shadow-2xl rounded-none md:rounded-3xl">
+    <aside className="my-0 ml-0 flex h-screen w-72 shrink-0 flex-col overflow-hidden rounded-none bg-gray-900 text-gray-100 shadow-2xl md:my-4 md:ml-4 md:h-[calc(100vh-32px)] md:rounded-3xl">
       <div className="border-b border-gray-800 p-6 text-center text-2xl font-bold tracking-tighter relative">
         PORTOFOLIO
         {onClose && (
@@ -42,7 +42,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
         )}
       </div>
 
-      <nav className="flex-1 space-y-2 p-4">
+      <nav className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
         {menuItems.map((item) => {
           const isActive = pathname === item.path;
           return (
