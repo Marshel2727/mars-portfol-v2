@@ -32,14 +32,16 @@ export default function AboutSection({ profile }: { profile?: AboutProfile }) {
           transition={{ duration: 0.55 }}
           className="relative mx-auto w-full max-w-sm lg:max-w-none"
         >
-          <img
-            src={imageUrl}
-            alt={`Foto profil ${content.full_name}`}
-            className="aspect-[4/5] w-full rounded-lg border border-gray-700 bg-gray-950 object-cover"
-          />
-          <div className="absolute bottom-4 left-4 right-4 rounded-lg border border-white/10 bg-gray-950/90 px-4 py-3 backdrop-blur-md">
-            <p className="font-bold text-white">{content.full_name}</p>
-            <p className="mt-0.5 text-sm text-teal-300">{content.headline}</p>
+          <div className="relative origin-bottom transition-transform duration-300 ease-out lg:rotate-2 lg:hover:rotate-0">
+            <img
+              src={imageUrl}
+              alt={`Foto profil ${content.full_name}`}
+              className="aspect-[4/5] w-full rounded-lg border border-gray-700 bg-gray-950 object-cover"
+            />
+            <div className="absolute bottom-4 left-4 right-4 rounded-lg border border-white/10 bg-gray-950/90 px-4 py-3 backdrop-blur-md">
+              <p className="font-bold text-white">{content.full_name}</p>
+              <p className="mt-0.5 text-sm text-teal-300">{content.headline}</p>
+            </div>
           </div>
         </motion.div>
 
