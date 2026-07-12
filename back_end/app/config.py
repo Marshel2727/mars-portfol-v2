@@ -4,6 +4,7 @@ from urllib.parse import quote_plus
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()
 
@@ -21,6 +22,7 @@ class Config():
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'rahasia-super-aman-portofolio-mars')
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES_HOURS', '8')))
 
     # VAPID Keys for PWA Push Notifications
     VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')

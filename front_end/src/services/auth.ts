@@ -15,7 +15,8 @@ export const login = async (email: string, password: string): Promise<LoginRespo
   const response = await api.post<LoginResponse>("/auth/login", { email, password });
 
   if (response.data.access_token) {
-    Cookies.set("access_token", response.data.access_token, { expires: 1 });
+    const expiriesAt = new Date(Date.now() + 8 * 60 * 60 * 1000); // 8 jam
+    Cookies.set("access_token", response.data.access_token, { expires: expiriesAt, sameSite: "strict", secure: window.location.protocol === "https:" });
   }
 
   return response.data;
