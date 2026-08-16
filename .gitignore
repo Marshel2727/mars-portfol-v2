@@ -2,6 +2,7 @@
 # Sensitive / Secret Files
 # ========================
 /.env
+/.env.local
 back_end/.env
 front_end/.env.local
 front_end/.env
@@ -46,3 +47,5 @@ front_end/next-env.d.ts
 # ========================
 .DS_Store
 *.pem
+
+.vercel
