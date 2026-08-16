@@ -37,42 +37,42 @@ export default function MessageDetailPage() {
     try {
       await deleteMessage(Number(id));
       router.push("/admin/messages"); // Balik ke inbox setelah hapus
-    } catch (error) {
+    } catch {
       alert("Gagal menghapus pesan.");
     }
   };
 
-  if (isLoading) return <div className="p-8 text-white">Memuat pesan...</div>;
-  if (!message) return <div className="p-8 text-white">Pesan tidak ditemukan.</div>;
+  if (isLoading) return <div className="p-8 text-editorial-muted">Memuat pesan...</div>;
+  if (!message) return <div className="p-8 text-editorial-muted">Pesan tidak ditemukan.</div>;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Tombol Kembali */}
       <Link
         href="/admin/messages"
-        className="text-teal-400 hover:text-teal-300 flex items-center gap-2 mb-4 transition"
+        className="mb-4 flex items-center gap-2 text-editorial-technical transition hover:text-editorial-accent-strong"
       >
         ← Kembali ke Kotak Masuk
       </Link>
 
-      <div className="bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-editorial-line bg-editorial-surface shadow-[var(--shadow-editorial)]">
         {/* Header Pesan (Ala Email) */}
-        <div className="p-6 border-b border-gray-700 bg-gray-800/50">
+        <div className="border-b border-editorial-line bg-editorial-paper-deep p-6">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-white mb-2">Pesan dari {message.name}</h1>
-              <div className="flex flex-col text-sm text-gray-400">
+              <h1 className="mb-2 text-2xl font-bold text-editorial-ink">Pesan dari {message.name}</h1>
+              <div className="flex flex-col text-sm text-editorial-muted">
                 <span>
-                  <strong className="text-gray-300">Dari:</strong> {message.name} ({message.email})
+                  <strong className="text-editorial-ink">Dari:</strong> {message.name} ({message.email})
                 </span>
                 <span>
-                  <strong className="text-gray-300">Tanggal:</strong> {message.created_at ? new Date(message.created_at).toLocaleString('id-ID') : '-'}
+                  <strong className="text-editorial-ink">Tanggal:</strong> {message.created_at ? new Date(message.created_at).toLocaleString('id-ID') : '-'}
                 </span>
               </div>
             </div>
             <button
               onClick={handleDelete}
-              className="bg-red-600/10 text-red-500 border border-red-600/20 px-4 py-2 rounded hover:bg-red-600 hover:text-white transition"
+              className="min-h-11 rounded border border-editorial-danger/20 bg-editorial-danger/10 px-4 py-2 text-editorial-danger transition hover:bg-editorial-danger hover:text-editorial-on-action"
             >
               Hapus Pesan
             </button>
@@ -80,7 +80,7 @@ export default function MessageDetailPage() {
         </div>
 
         {/* Isi Pesan */}
-        <div className="p-8 text-gray-200 leading-relaxed whitespace-pre-wrap min-h-[300px] text-lg">
+        <div className="min-h-[300px] whitespace-pre-wrap p-8 text-lg leading-relaxed text-editorial-ink">
           {message.content}
         </div>
       </div>

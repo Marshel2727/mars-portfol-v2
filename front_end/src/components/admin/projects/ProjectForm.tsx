@@ -15,12 +15,25 @@ interface ProjectFormProps {
 // useEffect reset maupun setelah submit — sebelumnya ditulis manual dua kali.
 const EMPTY_FORM = {
   title: "",
+  subTitle: "",
   description: "",
   demoUrl: "",
   githubUrl: "",
   category: "",
   techTags: "",
+  architectureSteps: "",
 };
+
+function parseArchitectureSteps(value: string) {
+  return value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line, index) => {
+    const [label, title, ...descriptionParts] = line.split("|").map((part) => part.trim());
+    const description = descriptionParts.join(" | ");
+    if (!title || !description) {
+      throw new Error(`Baris arsitektur ${index + 1} harus memakai format: nomor | judul | deskripsi`);
+    }
+    return { label: label || String(index + 1).padStart(2, "0"), title, description };
+  });
+}
 
 export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: ProjectFormProps) {
   const [fields, setFields] = useState(EMPTY_FORM);
@@ -38,11 +51,15 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
     if (projectToEdit) {
       setFields({
         title:       projectToEdit.title,
+        subTitle:    projectToEdit.sub_title || "",
         description: projectToEdit.description,
         demoUrl:     projectToEdit.demo_url || "",
         githubUrl:   projectToEdit.github_url || "",
         category:    projectToEdit.category || "",
         techTags:    projectToEdit.tech_tags?.join(", ") || "",
+        architectureSteps: projectToEdit.architecture_steps?.map((step, index) =>
+          `${step.label || String(index + 1).padStart(2, "0")} | ${step.title} | ${step.description}`
+        ).join("\n") || "",
       });
       setSelectedSkillIds(projectToEdit.skills?.map((skill) => skill.id) || []);
     } else {
@@ -78,15 +95,17 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
     try {
       const formData = new FormData();
       formData.append("title", fields.title);
+      formData.append("sub_title", fields.subTitle);
       formData.append("description", fields.description);
-      if (fields.demoUrl)   formData.append("demo_url",   fields.demoUrl);
-      if (fields.githubUrl) formData.append("github_url", fields.githubUrl);
+      formData.append("demo_url", fields.demoUrl);
+      formData.append("github_url", fields.githubUrl);
       formData.append("category", fields.category.trim() || "Lainnya");
       formData.append(
         "tech_tags",
         JSON.stringify(fields.techTags.split(",").map((tag) => tag.trim()).filter(Boolean))
       );
       formData.append("skill_ids", JSON.stringify(selectedSkillIds));
+      formData.append("architecture_steps", JSON.stringify(parseArchitectureSteps(fields.architectureSteps)));
       if (image)            formData.append("image",      image);
 
       if (projectToEdit) {
@@ -110,16 +129,16 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-lg border border-gray-750 bg-gray-900 p-6 shadow-2xl">
-        <div className="mb-6 flex items-center justify-between border-b border-gray-800 pb-4">
-          <h2 className="text-2xl font-bold text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-editorial-overlay p-4 backdrop-blur-sm">
+      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-lg border border-editorial-line bg-editorial-surface p-6 shadow-2xl">
+        <div className="mb-6 flex items-center justify-between border-b border-editorial-line pb-4">
+          <h2 className="text-2xl font-bold text-editorial-ink">
             {projectToEdit ? "✏️ Edit Proyek" : "✨ Tambah Proyek Baru"}
           </h2>
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-full p-1.5 text-gray-400 hover:bg-gray-800 hover:text-red-500 transition-colors focus:outline-none"
+            className="rounded-full p-1.5 text-editorial-muted transition-colors hover:bg-editorial-paper-deep hover:text-editorial-danger focus:outline-none"
             aria-label="Tutup"
           >
             <svg
@@ -138,83 +157,107 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">Judul Proyek *</label>
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">Judul Proyek *</label>
               <input
                 type="text" value={fields.title} onChange={setField("title")} required
-                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">Kategori Proyek *</label>
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">Kategori Proyek *</label>
               <input
                 type="text" value={fields.category} onChange={setField("category")} required
                 placeholder="Contoh: Full-Stack, AI, IoT"
-                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">
+                Subjudul <span className="text-xs text-editorial-muted">(Opsional)</span>
+              </label>
+              <input
+                type="text"
+                value={fields.subTitle}
+                onChange={setField("subTitle")}
+                maxLength={150}
+                placeholder="Ringkasan singkat yang tampil pada kartu dan detail project"
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">
                 Gambar Sampul{" "}
                 {projectToEdit
-                  ? <span className="text-xs text-gray-500">(Abaikan jika tidak ganti)</span>
+                  ? <span className="text-xs text-editorial-muted">(Abaikan jika tidak ganti)</span>
                   : "*"}
               </label>
               <input
                 id="image-upload" type="file"
                 accept="image/png, image/jpeg, image/jpg, image/gif"
                 onChange={(e) => setImage(e.target.files?.[0] || null)}
-                className="w-full rounded bg-gray-950 p-1.5 text-white border border-gray-800 file:mr-4 file:rounded file:border-0 file:bg-teal-600 file:px-4 file:py-1 file:text-white hover:file:bg-teal-700 focus:outline-none"
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-1.5 text-editorial-ink file:mr-4 file:rounded file:border-0 file:bg-editorial-action file:px-4 file:py-1 file:text-editorial-on-action hover:file:bg-editorial-action-hover focus:outline-none"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-gray-300">Deskripsi Proyek *</label>
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">Deskripsi Proyek *</label>
               <textarea
                 value={fields.description} onChange={setField("description")} required rows={4}
-                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-gray-300">Tech Tags</label>
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">Tech Tags</label>
               <input
                 type="text" value={fields.techTags} onChange={setField("techTags")}
                 placeholder="Next.js, Flask, MySQL, Docker"
-                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               />
-              <p className="mt-1 text-xs text-gray-500">Pisahkan setiap teknologi dengan koma.</p>
+              <p className="mt-1 text-xs text-editorial-muted">Pisahkan setiap teknologi dengan koma.</p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">Alur Arsitektur Project</label>
+              <textarea
+                value={fields.architectureSteps}
+                onChange={setField("architectureSteps")}
+                rows={5}
+                placeholder={"01 | Client Interface | Next.js dan dashboard pengguna\n02 | API & Routing | REST API dan autentikasi\n03 | Data & Hardware | Database dan node IoT"}
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 font-mono text-sm text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
+              />
+              <p className="mt-1 text-xs text-editorial-muted">Satu langkah per baris: nomor | judul | deskripsi. Kosongkan jika blok arsitektur tidak perlu ditampilkan.</p>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">
-                Demo URL <span className="text-xs text-gray-500">(Opsional)</span>
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">
+                Demo URL <span className="text-xs text-editorial-muted">(Opsional)</span>
               </label>
               <input
                 type="url" placeholder="https://..." value={fields.demoUrl} onChange={setField("demoUrl")}
-                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">
-                GitHub URL <span className="text-xs text-gray-500">(Opsional)</span>
+              <label className="mb-1 block text-sm font-medium text-editorial-technical">
+                GitHub URL <span className="text-xs text-editorial-muted">(Opsional)</span>
               </label>
               <input
                 type="url" placeholder="https://github.com/..." value={fields.githubUrl} onChange={setField("githubUrl")}
-                className="w-full rounded bg-gray-950 p-2 text-white border border-gray-800 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               />
             </div>
             <fieldset className="md:col-span-2">
-              <legend className="mb-2 text-sm font-medium text-gray-300">Skill yang Digunakan</legend>
-              <div className="grid max-h-40 grid-cols-1 gap-2 overflow-y-auto rounded border border-gray-800 bg-gray-950 p-3 sm:grid-cols-2">
+              <legend className="mb-2 text-sm font-medium text-editorial-technical">Skill yang Digunakan</legend>
+              <div className="grid max-h-40 grid-cols-1 gap-2 overflow-y-auto rounded border border-editorial-line-strong bg-editorial-paper-deep p-3 sm:grid-cols-2">
                 {availableSkills.length === 0 ? (
-                  <p className="text-sm text-gray-500 sm:col-span-2">Belum ada skill yang tersedia.</p>
+                  <p className="text-sm text-editorial-muted sm:col-span-2">Belum ada skill yang tersedia.</p>
                 ) : availableSkills.map((skill) => (
-                  <label key={skill.id} className="flex cursor-pointer items-center gap-2 text-sm text-gray-300">
+                  <label key={skill.id} className="flex cursor-pointer items-center gap-2 text-sm text-editorial-ink">
                     <input
                       type="checkbox"
                       checked={selectedSkillIds.includes(skill.id)}
                       onChange={() => toggleSkill(skill.id)}
-                      className="h-4 w-4 accent-teal-500"
+                      className="h-4 w-4 accent-editorial-accent"
                     />
                     <span>{skill.name}</span>
-                    <span className="text-xs text-gray-500">{skill.category}</span>
+                    <span className="text-xs text-editorial-muted">{skill.category}</span>
                   </label>
                 ))}
               </div>
@@ -224,13 +267,13 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
           <div className="mt-6 flex justify-end gap-3 pt-4">
             <button
               type="button" onClick={onCancel}
-              className="rounded bg-gray-700 px-6 py-2 font-medium text-gray-300 transition-colors hover:bg-gray-600"
+              className="rounded bg-editorial-paper-deep px-6 py-2 font-medium text-editorial-ink transition-colors hover:bg-editorial-paper"
             >
               Batal
             </button>
             <button
               type="submit" disabled={isSubmitting}
-              className="rounded bg-teal-600 px-6 py-2 font-medium text-white transition-colors hover:bg-teal-700 disabled:bg-teal-800 disabled:opacity-50 shadow-lg shadow-teal-500/20"
+              className="min-h-11 rounded bg-editorial-action px-6 py-2 font-medium text-editorial-on-action shadow-lg transition-colors hover:bg-editorial-action-hover disabled:bg-editorial-action-hover disabled:opacity-50"
             >
               {isSubmitting ? "Menyimpan..." : projectToEdit ? "Simpan Perubahan" : "Simpan Proyek"}
             </button>

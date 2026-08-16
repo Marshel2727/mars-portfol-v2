@@ -4,18 +4,21 @@ from app.models.about_profile import AboutProfile
 
 DEFAULT_ABOUT_PROFILE = {
     'id': 1,
-    'full_name': 'Marshel',
-    'headline': 'Full-Stack Developer & IoT Enthusiast',
+    'full_name': 'Marshel Andhino',
+    'headline': 'Computer Engineering Student',
     'bio': (
-        'Saya adalah mahasiswa Teknik Komputer yang menikmati proses mengubah '
-        'kebutuhan nyata menjadi aplikasi yang dapat digunakan. Saya terbiasa '
-        'mengerjakan antarmuka, backend, database, deployment, hingga integrasi perangkat IoT.'
+        'Saya mahasiswa Teknik Komputer yang tertarik pada persimpangan antara software, AI, '
+        'dan perangkat keras. Saya membangun project mulai dari antarmuka dan backend hingga '
+        'database, deployment, serta integrasi perangkat IoT.\n\n'
+        'Bagi saya, project bukan hanya tentang membuat sesuatu berjalan, tetapi memahami '
+        'bagaimana setiap bagian sistem bekerja dan bagaimana membuatnya lebih sederhana, '
+        'stabil, dan mudah dikembangkan.'
     ),
     'education': 'Mahasiswa Teknik Komputer',
     'location': 'Indonesia',
     'current_focus': (
-        'Memperkuat kemampuan full-stack development dan membangun sistem yang '
-        'stabil, mudah dipelihara, serta relevan bagi penggunanya.'
+        'Mendalami backend engineering, local AI, dan IoT—dengan fokus pada bagaimana '
+        'software, data, dan perangkat dapat bekerja sebagai satu sistem.'
     ),
     'cv_url': None,
     'profile_image_url': None,

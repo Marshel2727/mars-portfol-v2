@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/services/auth";
+import { getApiErrorMessage } from "@/services/api";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,11 +26,12 @@ export default function LoginPage() {
       await login( email, password );
       
       // Jika berhasil, arahkan (redirect) admin ke halaman dashboard
-      router.push("/admin");
-    } catch (error: any) {
+      router.replace("/admin");
+      router.refresh();
+    } catch (error: unknown) {
       // Jika gagal (email/password salah), tampilkan pesan error dari backend
       setErrorMsg(
-        error.response?.data?.message || "Terjadi kesalahan saat login."
+        getApiErrorMessage(error, "Terjadi kesalahan saat login.")
       );
     } finally {
       setIsLoading(false);
@@ -36,15 +39,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-800 to-emerald-900">
-      <div className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-8 shadow-2xl transition-all duration-300 hover:bg-white/10 hover:scale-[1.02] hover:shadow-blue-500/20 text-white">
+    <div className="relative flex min-h-screen items-center justify-center bg-editorial-paper p-4 pt-20 sm:p-6 sm:pt-20">
+      <ThemeToggle className="absolute right-4 top-4 sm:right-6 sm:top-6" />
+      <div className="w-full max-w-md rounded-2xl border border-editorial-line bg-editorial-surface p-8 text-editorial-ink shadow-[var(--shadow-editorial)] transition-all duration-300 hover:-translate-y-1 hover:border-editorial-line-strong">
         <h2 className="mb-6 text-center text-2xl font-bold">
           Admin Login
         </h2>
 
         {/* Jika ada errorMsg, tampilkan kotak peringatan merah */}
         {errorMsg && (
-          <div className="mb-4 rounded bg-red-100 p-3 text-sm text-red-700">
+          <div className="mb-4 rounded border border-editorial-danger/25 bg-editorial-danger/10 p-3 text-sm text-editorial-danger">
             {errorMsg}
           </div>
         )}
@@ -58,7 +62,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded border bg-white/60 px-3 py-2  focus:border-blue-700 focus:outline-none focus:ring-1 focus:ring-green-600 text-black"
+              className="w-full rounded border border-editorial-line-strong bg-editorial-surface px-3 py-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               required
             />
           </div>
@@ -71,7 +75,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border bg-white/60 px-3 py-2 focus:border-blue-800 focus:outline-none focus:ring-1 focus:ring-green-600 text-black"
+              className="w-full rounded border border-editorial-line-strong bg-editorial-surface px-3 py-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               required
             />
           </div>
@@ -79,7 +83,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded bg-gray-500 py-2 text-white hover:bg-cyan-900 transition disabled:bg-blue-300"
+            className="min-h-11 w-full rounded bg-editorial-action py-2 text-editorial-on-action transition hover:bg-editorial-action-hover disabled:opacity-50"
           >
             {isLoading ? "Loading..." : "Login"}
           </button>

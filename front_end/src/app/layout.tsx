@@ -1,23 +1,68 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { JetBrains_Mono, Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import RegisterSW from "../components/RegisterSW";
 import SWRProvider from "../components/SWRProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { THEME_COLORS, THEME_INIT_SCRIPT } from "@/lib/theme";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Marshel | Portfolio",
-  description: "Portfolio Marshel, mahasiswa Teknik Komputer yang berfokus pada Full-Stack Web Development, REST API, dashboard, dan integrasi Internet of Things.",
+  title: "Marshel — Full-Stack, IoT & Systems Engineer",
+  description:
+    "Portofolio Marshel, mahasiswa Computer Engineering berfokus pada Full-Stack Web Development, REST API, sistem IoT, dan arsitektur data terintegrasi.",
+  keywords: [
+    "Marshel",
+    "Computer Engineering",
+    "Full-Stack Developer",
+    "IoT Engineer",
+    "Next.js Portfolio",
+    "ESP32",
+    "Python",
+    "TypeScript",
+  ],
+  authors: [{ name: "Marshel" }],
+  creator: "Marshel",
+  publisher: "Marshel",
   manifest: "/manifest.json",
+  openGraph: {
+    title: "Marshel — Full-Stack, IoT & Systems Engineer",
+    description:
+      "Membangun software yang terhubung dengan dunia nyata—dari antarmuka web, API, database, hingga integrasi perangkat IoT.",
+    url: "https://marshelportfolio.me",
+    siteName: "Marshel Portfolio",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Marshel — Full-Stack, IoT & Systems Engineer",
+    description: "Full-Stack Web Development, REST API, dashboard, dan integrasi Internet of Things.",
+    creator: "@marshel",
+  },
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_COLORS.light },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLORS.dark },
+  ],
 };
 
 export default function RootLayout({
@@ -28,11 +73,18 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      data-theme="light"
+      suppressHydrationWarning
+      className={`${newsreader.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
-        <RegisterSW />
-        <SWRProvider>{children}</SWRProvider>
+        <ThemeProvider>
+          <RegisterSW />
+          <SWRProvider>{children}</SWRProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

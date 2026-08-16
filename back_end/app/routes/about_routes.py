@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from flask_jwt_extended import get_jwt, jwt_required
+from urllib.parse import urlparse
 
 from app.service.about_service import get_about_profile, update_about_profile
 from app.utils.about_upload import delete_profile_image, save_profile_image
@@ -39,6 +40,12 @@ def edit_about_profile():
 
     if not data.get('full_name') or not data.get('headline') or not data.get('bio'):
         return error_response(message='Nama, headline, dan narasi wajib diisi.', status_code=400)
+    if len(data['full_name']) > 150 or len(data['headline']) > 255:
+        return error_response(message='Nama atau headline terlalu panjang.', status_code=400)
+    if data.get('cv_url'):
+        parsed_cv_url = urlparse(data['cv_url'])
+        if parsed_cv_url.scheme not in ('http', 'https') or not parsed_cv_url.netloc:
+            return error_response(message='Tautan CV harus menggunakan http atau https.', status_code=400)
 
     image_file = request.files.get('profile_image')
     if image_file and image_file.filename:

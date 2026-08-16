@@ -6,7 +6,7 @@ import { getAllProjects } from "@/services/project";
 import { getAllSkill } from "@/services/Skils";
 import { getAllMessages } from "@/services/messages";
 import StatCard from "@/components/ui/StatCard";
-import api from "@/services/api";
+import api, { getApiErrorMessage } from "@/services/api";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -89,9 +89,9 @@ export default function AdminDashboard() {
         setMessage(response.data.message || "Gagal menyimpan subscription.");
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error subscribing to push notifications:", error);
-      setMessage(error.response?.data?.message || error.message || "Gagal mendaftarkan perangkat.");
+      setMessage(getApiErrorMessage(error, "Gagal mendaftarkan perangkat."));
     } finally {
       setIsSubscribing(false);
     }
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="mb-2 text-3xl font-bold text-gray-100 text-center">Dashboard Overview</h1>
+      <h1 className="mb-2 text-center text-3xl font-bold text-editorial-ink">Dashboard Overview</h1>
 
       <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
         <StatCard title="Total Proyek" value={projects.length} isLoading={isLoading} />
@@ -107,25 +107,25 @@ export default function AdminDashboard() {
         <StatCard title="Pesan Masuk" value={messages.length} isLoading={isLoading} />
       </div>
 
-      <div className="mt-12 p-6 bg-gray-800/40 rounded-2xl border border-gray-700/50 backdrop-blur-md max-w-md mx-auto text-center shadow-xl md:hidden">
-        <h2 className="text-xl font-semibold text-gray-100 mb-2">Notifikasi HP Admin</h2>
-        <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+      <div className="mx-auto mt-12 max-w-md rounded-2xl border border-editorial-line bg-editorial-surface p-6 text-center shadow-[var(--shadow-editorial)] md:hidden">
+        <h2 className="mb-2 text-xl font-semibold text-editorial-ink">Notifikasi HP Admin</h2>
+        <p className="mb-6 text-sm leading-relaxed text-editorial-muted">
           Terima pemberitahuan instan langsung di HP Anda saat pengunjung mengirimkan pesan baru pada form kontak portofolio.
         </p>
 
         {notificationStatus === "unsupported" && (
-          <p className="text-yellow-500 text-sm">Browser ini tidak mendukung notifikasi push.</p>
+          <p className="text-sm text-editorial-accent-strong">Browser ini tidak mendukung notifikasi push.</p>
         )}
 
         {notificationStatus === "granted" && (
           <div className="space-y-4">
-            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="inline-flex items-center rounded-full border border-editorial-success/20 bg-editorial-success/10 px-4 py-1.5 text-xs font-semibold text-editorial-success">
               🟢 Notifikasi Aktif di HP Ini
             </span>
             <button
               onClick={handleSubscribe}
               disabled={isSubscribing}
-              className="w-full py-2.5 px-4 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-gray-100 rounded-xl transition font-medium text-sm border border-gray-600/50 cursor-pointer"
+              className="w-full cursor-pointer rounded-xl border border-editorial-line-strong bg-editorial-paper-deep px-4 py-2.5 text-sm font-medium text-editorial-ink transition hover:bg-editorial-paper disabled:opacity-50"
             >
               {isSubscribing ? "Sinkronisasi..." : "Sinkronkan Ulang Perangkat"}
             </button>
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
         )}
 
         {notificationStatus === "denied" && (
-          <p className="text-red-400 text-sm leading-relaxed">
+          <p className="text-sm leading-relaxed text-editorial-danger">
             Izin notifikasi diblokir. Harap aktifkan izin notifikasi situs di pengaturan browser HP Anda terlebih dahulu.
           </p>
         )}
@@ -142,14 +142,14 @@ export default function AdminDashboard() {
           <button
             onClick={handleSubscribe}
             disabled={isSubscribing}
-            className="w-full py-3 px-6 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-gray-100 rounded-xl transition font-semibold text-sm shadow-lg shadow-emerald-950/20 cursor-pointer active:scale-[0.98]"
+            className="min-h-11 w-full cursor-pointer rounded-xl bg-editorial-action px-6 py-3 text-sm font-semibold text-editorial-on-action shadow-lg transition hover:bg-editorial-action-hover disabled:opacity-50 active:scale-[0.98]"
           >
             {isSubscribing ? "Mendaftarkan..." : "Aktifkan Notifikasi HP"}
           </button>
         )}
 
         {message && (
-          <p className="mt-4 text-xs text-gray-300 bg-gray-900/60 py-2 px-4 rounded-xl inline-block border border-gray-800">
+          <p className="mt-4 inline-block rounded-xl border border-editorial-line bg-editorial-paper-deep px-4 py-2 text-xs text-editorial-muted">
             {message}
           </p>
         )}

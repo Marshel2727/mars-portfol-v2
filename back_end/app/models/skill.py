@@ -9,6 +9,10 @@ class Skill(db.Model):
     level = db.Column(db.String(200))
     icon_url = db.Column(db.String(255))
     category = db.Column(db.String(100), nullable=False, default='Lainnya')
+    detail = db.Column(db.String(180))
+    proficiency = db.Column(db.Integer)
+    years_experience = db.Column(db.String(50))
+    display_order = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate = datetime.utcnow)
 
@@ -29,6 +33,10 @@ class Skill(db.Model):
             'level': self.level,
             'icon_url': self.icon_url,
             'category': self.category,
+            'detail': self.detail,
+            'proficiency': self.proficiency,
+            'years_experience': self.years_experience,
+            'display_order': self.display_order,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
             'projects': [

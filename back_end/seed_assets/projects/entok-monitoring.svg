@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Entok Monitoring project cover</title>
+  <desc id="desc">IoT telemetry dashboard illustration with scales, wireless nodes, and live charts.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071a1f"/><stop offset="1" stop-color="#102d31"/></linearGradient>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0V44" fill="none" stroke="#5eead4" stroke-opacity=".08"/></pattern>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/><rect width="1200" height="675" fill="url(#grid)"/>
+  <g fill="none" stroke="#5eead4" stroke-width="3">
+    <rect x="650" y="122" width="410" height="375" rx="26" fill="#0b2025"/>
+    <path d="M704 410l62-72 60 32 68-118 96 64" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="766" cy="338" r="8" fill="#5eead4"/><circle cx="826" cy="370" r="8" fill="#5eead4"/><circle cx="894" cy="252" r="8" fill="#5eead4"/>
+    <path d="M727 185h244M727 219h166" stroke-opacity=".34"/>
+    <path d="M242 318h242l-38 121H280z" fill="#112f34"/><path d="M294 270h138l34 48H260z" fill="#163c42"/>
+    <path d="M322 359h82" stroke-width="10" stroke-linecap="round"/>
+    <path d="M337 247c15-21 37-32 66-32M352 221c9-10 21-15 36-15" stroke-linecap="round"/>
+  </g>
+  <text x="112" y="112" fill="#5eead4" font-family="ui-monospace,monospace" font-size="20" letter-spacing="5">IOT / FARM OPERATIONS</text>
+  <text x="112" y="170" fill="#f8fafc" font-family="Arial,sans-serif" font-size="54" font-weight="700">ENTOK MONITORING</text>
+  <text x="112" y="211" fill="#9fb8bb" font-family="Arial,sans-serif" font-size="22">Realtime scale telemetry • feeding batches • farm dashboard</text>
+  <g font-family="ui-monospace,monospace" font-size="18"><text x="112" y="560" fill="#f8fafc">ESP32</text><text x="248" y="560" fill="#f8fafc">FLASK</text><text x="382" y="560" fill="#f8fafc">NEXT.JS</text><text x="548" y="560" fill="#f8fafc">MYSQL</text><text x="688" y="560" fill="#f8fafc">WEBSOCKET</text></g>
+</svg>

@@ -12,6 +12,9 @@ jwt = JWTManager()
 
 def create_app():
      app = Flask(__name__)
+     # Accept both /resource and /resource/ so reverse proxies never emit
+     # redirects that expose an internal Docker hostname.
+     app.url_map.strict_slashes = False
 
      frontend_origins = [url.strip() for url in os.getenv('FRONTEND_URL', 'http://localhost:3000').split(',')]
      CORS(app,
@@ -49,6 +52,7 @@ def create_app():
      from .models.project_image import ProjectImage
      from .models.push_subscription import PushSubscription
      from .models.about_profile import AboutProfile
+     from .models.site_content import SiteContent
 
      from .routes.project_routes import project_bp
      app.register_blueprint(project_bp)
@@ -67,5 +71,8 @@ def create_app():
 
      from .routes.about_routes import about_bp
      app.register_blueprint(about_bp)
+
+     from .routes.site_content_routes import site_content_bp
+     app.register_blueprint(site_content_bp)
 
      return app

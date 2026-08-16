@@ -12,9 +12,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy all other backend files
 COPY . .
+RUN chmod +x scripts/start.sh
 
 # Expose the Flask port
 EXPOSE 5000
 
-# Run database migrations, then start the app.
-CMD ["sh", "-c", "flask db upgrade && gunicorn -w 4 -b 0.0.0.0:5000 main:app"]
+# Seed an empty upload volume, run migrations, then start the app.
+CMD ["/app/scripts/start.sh"]

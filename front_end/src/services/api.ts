@@ -27,6 +27,30 @@ api.interceptors.request.use(
     }
 );
 
+api.interceptors.response.use(
+    (response) => response,
+    (error: unknown) => {
+        if (
+            axios.isAxiosError(error) &&
+            error.response?.status === 401 &&
+            typeof window !== "undefined" &&
+            window.location.pathname.startsWith("/admin")
+        ) {
+            Cookies.remove("access_token");
+            window.location.replace("/login?expired=1");
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+export const getApiErrorMessage = (error: unknown, fallback: string): string => {
+    if (!axios.isAxiosError(error)) return fallback;
+
+    const responseData = error.response?.data as { message?: string; msg?: string } | undefined;
+    return responseData?.message || responseData?.msg || error.message || fallback;
+};
+
 export const fetcher = (url: string) => api.get(url).then(res => res.data);
 
 export default api;

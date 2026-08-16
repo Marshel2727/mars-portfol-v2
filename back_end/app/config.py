@@ -21,7 +21,7 @@ class Config():
     SQLALCHEMY_DATABASE_URI = db_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'rahasia-super-aman-portofolio-mars')
+    JWT_SECRET_KEY = os.environ['JWT_SECRET_KEY']
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES_HOURS', '8')))
 
     # VAPID Keys for PWA Push Notifications

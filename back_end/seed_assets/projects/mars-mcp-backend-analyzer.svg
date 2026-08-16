@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Mars MCP Backend Analyzer cover</title><desc id="desc">Read-only repository analysis pipeline with compact context flow.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07121f"/><stop offset="1" stop-color="#122748"/></linearGradient><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#60a5fa" stroke-opacity=".08"/></pattern></defs>
+  <rect width="1200" height="675" fill="url(#bg)"/><rect width="1200" height="675" fill="url(#grid)"/>
+  <g fill="#0b1e36" stroke="#60a5fa" stroke-width="3">
+    <rect x="120" y="302" width="184" height="90" rx="14"/><rect x="374" y="302" width="184" height="90" rx="14"/><rect x="628" y="302" width="184" height="90" rx="14"/><rect x="882" y="302" width="184" height="90" rx="14"/>
+  </g>
+  <g fill="none" stroke="#93c5fd" stroke-width="4" stroke-linecap="round"><path d="M304 347h70M558 347h70M812 347h70"/><path d="M352 336l22 11-22 11M606 336l22 11-22 11M860 336l22 11-22 11"/></g>
+  <g fill="#dbeafe" font-family="ui-monospace,monospace" font-size="16" text-anchor="middle"><text x="212" y="340">PLAN TASK</text><text x="212" y="365">question scope</text><text x="466" y="340">PROJECT BRIEF</text><text x="466" y="365">compact map</text><text x="720" y="340">RELEVANT FILES</text><text x="720" y="365">ranked context</text><text x="974" y="340">READ LINES</text><text x="974" y="365">safe output</text></g>
+  <text x="112" y="112" fill="#60a5fa" font-family="ui-monospace,monospace" font-size="20" letter-spacing="5">MCP / CONTEXT ENGINEERING</text>
+  <text x="112" y="170" fill="#f8fafc" font-family="Arial,sans-serif" font-size="52" font-weight="700">BACKEND ANALYZER</text>
+  <text x="112" y="211" fill="#a8bdd9" font-family="Arial,sans-serif" font-size="22">Read-only Python project inspection with a low-token workflow</text>
+  <text x="112" y="548" fill="#93c5fd" font-family="ui-monospace,monospace" font-size="18">PYTHON • FASTMCP • AST • PATH SAFETY • PYTEST</text>
+</svg>

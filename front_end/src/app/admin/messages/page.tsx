@@ -15,14 +15,14 @@ export default function MessageAdminPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white">Pesan Masuk</h1>
-        <p className="mt-2 text-gray-400">
+        <h1 className="text-3xl font-bold text-editorial-ink">Pesan Masuk</h1>
+        <p className="mt-2 text-editorial-muted">
           Daftar pesan dan pertanyaan yang dikirimkan oleh pengunjung melalui formulir kontak.
         </p>
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-md text-sm">
+        <div className="rounded-md border border-editorial-danger/20 bg-editorial-danger/10 p-4 text-sm text-editorial-danger">
           Gagal memuat pesan: {error.message || "Pastikan Anda sudah login sebagai Admin."}
         </div>
       )}

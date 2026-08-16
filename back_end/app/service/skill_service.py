@@ -20,7 +20,7 @@ def _get_projects(project_ids):
 
 def get_all_skill():
     
-    skills = Skill.query.all()
+    skills = Skill.query.order_by(Skill.display_order.asc(), Skill.id.asc()).all()
 
     return [skill.to_dict() for skill in skills]
 
@@ -37,7 +37,11 @@ def create_skill(data):
         name = data.get('name'),
         level = data.get('level'),
         icon_url = data.get('icon_url'),
-        category = data.get('category') or 'Lainnya'
+        category = data.get('category') or 'Lainnya',
+        detail = data.get('detail'),
+        proficiency = data.get('proficiency'),
+        years_experience = data.get('years_experience'),
+        display_order = data.get('display_order', 0)
     )
     new_skill.projects = _get_projects(data.get('project_ids', []))
 
@@ -53,7 +57,10 @@ def update_skill(skill_id, data):
     if not skill:
         return None
     
-    allowed_filed=['name', 'level', 'icon_url', 'category']
+    allowed_filed = [
+        'name', 'level', 'icon_url', 'category', 'detail', 'proficiency',
+        'years_experience', 'display_order'
+    ]
 
     for key, value  in data.items():
         if key in allowed_filed:

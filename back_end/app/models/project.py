@@ -20,6 +20,7 @@ class Project(db.Model):
     github_url = db.Column(db.String(150))
     category = db.Column(db.String(100), nullable=False, default='Lainnya')
     tech_tags = db.Column(db.JSON, nullable=False, default=list)
+    architecture_steps = db.Column(db.JSON, nullable=False, default=list)
     created_at = db.Column(db.DateTime, default = datetime.utcnow)
     updated_at = db.Column(db.DateTime, default = datetime.utcnow, onupdate = datetime.utcnow)
 
@@ -45,6 +46,7 @@ class Project(db.Model):
             'github_url': self.github_url,
             'category': self.category,
             'tech_tags': self.tech_tags or [],
+            'architecture_steps': self.architecture_steps or [],
             'created_at': self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
             'updated_at': self.updated_at.strftime("%Y-%m-%d %H:%M:%S") if self.updated_at else None,
 

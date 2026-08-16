@@ -2,16 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-
-  // Close mobile menu on pathname change (safety fallback)
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
+  const [openPath, setOpenPath] = useState<string | null>(null);
+  const isOpen = openPath === pathname;
 
   const isLinkActive = (path: string) => {
     return pathname === path;
@@ -28,7 +24,7 @@ export default function Navbar() {
       <div className="flex items-center justify-between px-6 sm:px-8 py-5 max-w-7xl mx-auto">
         <Link 
           href="/" 
-          onClick={() => setIsOpen(false)}
+          onClick={() => setOpenPath(null)}
           className="text-2xl font-bold tracking-tighter text-teal-400 hover:scale-105 transition-transform duration-200"
         >
           marsPorto.
@@ -56,7 +52,7 @@ export default function Navbar() {
 
         {/* Mobile Hamburger Button */}
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setOpenPath(isOpen ? null : pathname)}
           className="md:hidden p-2 text-gray-400 hover:text-teal-400 focus:outline-none transition-colors duration-200"
           aria-label="Toggle Menu"
         >
@@ -80,7 +76,7 @@ export default function Navbar() {
                 <Link
                   key={link.path}
                   href={link.path}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setOpenPath(null)}
                   className={`transition-all duration-200 py-3 px-5 rounded-xl border-l-4 ${
                     active
                       ? "text-teal-400 border-teal-500 bg-teal-500/5 shadow-[inset_4px_0_12px_rgba(20,184,166,0.1)] font-bold"

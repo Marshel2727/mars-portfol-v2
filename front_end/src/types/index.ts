@@ -4,6 +4,10 @@ export interface Skill {
     level: string;
     icon_url: string;
     category: string;
+    detail?: string;
+    proficiency?: number;
+    years_experience?: string;
+    display_order?: number;
     projects?: ProjectReference[];
     created_at?: string;
     updated_at?: string;
@@ -43,6 +47,7 @@ export interface Project {
   github_url?: string;
   category: string;
   tech_tags: string[];
+  architecture_steps?: ArchitectureStep[];
   skills?: SkillReference[];
   created_at?: string;
   // Tambahkan baris ini untuk menampung data galeri dari backend
@@ -65,6 +70,12 @@ export interface User {
     role: string;
     created_at?: string;
     updated_at?: string;
+}
+
+export interface ArchitectureStep {
+  label: string;
+  title: string;
+  description: string;
 }
 
 export interface AboutProfile {

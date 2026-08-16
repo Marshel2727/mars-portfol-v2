@@ -3,7 +3,7 @@ from flask import jsonify
 def success_response(data=None, message=None, status_code=200):
     
     response = {
-        'status': 'Success'
+        'status': 'success'
     }
 
     if data is not None:

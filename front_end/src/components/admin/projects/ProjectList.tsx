@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Project } from "@/types";
 import { deleteProject } from "@/services/project";
 import ProjectGalleryModal from "./ProjectGalleryModal";
+import { getImageUrl } from "@/lib/utils";
 
 interface ProjectListProps {
   projects: Project[];
@@ -13,7 +14,8 @@ interface ProjectListProps {
 }
 
 export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: ProjectListProps) {
-  const [activeGallery, setActiveGallery] = useState<Project | null>(null);
+  const [activeGalleryId, setActiveGalleryId] = useState<number | null>(null);
+  const activeGallery = projects.find((project) => project.id === activeGalleryId) || null;
 
   const handleDelete = async (id: number) => {
     if (!confirm("Yakin ingin hapus project ini?")) return;
@@ -27,23 +29,23 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
   };
 
   return (
-    <div className="rounded-lg bg-gray-800 p-6 shadow-md border border-gray-700">
+    <div className="rounded-lg border border-editorial-line bg-editorial-surface p-6 shadow-[var(--shadow-editorial)]">
       
       {/* --- HEADER TABEL: Judul Kiri, Tombol Kanan --- */}
-      <div className="mb-6 flex items-center justify-between border-b border-gray-700 pb-4">
-        <h2 className="text-xl font-bold text-white">DAFTAR PROJECT</h2>
+      <div className="mb-6 flex items-center justify-between border-b border-editorial-line pb-4">
+        <h2 className="text-xl font-bold text-editorial-ink">DAFTAR PROJECT</h2>
       </div>
 
       {isLoading ? (
-        <div className="py-8 text-center text-gray-400">Memuat data proyek...</div>
+        <div className="py-8 text-center text-editorial-muted">Memuat data proyek...</div>
       ) : projects.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-700 py-12 text-center text-gray-400 bg-gray-900/50">
+        <div className="rounded-lg border border-dashed border-editorial-line-strong bg-editorial-paper-deep py-12 text-center text-editorial-muted">
           Belum ada proyek yang ditambahkan.
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-300">
-            <thead className="bg-gray-700/50 text-xs uppercase text-gray-400 border-b border-gray-600">
+          <table className="w-full text-left text-sm text-editorial-ink">
+            <thead className="border-b border-editorial-line bg-editorial-paper-deep text-xs uppercase text-editorial-muted">
               <tr>
                 <th className="px-4 py-3 font-semibold">Gambar</th>
                 <th className="px-4 py-3 font-semibold">Judul</th>
@@ -54,29 +56,29 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
             </thead>
             <tbody className="divide-y divide-gray-700">
               {projects.map((project) => (
-                <tr key={project.id} className="transition-colors hover:bg-gray-700/30">
+                <tr key={project.id} className="transition-colors hover:bg-editorial-paper-deep">
                   <td className="px-4 py-3">
                     <img 
-                      src={`${process.env.NEXT_PUBLIC_BASE_URL}${project.image_url}`} 
+                      src={getImageUrl(project.image_url)}
                       alt={project.title}
-                      className="h-12 w-12 rounded object-cover shadow-sm border border-gray-600"
+                      className="h-12 w-12 rounded border border-editorial-line-strong object-cover shadow-sm"
                     />
                   </td>
-                  <td className="px-4 py-3 font-medium text-white max-w-xs break-words">{project.title}</td>
+                  <td className="max-w-xs break-words px-4 py-3 font-medium text-editorial-ink">{project.title}</td>
                   <td className="px-4 py-3">
-                    <span className="mb-2 inline-block rounded bg-teal-500/10 px-2 py-1 text-xs font-semibold text-teal-300">
+                    <span className="mb-2 inline-block rounded bg-editorial-technical/10 px-2 py-1 text-xs font-semibold text-editorial-technical">
                       {project.category || "Lainnya"}
                     </span>
                     <div className="flex max-w-xs flex-wrap gap-1">
                       {project.tech_tags?.map((tag) => (
-                        <span key={tag} className="rounded border border-gray-700 px-1.5 py-0.5 text-xs text-gray-400">
+                        <span key={tag} className="rounded border border-editorial-line px-1.5 py-0.5 text-xs text-editorial-muted">
                           {tag}
                         </span>
                       ))}
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="line-clamp-2 max-w-xs text-sm text-gray-300 font-normal">
+                    <div className="line-clamp-2 max-w-xs text-sm font-normal text-editorial-muted">
                       {project.description}
                     </div>
                   </td>
@@ -85,8 +87,8 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
                       
                       {/* Tombol Galeri */}
                       <button
-                        onClick={() => setActiveGallery(project)}
-                        className="flex items-center gap-1.5 rounded-md border border-teal-500/20 bg-teal-500/10 px-3 py-1.5 text-xs font-semibold text-teal-400 transition-colors hover:bg-teal-500 hover:text-white shadow-sm"
+                        onClick={() => setActiveGalleryId(project.id)}
+                        className="flex min-h-11 items-center gap-1.5 rounded-md border border-editorial-technical/20 bg-editorial-technical/10 px-3 py-1.5 text-xs font-semibold text-editorial-technical shadow-sm transition-colors hover:bg-editorial-technical hover:text-editorial-on-action"
                         title="Kelola Galeri"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -98,7 +100,7 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
                       {/* Tombol Edit */}
                       <button
                         onClick={() => onEdit(project)}
-                        className="flex items-center gap-1.5 rounded-md border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-400 transition-colors hover:bg-blue-500 hover:text-white shadow-sm"
+                        className="flex min-h-11 items-center gap-1.5 rounded-md border border-editorial-accent/20 bg-editorial-accent/10 px-3 py-1.5 text-xs font-semibold text-editorial-accent-strong shadow-sm transition-colors hover:bg-editorial-action hover:text-editorial-on-action"
                         title="Edit Proyek"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -110,7 +112,7 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
                       {/* Tombol Hapus */}
                       <button
                         onClick={() => handleDelete(project.id)}
-                        className="flex items-center gap-1.5 rounded-md border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500 hover:text-white shadow-sm"
+                        className="flex min-h-11 items-center gap-1.5 rounded-md border border-editorial-danger/20 bg-editorial-danger/10 px-3 py-1.5 text-xs font-semibold text-editorial-danger shadow-sm transition-colors hover:bg-editorial-danger hover:text-editorial-on-action"
                         title="Hapus Proyek"
                       >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -132,7 +134,7 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
       {activeGallery && (
         <ProjectGalleryModal 
           project={activeGallery} 
-          onClose={() => setActiveGallery(null)} 
+          onClose={() => setActiveGalleryId(null)}
           onRefresh={onRefresh} 
         />
       )}

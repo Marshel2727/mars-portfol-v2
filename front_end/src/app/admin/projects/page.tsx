@@ -39,12 +39,12 @@ export default function ProjectAdminPage() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white">Kelola Project</h1>
+        <h1 className="text-3xl font-bold text-editorial-ink">Kelola Project</h1>
         
         {/* Tombol untuk memunculkan form tambah proyek */}
         <button 
           onClick={handleAddNewProject}
-          className="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-md font-medium transition"
+          className="min-h-11 rounded-md bg-editorial-action px-4 py-2 font-medium text-editorial-on-action transition hover:bg-editorial-action-hover"
         >
           + Tambah Proyek
         </button>

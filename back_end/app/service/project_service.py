@@ -18,6 +18,26 @@ def _normalize_tags(tags):
     return normalized
 
 
+def _normalize_architecture_steps(steps):
+    if not isinstance(steps, list):
+        return []
+
+    normalized = []
+    for index, step in enumerate(steps[:12]):
+        if not isinstance(step, dict):
+            continue
+        title = str(step.get('title') or '').strip()
+        description = str(step.get('description') or '').strip()
+        if not title or not description:
+            continue
+        normalized.append({
+            'label': str(step.get('label') or index + 1).strip(),
+            'title': title,
+            'description': description,
+        })
+    return normalized
+
+
 def _get_skills(skill_ids):
     if not isinstance(skill_ids, list):
         return []
@@ -57,7 +77,8 @@ def create_project(data):
         demo_url = data.get('demo_url'),
         github_url = data.get('github_url'),
         category = data.get('category') or 'Lainnya',
-        tech_tags = _normalize_tags(data.get('tech_tags', []))
+        tech_tags = _normalize_tags(data.get('tech_tags', [])),
+        architecture_steps = _normalize_architecture_steps(data.get('architecture_steps', []))
     )
     new_project.skills = _get_skills(data.get('skill_ids', []))
 
@@ -91,6 +112,8 @@ def update_project(project_id, data):
         project.tech_tags = _normalize_tags(data['tech_tags'])
     if 'skill_ids' in data:
         project.skills = _get_skills(data['skill_ids'])
+    if 'architecture_steps' in data:
+        project.architecture_steps = _normalize_architecture_steps(data['architecture_steps'])
     
     db.session.commit()
 

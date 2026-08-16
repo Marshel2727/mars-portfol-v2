@@ -16,7 +16,7 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
     try {
       await deleteMessage(id);
       onRefresh();
-    } catch (error) {
+    } catch {
       alert('Gagal menghapus pesan.');
     }
   };
@@ -31,17 +31,17 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
   };
 
   return (
-    <div className="rounded-lg bg-gray-800 p-6 shadow-md border border-gray-700">
-      <h2 className="mb-4 text-xl font-semibold text-white">Kotak Masuk Pesan</h2>
+    <div className="rounded-lg border border-editorial-line bg-editorial-surface p-6 shadow-[var(--shadow-editorial)]">
+      <h2 className="mb-4 text-xl font-semibold text-editorial-ink">Kotak Masuk Pesan</h2>
       
       {isLoading ? (
-        <p className="text-gray-400">Memuat pesan...</p>
+        <p className="text-editorial-muted">Memuat pesan...</p>
       ) : messages.length === 0 ? (
-        <p className="text-gray-400">Tidak ada pesan masuk.</p>
+        <p className="text-editorial-muted">Tidak ada pesan masuk.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-300">
-            <thead className="bg-gray-700 text-xs uppercase text-gray-400">
+          <table className="w-full text-left text-sm text-editorial-ink">
+            <thead className="bg-editorial-paper-deep text-xs uppercase text-editorial-muted">
               <tr>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Pengirim</th>
@@ -54,34 +54,34 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
               {messages.map((msg) => (
                 <tr 
                   key={msg.id} 
-                  className={`border-b border-gray-700 transition hover:bg-gray-750 ${msg.is_read ? 'opacity-60' : 'bg-gray-750'}`}
+                  className={`border-b border-editorial-line transition hover:bg-editorial-paper-deep ${msg.is_read ? 'opacity-60' : 'bg-editorial-paper-deep'}`}
                 >
                   <td className="px-4 py-3">
                     {!msg.is_read ? (
-                      <span className="flex h-2 w-2 rounded-full bg-teal-500"></span>
+                      <span className="flex h-2 w-2 rounded-full bg-editorial-technical"></span>
                     ) : (
-                      <span className="text-gray-500 text-xs">Read</span>
+                      <span className="text-xs text-editorial-muted">Read</span>
                     )}
                   </td>
                   
                   {/* Bagian Pengirim yang sudah dibungkus Link */}
                   <td className="px-4 py-3">
                     <Link href={`/admin/messages/${msg.id}`} className="hover:underline block">
-                      <div className={!msg.is_read ? "font-bold text-white" : "text-gray-400"}>
+                      <div className={!msg.is_read ? "font-bold text-editorial-ink" : "text-editorial-muted"}>
                         {msg.name}
                       </div>
-                      <div className="text-xs text-gray-500">{msg.email}</div>
+                      <div className="text-xs text-editorial-muted">{msg.email}</div>
                     </Link>
                   </td>
 
                   {/* Bagian Pesan yang sudah dibungkus Link */}
-                  <td className={`px-4 py-3 max-w-xs ${!msg.is_read ? "font-medium text-gray-200" : "text-gray-400"}`}>
+                  <td className={`max-w-xs px-4 py-3 ${!msg.is_read ? "font-medium text-editorial-ink" : "text-editorial-muted"}`}>
                     <Link href={`/admin/messages/${msg.id}`} className="hover:underline block truncate">
                       {msg.content}
                     </Link>
                   </td>
 
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs text-editorial-muted">
                     {msg.created_at ? new Date(msg.created_at).toLocaleDateString('id-ID') : '-'}
                   </td>
                   
@@ -89,14 +89,14 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
                     {!msg.is_read && (
                       <button 
                         onClick={() => handleMarkAsRead(msg.id)}
-                        className="text-teal-400 hover:text-teal-300 text-xs font-semibold"
+                        className="text-xs font-semibold text-editorial-technical hover:text-editorial-accent-strong"
                       >
                         Tandai Baca
                       </button>
                     )}
                     <button 
                       onClick={() => handleDelete(msg.id)}
-                      className="text-red-500 hover:text-red-400 text-xs font-semibold"
+                      className="text-xs font-semibold text-editorial-danger hover:text-editorial-accent-strong"
                     >
                       Hapus
                     </button>

@@ -17,14 +17,19 @@ def upload_project_gallery():
     if claims.get('role') != 'admin':
         return error_response(message='Akses ditolak! Hanya admin yang boleh mengakses.', status_code=403)
     
-    project_id = request.form.get('project_id')
+    project_id = request.form.get('project_id', '').strip()
     image_file = request.files.get('image_file')
     caption = request.form.get('caption')
 
     if not project_id:
         return error_response(message='Project_id wajib ada')
-    
-    project = get_project_by_id(project_id)
+
+    try:
+        normalized_project_id = int(project_id)
+    except ValueError:
+        return error_response(message='Project_id harus berupa angka.', status_code=400)
+
+    project = get_project_by_id(normalized_project_id)
 
     if not project:
         return error_response(message='Project tidak ditemukan', status_code=404)
@@ -37,7 +42,12 @@ def upload_project_gallery():
     if not image_url:
         return error_response(message='Format gambar tidak valid! Gunakan png, jpg, jpeg, atau gif')
     
-    new_gallery_image = add_project_image(project_id, image_url, caption)
+    normalized_caption = (caption or '').strip() or None
+    if normalized_caption and len(normalized_caption) > 255:
+        delete_image(image_url)
+        return error_response(message='Caption maksimal 255 karakter.', status_code=400)
+
+    new_gallery_image = add_project_image(normalized_project_id, image_url, normalized_caption)
     return success_response(data=new_gallery_image, status_code=201)
 
 

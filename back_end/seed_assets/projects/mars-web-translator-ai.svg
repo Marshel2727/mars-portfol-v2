@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Mars Web Translator AI cover</title><desc id="desc">Browser translation pipeline from English documentation to Indonesian through FastAPI and Ollama.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111827"/><stop offset="1" stop-color="#172554"/></linearGradient><pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0V44" fill="none" stroke="#818cf8" stroke-opacity=".08"/></pattern></defs>
+  <rect width="1200" height="675" fill="url(#bg)"/><rect width="1200" height="675" fill="url(#grid)"/>
+  <g fill="#101d3b" stroke="#818cf8" stroke-width="3"><rect x="610" y="148" width="470" height="360" rx="24"/><path d="M610 210h470"/><circle cx="650" cy="179" r="8" fill="#f87171" stroke="none"/><circle cx="678" cy="179" r="8" fill="#fbbf24" stroke="none"/><circle cx="706" cy="179" r="8" fill="#34d399" stroke="none"/></g>
+  <g font-family="ui-monospace,monospace"><text x="668" y="284" fill="#c7d2fe" font-size="48" font-weight="700">EN</text><text x="927" y="284" fill="#e0e7ff" font-size="48" font-weight="700">ID</text><text x="673" y="338" fill="#94a3b8" font-size="16">Build reliable APIs</text><text x="877" y="338" fill="#c7d2fe" font-size="16">Bangun API yang andal</text></g>
+  <g fill="none" stroke="#a5b4fc" stroke-width="5" stroke-linecap="round"><path d="M770 277h105"/><path d="M849 257l26 20-26 20"/><path d="M675 400h340M675 438h248" stroke-opacity=".45"/></g>
+  <text x="112" y="112" fill="#818cf8" font-family="ui-monospace,monospace" font-size="20" letter-spacing="5">BROWSER EXTENSION / LOCAL AI</text>
+  <text x="112" y="170" fill="#f8fafc" font-family="Arial,sans-serif" font-size="52" font-weight="700">WEB TRANSLATOR AI</text>
+  <text x="112" y="211" fill="#b5bfd5" font-family="Arial,sans-serif" font-size="22">Viewport-first technical translation with local caching</text>
+  <text x="112" y="553" fill="#a5b4fc" font-family="ui-monospace,monospace" font-size="18">MANIFEST V3 • FASTAPI • OLLAMA • QWEN</text>
+</svg>

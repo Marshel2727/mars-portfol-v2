@@ -1,31 +1,45 @@
 from app import db
 from app.models.user import User
 from flask_jwt_extended import create_access_token
+from sqlalchemy.exc import IntegrityError
 
-def register_user(data):
+def has_registered_users():
+    return User.query.first() is not None
+
+
+def register_user(data, role='user'):
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip().lower()
     
-    if User.query.filter_by(email=data.get('email')).first():
+    if User.query.filter_by(email=email).first():
         return {
             'status': 'error',
             'message': 'email sudah digunakan sebelumnya!'
         }, 400
     
-    if User.query.filter_by(username=data.get('username')).first():
+    if User.query.filter_by(username=username).first():
         return {
             'status': 'error',
             'message': 'username sudah digunakan sebelumnya!'
         }, 400
     
     new_user = User(
-        username = data.get('username'),
-        email = data.get('email'),
-        role = data.get('role')
+        username=username,
+        email=email,
+        role=role
     )
 
     new_user.set_password(data.get('password'))
 
-    db.session.add(new_user)
-    db.session.commit()
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return {
+            'status': 'error',
+            'message': 'Username atau email sudah digunakan.'
+        }, 409
 
     return {
         'status': 'success',
@@ -33,13 +47,13 @@ def register_user(data):
     }, 201
 
 def verify_login(email, password):
-    
-    user = User.query.filter_by(email = email).first()
+    normalized_email = email.strip().lower()
+    user = User.query.filter_by(email=normalized_email).first()
 
     if not user or not user.check_password(password):
         return {
             'status': 'error',
-            'message': 'Email atu password salah!'
+            'message': 'Email atau password salah!'
         }, 401
     
     access_token = create_access_token(

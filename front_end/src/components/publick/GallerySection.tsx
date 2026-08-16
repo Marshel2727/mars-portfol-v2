@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import useSWR from "swr";
-import { Project } from "@/types";
 import { getAllProjects } from "@/services/project";
 import Link from "next/link";
 import { motion } from "framer-motion";
