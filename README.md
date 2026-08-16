@@ -55,3 +55,23 @@ docker compose exec -T db mysqldump \
 ```
 
 Simpan `.env`, backup database, dan volume upload di luar repository GitHub.
+
+## Deployment hybrid: VPS backend + Vercel frontend
+
+Jalankan hanya database dan backend di VPS:
+
+```bash
+docker compose up --build -d db backend
+```
+
+Port Flask dan MySQL hanya bind ke `127.0.0.1`. Pasang `deploy/nginx-api.conf` pada Nginx host, lalu arahkan `api.marshelportfolio.me` ke VPS dan aktifkan HTTPS.
+
+Pada project frontend Vercel, gunakan root directory `front_end` dan environment berikut:
+
+```text
+NEXT_PUBLIC_API_URL=/api
+NEXT_PUBLIC_BASE_URL=/
+BACKEND_INTERNAL_URL=https://api.marshelportfolio.me
+```
+
+Set `FRONTEND_URL` backend ke domain production frontend, misalnya `https://marshelportfolio.me,https://www.marshelportfolio.me`.
