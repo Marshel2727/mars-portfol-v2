@@ -26,7 +26,7 @@ export const DEFAULT_SITE_CONTENT = {
     metrics: [
       { value: "AUTO_PROJECT_COUNT", label: "Proyek Terverifikasi" },
       { value: "03", label: "Pilar Rekayasa (Web / API / IoT)" },
-      { value: "100%", label: "Fokus pada Clarity & Reliability" },
+      { value: "10+", label: "Teknologi & Modul Terintegrasi" },
     ],
     selected_work_eyebrow: "SELECTED WORK",
     selected_work_title: "Sistem nyata yang dibangun dengan presisi.",

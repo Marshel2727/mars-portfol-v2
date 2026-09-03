@@ -1,23 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { Message } from "@/types";
 import { deleteMessage, markMessageAsRead } from "@/services/messages";
-import Link from "next/link"; // Tambahan import Link
+import Link from "next/link";
+import ConfirmModal from "../ConfirmModal";
 
-interface MessageListProps { // Memperbaiki typo Props
+interface MessageListProps {
   messages: Message[];
   isLoading: boolean;
   onRefresh: () => void;
 }
 
 export default function MessagesList({ messages, isLoading, onRefresh }: MessageListProps) {
-  const handleDelete = async (id: number) => {
-    if (!confirm('Yakin ingin hapus pesan ini?')) return;
+  const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    if (!messageToDelete) return;
+    setIsDeleting(true);
     try {
-      await deleteMessage(id);
+      await deleteMessage(messageToDelete.id);
+      setMessageToDelete(null);
       onRefresh();
-    } catch {
-      alert('Gagal menghapus pesan.');
+    } catch (error) {
+      console.error("Gagal menghapus pesan", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -26,7 +35,7 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
       await markMessageAsRead(id);
       onRefresh();
     } catch (error) {
-      console.error('Gagal update status baca', error);
+      console.error("Gagal update status baca", error);
     }
   };
 
@@ -54,17 +63,16 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
               {messages.map((msg) => (
                 <tr 
                   key={msg.id} 
-                  className={`border-b border-editorial-line transition hover:bg-editorial-paper-deep ${msg.is_read ? 'opacity-60' : 'bg-editorial-paper-deep'}`}
+                  className={`border-b border-editorial-line transition hover:bg-editorial-paper-deep ${msg.is_read ? "opacity-60" : "bg-editorial-paper-deep"}`}
                 >
                   <td className="px-4 py-3">
                     {!msg.is_read ? (
-                      <span className="flex h-2 w-2 rounded-full bg-editorial-technical"></span>
+                      <span className="flex h-2 w-2 rounded-full bg-editorial-technical" />
                     ) : (
-                      <span className="text-xs text-editorial-muted">Read</span>
+                      <span className="text-xs text-editorial-muted">Dibaca</span>
                     )}
                   </td>
                   
-                  {/* Bagian Pengirim yang sudah dibungkus Link */}
                   <td className="px-4 py-3">
                     <Link href={`/admin/messages/${msg.id}`} className="hover:underline block">
                       <div className={!msg.is_read ? "font-bold text-editorial-ink" : "text-editorial-muted"}>
@@ -74,7 +82,6 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
                     </Link>
                   </td>
 
-                  {/* Bagian Pesan yang sudah dibungkus Link */}
                   <td className={`max-w-xs px-4 py-3 ${!msg.is_read ? "font-medium text-editorial-ink" : "text-editorial-muted"}`}>
                     <Link href={`/admin/messages/${msg.id}`} className="hover:underline block truncate">
                       {msg.content}
@@ -82,7 +89,7 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
                   </td>
 
                   <td className="px-4 py-3 text-xs text-editorial-muted">
-                    {msg.created_at ? new Date(msg.created_at).toLocaleDateString('id-ID') : '-'}
+                    {msg.created_at ? new Date(msg.created_at).toLocaleDateString("id-ID") : "-"}
                   </td>
                   
                   <td className="px-4 py-3 text-center space-x-3">
@@ -95,7 +102,7 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
                       </button>
                     )}
                     <button 
-                      onClick={() => handleDelete(msg.id)}
+                      onClick={() => setMessageToDelete(msg)}
                       className="text-xs font-semibold text-editorial-danger hover:text-editorial-accent-strong"
                     >
                       Hapus
@@ -107,6 +114,18 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
           </table>
         </div>
       )}
+
+      {/* MODAL KONFIRMASI HAPUS PESAN */}
+      <ConfirmModal
+        isOpen={Boolean(messageToDelete)}
+        title="Hapus Pesan"
+        message={`Apakah Anda yakin ingin menghapus pesan dari "${messageToDelete?.name}" (${messageToDelete?.email})?`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setMessageToDelete(null)}
+      />
     </div>
   );
 }

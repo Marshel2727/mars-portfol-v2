@@ -29,6 +29,14 @@ export function TextScramble({
     if (isScramblingRef.current) return;
     isScramblingRef.current = true;
 
+    const prefersReducedMotion = typeof window !== "undefined"
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      setDisplayText(text);
+      return;
+    }
+
     const length = text.length;
     let frame = 0;
     const maxFrames = Math.max(12, Math.floor(length * 1.5));
@@ -73,6 +81,7 @@ export function TextScramble({
   return (
     <Component
       className={`scramble-text ${className}`}
+      aria-label={text}
       onMouseEnter={scrambleOnHover ? startScramble : undefined}
     >
       {displayText}

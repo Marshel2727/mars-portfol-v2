@@ -6,12 +6,12 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/auth";
 
 const menuItems = [
-  { name: "DashBoard", path: "/admin" },
-  { name: "About Profile", path: "/admin/about" },
+  { name: "Dashboard", path: "/admin" },
+  { name: "Profil & Biodata", path: "/admin/about" },
   { name: "Konten Website", path: "/admin/content" },
-  { name: "Projects", path: "/admin/projects" },
-  { name: "Skills", path: "/admin/skills" },
-  { name: "Message", path: "/admin/messages" },
+  { name: "Daftar Proyek", path: "/admin/projects" },
+  { name: "Keahlian & Stack", path: "/admin/skills" },
+  { name: "Pesan Masuk", path: "/admin/messages" },
 ];
 
 interface SidebarProps {

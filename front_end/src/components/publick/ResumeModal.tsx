@@ -37,7 +37,7 @@ export default function ResumeModal({ isOpen, onClose, cvUrl, fullName }: Resume
       <div className="resume-modal-container" onClick={(e) => e.stopPropagation()}>
         <header className="resume-modal-header">
           <div>
-            <p className="eyebrow eyebrow--technical" style={{ fontSize: 11 }}>{content.resume.eyebrow}</p>
+            <p className="eyebrow eyebrow--technical" style={{ fontSize: 12 }}>{content.resume.eyebrow}</p>
             <h3 className="resume-modal-title">{modalTitle}</h3>
           </div>
           <button type="button" className="resume-modal-close" onClick={onClose} aria-label="Tutup modal CV">

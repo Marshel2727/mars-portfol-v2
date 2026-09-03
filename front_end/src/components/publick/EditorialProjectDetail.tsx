@@ -218,13 +218,13 @@ export default function EditorialProjectDetail({ projectId }: { projectId: numbe
           </section>
         )}
 
-        <section className="section-block" aria-labelledby="gallery-title">
-          <div className="editorial-shell">
-            <header className="gallery-heading">
-              <p className="eyebrow eyebrow--technical">{content.gallery_eyebrow}</p>
-              <h2 id="gallery-title" className="section-title">{content.gallery_title}</h2>
-            </header>
-            {gallery.length ? (
+        {gallery.length > 0 && (
+          <section className="section-block" aria-labelledby="gallery-title">
+            <div className="editorial-shell">
+              <header className="gallery-heading">
+                <p className="eyebrow eyebrow--technical">{content.gallery_eyebrow}</p>
+                <h2 id="gallery-title" className="section-title">{content.gallery_title}</h2>
+              </header>
               <div className="gallery-grid">
                 {gallery.map((image, index) => (
                   <button
@@ -239,9 +239,24 @@ export default function EditorialProjectDetail({ projectId }: { projectId: numbe
                   </button>
                 ))}
               </div>
-            ) : (
-              <FeedbackState title={content.gallery_empty_title} message={content.gallery_empty_message} />
-            )}
+            </div>
+          </section>
+        )}
+
+        <section className="section-block section-block--subtle" aria-labelledby="project-nav-title">
+          <div className="editorial-shell" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
+            <div>
+              <p className="eyebrow eyebrow--technical">EKSPLORASI REPOSITORI</p>
+              <h3 className="section-title" style={{ fontSize: 26, marginTop: 4 }}>Tertarik melihat studi kasus lainnya?</h3>
+            </div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <Link className="button" href="/projects">
+                {content.back_label} →
+              </Link>
+              <Link className="button button--secondary" href="/contact">
+                Diskusikan Kebutuhan Serupa
+              </Link>
+            </div>
           </div>
         </section>
       </main>

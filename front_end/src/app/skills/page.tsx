@@ -36,6 +36,24 @@ function getCompetencyBadge(level: string) {
   };
 }
 
+function getSkillDescription(skill: Skill): string {
+  if (skill.detail?.trim()) return skill.detail.trim();
+  const cat = (skill.category || "").toLowerCase();
+  if (cat.includes("front") || cat.includes("web") || cat.includes("ui")) {
+    return `${skill.name} diterapkan secara aktif dalam perancangan antarmuka modern yang responsif, modular, dan memprioritaskan kenyamanan serta kejelasan interaksi pengguna.`;
+  }
+  if (cat.includes("back") || cat.includes("api") || cat.includes("server")) {
+    return `${skill.name} diimplementasikan untuk membangun arsitektur RESTful API yang scalable, manajemen autentikasi aman, dan pengolahan logika data berkinerja tinggi.`;
+  }
+  if (cat.includes("iot") || cat.includes("embed") || cat.includes("hard")) {
+    return `${skill.name} digunakan dalam ekosistem Internet of Things untuk integrasi sensor fisik, telemetri data real-time, dan komunikasi nirkabel mikrokontroler.`;
+  }
+  if (cat.includes("data") || cat.includes("sql")) {
+    return `${skill.name} digunakan untuk manajemen skema relasional, optimasi kueri terstruktur, dan pemeliharaan integritas basis data produksi.`;
+  }
+  return `${skill.name} digunakan secara aktif dalam pipeline arsitektur rekayasa sistem untuk menjamin performa tinggi, kebersihan kode, dan skalabilitas.`;
+}
+
 function SkillDetailModal({
   skill,
   onClose,
@@ -78,10 +96,10 @@ function SkillDetailModal({
                 {skill.name}
               </h3>
               <div className="skill-modal-meta-row">
-                <span className="tag" style={{ fontSize: 11 }}>{skill.category}</span>
+                <span className="tag" style={{ fontSize: 12 }}>{skill.category}</span>
                 <span className={`competency-level-badge ${badge.className}`}>{badge.label}</span>
                 {skill.years_experience && (
-                  <span style={{ fontFamily: "var(--font-mono-editorial)", fontSize: 11, color: "var(--muted)" }}>
+                  <span style={{ fontFamily: "var(--font-mono-editorial)", fontSize: 12, color: "var(--muted)" }}>
                     • {skill.years_experience}
                   </span>
                 )}
@@ -106,7 +124,7 @@ function SkillDetailModal({
           <div className="skill-modal-section">
             <h4 className="skill-modal-section-title">⚡ KAPABILITAS REKAYASA & EKOSISTEM</h4>
             <p className="skill-modal-text">
-              {skill.detail || `${skill.name} digunakan secara aktif dalam pipeline arsitektur rekayasa sistem untuk menjamin performa tinggi, kebersihan kode, dan skalabilitas.`}
+              {getSkillDescription(skill)}
             </p>
           </div>
 
@@ -172,6 +190,7 @@ function SkillDetailModal({
 function SkillsContent({ skills, loading, error }: { skills: Skill[]; loading: boolean; error: boolean }) {
   const content = useSiteContent().skills;
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
   const groupedSkills = useMemo(() => skills.reduce<Record<string, Skill[]>>((groups, skill) => {
     const category = skill.category?.trim() || "Lainnya";
@@ -192,153 +211,184 @@ function SkillsContent({ skills, loading, error }: { skills: Skill[]; loading: b
 
       <section className="section-block section-block--subtle" aria-labelledby="core-competencies-title">
         <div className="editorial-shell">
-          <header className="section-header" style={{ marginBottom: 24 }}>
+          <header className="section-header" style={{ marginBottom: 28, flexWrap: "wrap", gap: 20 }}>
             <div>
-              <p className="eyebrow eyebrow--technical">{content.competencies_eyebrow}</p>
-              <h2 id="core-competencies-title" className="section-title">{content.competencies_title}</h2>
+              <p className="eyebrow eyebrow--technical">
+                {viewMode === "grid" ? content.competencies_eyebrow : content.specifications_eyebrow}
+              </p>
+              <h2 id="core-competencies-title" className="section-title">
+                {viewMode === "grid" ? content.competencies_title : content.specifications_title}
+              </h2>
             </div>
-            <p style={{ margin: 0, fontSize: 13, color: "var(--muted)", alignSelf: "end" }}>
-              💡 Klik pada kartu skill untuk melihat rincian spesifikasi & studi kasus
-            </p>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+              <p style={{ margin: 0, fontSize: 13, color: "var(--muted)" }}>
+                💡 Klik item untuk rincian spesifikasi & studi kasus
+              </p>
+
+              <div className="view-mode-toggle" role="group" aria-label="Mode Tampilan Keahlian">
+                <button
+                  type="button"
+                  className="view-mode-btn"
+                  aria-pressed={viewMode === "grid"}
+                  onClick={() => setViewMode("grid")}
+                  title="Tampilan Grid Disiplin"
+                >
+                  <svg className="view-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14, height: 14 }}>
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                  </svg>
+                  Grid Disiplin
+                </button>
+                <button
+                  type="button"
+                  className="view-mode-btn"
+                  aria-pressed={viewMode === "table"}
+                  onClick={() => setViewMode("table")}
+                  title="Tampilan Matriks Spesifikasi"
+                >
+                  <svg className="view-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14, height: 14 }}>
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" strokeWidth="3" strokeLinecap="round" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" strokeWidth="3" strokeLinecap="round" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                  Matriks Spek
+                </button>
+              </div>
+            </div>
           </header>
 
           {loading ? (
-            <div className="skeleton" style={{ height: 260 }} aria-label="Memuat skill" />
+            <div className="skeleton" style={{ height: 280 }} aria-label="Memuat skill" />
           ) : error ? (
             <FeedbackState title="Skill gagal dimuat" message="API skill tidak merespons dengan benar." />
-          ) : Object.keys(groupedSkills).length ? (
-            <div className="core-competencies-grid">
-              {Object.entries(groupedSkills).map(([category, categorySkills]) => (
-                <article key={category} className="competency-card">
-                  <div className="competency-card__header">
-                    <svg className="competency-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                      <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.8" />
-                      <path d="m8 9 3 3-3 3m5 0h3" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <span className="competency-card__title">{category}</span>
-                  </div>
-                  <ul className="competency-card__list">
-                    {categorySkills.map((skill) => {
+          ) : skills.length > 0 ? (
+            viewMode === "grid" ? (
+              <div className="core-competencies-grid">
+                {Object.entries(groupedSkills).map(([category, categorySkills]) => (
+                  <article key={category} className="competency-card">
+                    <div className="competency-card__header">
+                      <svg className="competency-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.8" />
+                        <path d="m8 9 3 3-3 3m5 0h3" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span className="competency-card__title">{category}</span>
+                    </div>
+                    <ul className="competency-card__list">
+                      {categorySkills.map((skill) => {
+                        const badge = getCompetencyBadge(skill.level);
+                        return (
+                          <li
+                            key={skill.id}
+                            className="competency-card__item competency-card__item--clickable"
+                            onClick={() => setSelectedSkill(skill)}
+                            title={`Klik untuk melihat spesifikasi teknis ${skill.name}`}
+                          >
+                            <span className="competency-card__name">
+                              {skill.icon_url && (
+                                <img
+                                  src={getImageUrl(skill.icon_url)}
+                                  alt=""
+                                  aria-hidden="true"
+                                  style={{ width: 20, height: 20, objectFit: "contain", marginRight: 8, verticalAlign: "middle" }}
+                                />
+                              )}
+                              {skill.name}
+                            </span>
+                            <span className={`competency-level-badge ${badge.className}`} style={{ fontSize: 11, padding: "2px 8px" }}>
+                              {badge.label}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="tech-spec-table-wrap">
+                <table className="tech-spec-table">
+                  <thead>
+                    <tr>
+                      <th>{headers[0] || "TEKNOLOGI"}</th>
+                      <th>{headers[1] || "KATEGORI"}</th>
+                      <th>{headers[2] || "LEVEL PENGALAMAN"}</th>
+                      <th>{headers[3] || "STATUS & EKOSISTEM"}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {skills.map((skill) => {
                       const badge = getCompetencyBadge(skill.level);
                       return (
-                        <li
+                        <tr
                           key={skill.id}
-                          className="competency-card__item competency-card__item--clickable"
+                          className="skill-row--clickable"
                           onClick={() => setSelectedSkill(skill)}
-                          title={`Klik untuk melihat spesifikasi teknis ${skill.name}`}
+                          title={`Klik untuk melihat detail ${skill.name}`}
                         >
-                          <span className="competency-card__name">
-                            {skill.icon_url && (
-                              <img
-                                src={getImageUrl(skill.icon_url)}
-                                alt=""
-                                aria-hidden="true"
-                                style={{ width: 20, height: 20, objectFit: "contain", marginRight: 8, verticalAlign: "middle" }}
-                              />
-                            )}
-                            {skill.name}
-                          </span>
-                          <span className={`competency-level-badge ${badge.className}`} style={{ fontSize: 10, padding: "2px 8px" }}>
-                            {badge.label}
-                          </span>
-                        </li>
+                          <td className="tech-spec__name">
+                            <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+                              {skill.icon_url && (
+                                <img
+                                  src={getImageUrl(skill.icon_url)}
+                                  alt=""
+                                  aria-hidden="true"
+                                  style={{ width: 22, height: 22, objectFit: "contain" }}
+                                />
+                              )}
+                              <span>{skill.name} ↗</span>
+                            </div>
+                          </td>
+                          <td className="tech-spec__category">
+                            <span className="tag" style={{ fontSize: 12 }}>{skill.category}</span>
+                          </td>
+                          <td className="tech-spec__level">
+                            <span className={`competency-level-badge ${badge.className}`}>
+                              {badge.label}
+                            </span>
+                          </td>
+                          <td className="tech-spec__eco">
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                              {skill.detail && (
+                                <span className="competency-ecosystem-text">{skill.detail}</span>
+                              )}
+                              {skill.projects && skill.projects.length > 0 ? (
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                                  {skill.projects.map((proj) => (
+                                    <Link
+                                      key={proj.id}
+                                      href={`/projects/${proj.id}`}
+                                      className="competency-project-pill"
+                                      onClick={(e) => e.stopPropagation()}
+                                      title={`Lihat studi kasus: ${proj.title}`}
+                                    >
+                                      ↗ {proj.title}
+                                    </Link>
+                                  ))}
+                                </div>
+                              ) : (
+                                !skill.detail && (
+                                  <span className="competency-ecosystem-text" style={{ color: "var(--muted)", fontSize: 13 }}>
+                                    Aktif diimplementasikan pada pipeline rekayasa
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          </td>
+                        </tr>
                       );
                     })}
-                  </ul>
-                </article>
-              ))}
-            </div>
+                  </tbody>
+                </table>
+              </div>
+            )
           ) : (
             <FeedbackState title="Belum ada skill" message="Tambahkan skill dari halaman admin agar muncul di sini." />
-          )}
-        </div>
-      </section>
-
-      <section className="section-block" aria-labelledby="tech-specs-title">
-        <div className="editorial-shell">
-          <header className="section-header" style={{ marginBottom: 28 }}>
-            <div>
-              <p className="eyebrow eyebrow--technical">{content.specifications_eyebrow}</p>
-              <h2 id="tech-specs-title" className="section-title">{content.specifications_title}</h2>
-            </div>
-          </header>
-
-          {skills.length > 0 && (
-            <div className="tech-spec-table-wrap">
-              <table className="tech-spec-table">
-                <thead>
-                  <tr>
-                    <th>{headers[0] || "TEKNOLOGI"}</th>
-                    <th>{headers[1] || "KATEGORI"}</th>
-                    <th>{headers[2] || "LEVEL PENGALAMAN"}</th>
-                    <th>{headers[3] || "STATUS & EKOSISTEM"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {skills.map((skill) => {
-                    const badge = getCompetencyBadge(skill.level);
-                    return (
-                      <tr
-                        key={skill.id}
-                        className="skill-row--clickable"
-                        onClick={() => setSelectedSkill(skill)}
-                        title={`Klik untuk melihat detail ${skill.name}`}
-                      >
-                        <td className="tech-spec__name">
-                          <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-                            {skill.icon_url && (
-                              <img
-                                src={getImageUrl(skill.icon_url)}
-                                alt=""
-                                aria-hidden="true"
-                                style={{ width: 22, height: 22, objectFit: "contain" }}
-                              />
-                            )}
-                            <span>{skill.name} ↗</span>
-                          </div>
-                        </td>
-                        <td className="tech-spec__category">
-                          <span className="tag" style={{ fontSize: 11 }}>{skill.category}</span>
-                        </td>
-                        <td className="tech-spec__level">
-                          <span className={`competency-level-badge ${badge.className}`}>
-                            {badge.label}
-                          </span>
-                        </td>
-                        <td className="tech-spec__eco">
-                          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                            {skill.detail && (
-                              <span className="competency-ecosystem-text">{skill.detail}</span>
-                            )}
-                            {skill.projects && skill.projects.length > 0 ? (
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                                {skill.projects.map((proj) => (
-                                  <Link
-                                    key={proj.id}
-                                    href={`/projects/${proj.id}`}
-                                    className="competency-project-pill"
-                                    onClick={(e) => e.stopPropagation()}
-                                    title={`Lihat studi kasus: ${proj.title}`}
-                                  >
-                                    ↗ {proj.title}
-                                  </Link>
-                                ))}
-                              </div>
-                            ) : (
-                              !skill.detail && (
-                                <span className="competency-ecosystem-text" style={{ color: "var(--muted)", fontSize: 12 }}>
-                                  Aktif diimplementasikan pada pipeline rekayasa
-                                </span>
-                              )
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
           )}
         </div>
       </section>

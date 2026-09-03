@@ -5,12 +5,15 @@ import { useParams, useRouter } from "next/navigation";
 import { getMessageById,markMessageAsRead, deleteMessage } from "@/services/messages";
 import { Message } from "@/types";
 import Link from "next/link";
+import ConfirmModal from "@/components/admin/ConfirmModal";
 
 export default function MessageDetailPage() {
   const { id } = useParams(); // Mengambil ID dari URL
   const router = useRouter();
   const [message, setMessage] = useState<Message | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -32,13 +35,16 @@ export default function MessageDetailPage() {
     if (id) fetchDetail();
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!confirm("Hapus pesan ini?")) return;
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
     try {
       await deleteMessage(Number(id));
       router.push("/admin/messages"); // Balik ke inbox setelah hapus
     } catch {
-      alert("Gagal menghapus pesan.");
+      console.error("Gagal menghapus pesan.");
+    } finally {
+      setIsDeleting(false);
+      setIsConfirmOpen(false);
     }
   };
 
@@ -71,7 +77,7 @@ export default function MessageDetailPage() {
               </div>
             </div>
             <button
-              onClick={handleDelete}
+              onClick={() => setIsConfirmOpen(true)}
               className="min-h-11 rounded border border-editorial-danger/20 bg-editorial-danger/10 px-4 py-2 text-editorial-danger transition hover:bg-editorial-danger hover:text-editorial-on-action"
             >
               Hapus Pesan
@@ -84,6 +90,17 @@ export default function MessageDetailPage() {
           {message.content}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Hapus Pesan"
+        message={`Apakah Anda yakin ingin menghapus pesan dari "${message.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </div>
   );
 }

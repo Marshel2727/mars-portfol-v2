@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Project } from "@/types";
 import { deleteProject } from "@/services/project";
 import ProjectGalleryModal from "./ProjectGalleryModal";
+import ConfirmModal from "../ConfirmModal";
 import { getImageUrl } from "@/lib/utils";
 
 interface ProjectListProps {
@@ -15,16 +16,21 @@ interface ProjectListProps {
 
 export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: ProjectListProps) {
   const [activeGalleryId, setActiveGalleryId] = useState<number | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const activeGallery = projects.find((project) => project.id === activeGalleryId) || null;
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Yakin ingin hapus project ini?")) return;
+  const handleConfirmDelete = async () => {
+    if (!projectToDelete) return;
+    setIsDeleting(true);
     try {
-      await deleteProject(id);
+      await deleteProject(projectToDelete.id);
+      setProjectToDelete(null);
       onRefresh();
     } catch (error) {
       console.error("Gagal Hapus", error);
-      alert("Gagal Menghapus Project.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -54,7 +60,7 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
                 <th className="px-4 py-3 text-center font-semibold">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody className="divide-y divide-editorial-line">
               {projects.map((project) => (
                 <tr key={project.id} className="transition-colors hover:bg-editorial-paper-deep">
                   <td className="px-4 py-3">
@@ -111,7 +117,7 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
 
                       {/* Tombol Hapus */}
                       <button
-                        onClick={() => handleDelete(project.id)}
+                        onClick={() => setProjectToDelete(project)}
                         className="flex min-h-11 items-center gap-1.5 rounded-md border border-editorial-danger/20 bg-editorial-danger/10 px-3 py-1.5 text-xs font-semibold text-editorial-danger shadow-sm transition-colors hover:bg-editorial-danger hover:text-editorial-on-action"
                         title="Hapus Proyek"
                       >
@@ -138,6 +144,18 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
           onRefresh={onRefresh} 
         />
       )}
+
+      {/* TAMPILKAN MODAL KONFIRMASI HAPUS */}
+      <ConfirmModal
+        isOpen={Boolean(projectToDelete)}
+        title="Hapus Proyek"
+        message={`Apakah Anda yakin ingin menghapus proyek "${projectToDelete?.title}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setProjectToDelete(null)}
+      />
 
     </div>
   );

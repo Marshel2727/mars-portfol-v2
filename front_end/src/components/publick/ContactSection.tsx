@@ -23,7 +23,9 @@ function validate(values: FormValues, messages: ReturnType<typeof useSiteContent
 }
 
 export default function ContactSection() {
-  const content = useSiteContent().contact;
+  const siteContent = useSiteContent();
+  const content = siteContent.contact;
+  const projectTypes = siteContent.home.project_types || [];
   const searchParams = useSearchParams();
   const [values, setValues] = useState<FormValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -38,13 +40,10 @@ export default function ContactSection() {
 
   useEffect(() => {
     const typeParam = searchParams.get("type");
-    const briefParam = searchParams.get("brief");
-    if (typeParam || briefParam) {
-      setSelectedBriefType(typeParam || null);
-      const prefillMsg = `[${content.prefill_focus_label}: ${typeParam || content.prefill_general_label}]\n${briefParam ? `${briefParam}\n\n` : ""}${content.prefill_detail_label}: `;
-      setValues((prev) => ({ ...prev, content: prefillMsg }));
+    if (typeParam) {
+      setSelectedBriefType(typeParam);
     }
-  }, [content.prefill_detail_label, content.prefill_focus_label, content.prefill_general_label, searchParams]);
+  }, [searchParams]);
 
   const updateField = (field: keyof FormValues, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -61,10 +60,14 @@ export default function ContactSection() {
     setIsSending(true);
     setStatus("idle");
     try {
+      const finalContent = selectedBriefType
+        ? `[Fokus: ${selectedBriefType}]\n\n${values.content.trim()}`
+        : values.content.trim();
+
       await createMessage({
         name: values.name.trim(),
         email: values.email.trim(),
-        content: values.content.trim(),
+        content: finalContent,
       });
       setValues(initialValues);
       setStatus("success");
@@ -101,12 +104,35 @@ export default function ContactSection() {
       </section>
 
       <form className="contact-form" onSubmit={handleSubmit} noValidate>
-        {selectedBriefType && (
-          <div className="brief-intake-badge" role="status">
-            <span className="brief-intake-badge__pulse" aria-hidden="true" />
-            <span>Fokus Brief: {selectedBriefType}</span>
+        {/* Interactive Brief Category Chips */}
+        <div className="contact-brief-selector" role="group" aria-label="Pilih Fokus Diskusi">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontFamily: "var(--font-mono-editorial)", fontSize: 11, fontWeight: 700, color: "var(--technical)", textTransform: "uppercase" }}>
+              FOKUS KEBUTUHAN PROYEK (OPSIONAL)
+            </span>
+            {selectedBriefType && (
+              <button
+                type="button"
+                onClick={() => setSelectedBriefType(null)}
+                style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 11, cursor: "pointer", fontFamily: "var(--font-mono-editorial)", fontWeight: 600 }}
+              >
+                Reset Pilihan ×
+              </button>
+            )}
           </div>
-        )}
+          <div className="contact-brief-pills">
+            {projectTypes.map((type) => (
+              <button
+                key={type.id}
+                type="button"
+                className={`contact-brief-pill${selectedBriefType === type.label ? " contact-brief-pill--active" : ""}`}
+                onClick={() => setSelectedBriefType(selectedBriefType === type.label ? null : type.label)}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <p className="eyebrow eyebrow--technical" style={{ color: "var(--ink)", margin: 0 }}>
           {content.form_eyebrow}

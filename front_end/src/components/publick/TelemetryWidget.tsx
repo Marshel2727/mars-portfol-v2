@@ -66,6 +66,12 @@ export default function TelemetryWidget() {
         <span className="telemetry-meta" title="ESP32-S3 IoT Hardware, FastAPI backend node, PostgreSQL database telemetry stream">
           {content.nodes_value}
         </span>
+        <div className="telemetry-signal-bars" aria-hidden="true" title={isLive ? "Sinyal Telemetri Aktif" : "Sinyal Dijeda"}>
+          <span className="telemetry-signal-bar" style={{ height: isLive ? 4 : 2 }} />
+          <span className="telemetry-signal-bar" style={{ height: isLive ? 8 : 2 }} />
+          <span className="telemetry-signal-bar" style={{ height: isLive ? 12 : 2 }} />
+          <span className="telemetry-signal-bar" style={{ height: isLive ? 9 : 2 }} />
+        </div>
       </div>
     </div>
   );

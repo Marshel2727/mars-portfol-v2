@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Skill } from "@/types";
 import { deleteSkill } from "@/services/Skils";
 import { getImageUrl } from "@/lib/utils";
+import ConfirmModal from "../ConfirmModal";
 
 // ✅ BUG FIX: Mengganti nama interface dari 'SkillFormProps' menjadi 'SkillListProps'
 // (copy-paste error dari SkillForm.tsx)
@@ -25,14 +27,20 @@ const getLevelColor = (level: string): string => {
 };
 
 export default function SkillList({ skills, isLoading, onRefresh, onEdit }: SkillListProps) {
-  const handleDelete = async (id: number) => {
-    if (!confirm("Yakin ingin hapus skill ini?")) return;
+  const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    if (!skillToDelete) return;
+    setIsDeleting(true);
     try {
-      await deleteSkill(id);
+      await deleteSkill(skillToDelete.id);
+      setSkillToDelete(null);
       onRefresh();
     } catch (error) {
       console.error("Gagal hapus", error);
-      alert("Gagal Menghapus Skill.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -85,7 +93,7 @@ export default function SkillList({ skills, isLoading, onRefresh, onEdit }: Skil
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(skill.id)}
+                      onClick={() => setSkillToDelete(skill)}
                       className="font-medium text-editorial-danger transition hover:text-editorial-accent-strong"
                     >
                       Hapus
@@ -97,6 +105,18 @@ export default function SkillList({ skills, isLoading, onRefresh, onEdit }: Skil
           </table>
         </div>
       )}
+
+      {/* MODAL KONFIRMASI HAPUS SKILL */}
+      <ConfirmModal
+        isOpen={Boolean(skillToDelete)}
+        title="Hapus Skill"
+        message={`Apakah Anda yakin ingin menghapus skill "${skillToDelete?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmLabel="Ya, Hapus"
+        cancelLabel="Batal"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setSkillToDelete(null)}
+      />
     </div>
   );
 }
