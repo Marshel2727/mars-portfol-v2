@@ -11,6 +11,7 @@ from app.service.message_service import (
     mark_as_read,
 )
 from app.utils.response import error_response, success_response
+from app.utils.security import rate_limit
 
 
 message_bp = Blueprint('message_bp', __name__, url_prefix='/api/messages')
@@ -43,9 +44,10 @@ def fetch_message_by_id(id):
 
 
 @message_bp.route('/', methods=['POST'])
+@rate_limit('contact')
 def add_message():
     data_msg = request.get_json(silent=True)
-    if not data_msg or not data_msg.get('name') or not data_msg.get('email') or not data_msg.get('content'):
+    if not isinstance(data_msg, dict) or not all(isinstance(data_msg.get(key), str) and data_msg[key] for key in ('name', 'email', 'content')):
         return error_response(message='Nama, email, dan pesan wajib diisi.')
 
     normalized_message = {

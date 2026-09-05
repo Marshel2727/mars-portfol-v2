@@ -1,8 +1,11 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+    baseURL: "/api",
+    withCredentials: true,
+    xsrfCookieName: "csrf_access_token",
+    xsrfHeaderName: "X-CSRF-TOKEN",
+    timeout: 20000,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -10,12 +13,6 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = Cookies.get('access_token');
-
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`
-        }
-
         if (config.data instanceof FormData) {
             delete config.headers['Content-Type']
         }
@@ -36,7 +33,6 @@ api.interceptors.response.use(
             typeof window !== "undefined" &&
             window.location.pathname.startsWith("/admin")
         ) {
-            Cookies.remove("access_token");
             window.location.replace("/login?expired=1");
         }
 

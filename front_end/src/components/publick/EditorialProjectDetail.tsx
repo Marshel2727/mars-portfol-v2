@@ -7,6 +7,7 @@ import useSWR from "swr";
 
 import { getImageUrl } from "@/lib/utils";
 import { getProjectById } from "@/services/project";
+import type { Project } from "@/types";
 
 import { FeedbackState, ProjectVisual, TechTags } from "./EditorialUI";
 import { useSiteContent } from "./SiteContentProvider";
@@ -18,12 +19,13 @@ function descriptionParagraphs(description: string) {
     .filter(Boolean);
 }
 
-export default function EditorialProjectDetail({ projectId }: { projectId: number }) {
+export default function EditorialProjectDetail({ projectId, initialProject }: { projectId: number; initialProject?: Project }) {
   const content = useSiteContent().project_detail;
   const isValidId = Number.isInteger(projectId) && projectId > 0;
   const { data: project, error, isLoading } = useSWR(
     isValidId ? `/projects/${projectId}` : null,
     () => getProjectById(projectId),
+    { fallbackData: initialProject },
   );
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -57,7 +59,7 @@ export default function EditorialProjectDetail({ projectId }: { projectId: numbe
     return <ProjectNotFound />;
   }
 
-  if (isLoading) {
+  if (isLoading && !project) {
     return (
       <main className="editorial-shell section-block" aria-busy="true">
         <div className="skeleton" style={{ height: 620 }} />
@@ -65,7 +67,7 @@ export default function EditorialProjectDetail({ projectId }: { projectId: numbe
     );
   }
 
-  if (error || !project) {
+  if (!project) {
     const notFound = axios.isAxiosError(error) && error.response?.status === 404;
     return notFound ? <ProjectNotFound /> : (
       <main className="editorial-shell section-block">
@@ -156,7 +158,7 @@ export default function EditorialProjectDetail({ projectId }: { projectId: numbe
                   <span>🛡️</span> DEPLOYMENT & DELIVERY
                 </span>
                 <p className="highlight-point__text">
-                  {project.demo_url ? "Production Ready & Live Deployed" : "Modular Codebase & Tested Architecture"}
+                  {project.demo_url ? "Tautan demo tersedia" : project.github_url ? "Source code tersedia" : "Dokumentasi proyek tersedia"}
                 </p>
               </div>
             </div>

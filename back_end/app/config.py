@@ -23,6 +23,15 @@ class Config():
 
     JWT_SECRET_KEY = os.environ['JWT_SECRET_KEY']
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES_HOURS', '8')))
+    JWT_TOKEN_LOCATION = ['cookies']
+    JWT_ACCESS_COOKIE_NAME = 'admin_session'
+    JWT_COOKIE_SECURE = os.getenv('JWT_COOKIE_SECURE', 'true').lower() == 'true'
+    JWT_COOKIE_SAMESITE = 'Lax'
+    JWT_COOKIE_CSRF_PROTECT = True
+    JWT_SESSION_COOKIE = False
+    MAX_CONTENT_LENGTH = 20 * 1024 * 1024
+    SECURITY_STORE_PATH = os.getenv('SECURITY_STORE_PATH')
+    TRUSTED_PROXY_HOPS = int(os.getenv('TRUSTED_PROXY_HOPS', '0'))
 
     # VAPID Keys for PWA Push Notifications
     VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')

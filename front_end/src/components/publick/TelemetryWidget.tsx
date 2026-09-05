@@ -22,7 +22,8 @@ export default function TelemetryWidget() {
   }, [isLive]);
 
   return (
-    <div className="telemetry-widget" aria-label="System & IoT Telemetry Live Status">
+    <div className="telemetry-widget" aria-label="Simulasi telemetri IoT, bukan data perangkat nyata">
+      <p className="telemetry-meta">SIMULASI TELEMETRI · Data ilustrasi</p>
       <div className="telemetry-widget__header">
         <div className="telemetry-widget__title-wrap">
           <span className="telemetry-pulse-dot" data-active={isLive} aria-hidden="true" />

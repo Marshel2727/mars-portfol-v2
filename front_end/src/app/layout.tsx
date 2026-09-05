@@ -5,6 +5,7 @@ import RegisterSW from "../components/RegisterSW";
 import SWRProvider from "../components/SWRProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { THEME_COLORS, THEME_INIT_SCRIPT } from "@/lib/theme";
+import { siteUrl } from "@/lib/seo";
 
 const newsreader = Newsreader({
   variable: "--font-newsreader",
@@ -23,6 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Marshel — Full-Stack, IoT & Systems Engineer",
   description:
     "Portofolio Marshel, mahasiswa Computer Engineering berfokus pada Full-Stack Web Development, REST API, sistem IoT, dan arsitektur data terintegrasi.",
@@ -44,7 +46,8 @@ export const metadata: Metadata = {
     title: "Marshel — Full-Stack, IoT & Systems Engineer",
     description:
       "Membangun software yang terhubung dengan dunia nyata—dari antarmuka web, API, database, hingga integrasi perangkat IoT.",
-    url: "https://marshelportfolio.me",
+    url: siteUrl,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Marshel Portfolio" }],
     siteName: "Marshel Portfolio",
     locale: "id_ID",
     type: "website",
@@ -53,7 +56,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Marshel — Full-Stack, IoT & Systems Engineer",
     description: "Full-Stack Web Development, REST API, dashboard, dan integrasi Internet of Things.",
-    creator: "@marshel",
+    images: ["/opengraph-image"],
   },
 };
 

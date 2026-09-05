@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { useSiteContent } from "./SiteContentProvider";
 
@@ -13,17 +13,35 @@ interface ResumeModalProps {
 
 export default function ResumeModal({ isOpen, onClose, cvUrl, fullName }: ResumeModalProps) {
   const content = useSiteContent();
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const dialog = dialogRef.current;
+    const focusable = () => Array.from(dialog?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex="0"]') || []);
+    (focusable()[0] || dialog)?.focus();
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "Tab") {
+        const elements = focusable();
+        const first = elements[0];
+        const last = elements[elements.length - 1];
+        if (!first) { e.preventDefault(); dialog?.focus(); return; }
+        if (e.shiftKey && (document.activeElement === first || !dialog?.contains(document.activeElement))) {
+          e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && (document.activeElement === last || !dialog?.contains(document.activeElement))) {
+          e.preventDefault(); first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      previousFocus?.focus();
     };
   }, [isOpen, onClose]);
 
@@ -33,7 +51,7 @@ export default function ResumeModal({ isOpen, onClose, cvUrl, fullName }: Resume
   const modalTitle = content.resume.title_template.replace("{name}", fullName || "Marshel");
 
   return (
-    <div className="resume-modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Curriculum Vitae Viewer">
+    <div ref={dialogRef} tabIndex={-1} className="resume-modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Curriculum Vitae Viewer">
       <div className="resume-modal-container" onClick={(e) => e.stopPropagation()}>
         <header className="resume-modal-header">
           <div>

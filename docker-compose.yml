@@ -38,12 +38,16 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
       JWT_ACCESS_TOKEN_EXPIRES_HOURS: ${JWT_ACCESS_TOKEN_EXPIRES_HOURS:-8}
+      JWT_COOKIE_SECURE: ${JWT_COOKIE_SECURE:-true}
+      TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-0}
+      SECURITY_STORE_PATH: /var/lib/mars-security/security.sqlite3
       FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL in .env}
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       VAPID_CLAIM_EMAIL: ${VAPID_CLAIM_EMAIL:-mailto:marshelportfolio@gmail.com}
     volumes:
       - backend_uploads:/app/app/static/uploads
+      - backend_security:/var/lib/mars-security
     restart: unless-stopped
 
   frontend:
@@ -78,3 +82,4 @@ services:
 volumes:
   db_data:
   backend_uploads:
+  backend_security:

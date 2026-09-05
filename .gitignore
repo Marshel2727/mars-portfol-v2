@@ -3,6 +3,8 @@
 # ========================
 /.env
 /.env.local
+/.test-venv/
+back_end/instance/
 back_end/.env
 front_end/.env.local
 front_end/.env

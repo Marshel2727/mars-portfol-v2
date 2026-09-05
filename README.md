@@ -37,15 +37,13 @@ Jangan menjalankan `docker compose down -v` pada server yang sudah berisi data k
 
 ## Membuat admin pertama
 
-Dump tidak berisi akun atau password. Setelah deployment pertama, buat admin melalui endpoint bootstrap satu kali:
+Dump tidak berisi akun atau password. Setelah deployment pertama, buat admin dari terminal server (password diminta secara tersembunyi):
 
 ```bash
-curl -X POST http://localhost/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","email":"admin@example.com","password":"GANTI_PASSWORD_KUAT"}'
+docker compose exec backend flask create-admin
 ```
 
-Akun pertama otomatis mendapat role `admin`. Setelah itu endpoint register memerlukan JWT admin.
+Perintah hanya bisa digunakan ketika belum ada akun. Endpoint register selalu memerlukan sesi admin dan CSRF; bootstrap publik sudah ditutup. Akun yang sudah ada tidak perlu dibuat ulang.
 
 ## Backup sebelum update
 
@@ -71,7 +69,34 @@ Pada project frontend Vercel, gunakan root directory `front_end` dan environment
 ```text
 NEXT_PUBLIC_API_URL=/api
 NEXT_PUBLIC_BASE_URL=/
+NEXT_PUBLIC_SITE_URL=https://v2.marshelportfolio.me
 BACKEND_INTERNAL_URL=https://api.marshelportfolio.me
 ```
 
 Set `FRONTEND_URL` backend ke domain production frontend, misalnya `https://marshelportfolio.me,https://www.marshelportfolio.me`.
+
+## Catatan pembaruan keamanan (kode lokal)
+
+- Deploy frontend dan backend yang baru bersama-sama, lalu login ulang. JWT sekarang hanya dikirim melalui cookie HttpOnly `admin_session`; JavaScript hanya membaca cookie CSRF. Frontend memakai `/api` pada origin yang sama melalui rewrite `BACKEND_INTERNAL_URL`.
+- Set `FRONTEND_URL` persis ke origin website, misalnya `https://v2.marshelportfolio.me`. Login dari origin di luar daftar akan ditolak.
+- `JWT_COOKIE_SECURE` default `true` untuk HTTPS. Untuk development HTTP saja, set `false` pada environment backend. Jika memakai Compose, tambahkan penerusan environment baru ini sendiri pada service backend; file `.env` saja tidak otomatis meneruskan semua variabel ke container.
+- Pembatasan login: 10 permintaan per akun dan 30 per IP setiap 15 menit. Form kontak: 5 permintaan per IP setiap 10 menit. Respons penolakan memakai HTTP 429 dan `Retry-After`.
+- Limiter dan pencabutan sesi logout memakai SQLite privat yang dibagi antarkerja Gunicorn pada satu host. Atur `SECURITY_STORE_PATH` ke lokasi persisten yang dapat ditulis backend; jangan letakkan dalam `static/uploads`. Default: `back_end/instance/security.sqlite3`. Mount lokasi tersebut saat deployment agar pencabutan sesi bertahan setelah container dibuat ulang. Untuk banyak replika/host, ganti dengan penyimpanan bersama.
+- Atur `TRUSTED_PROXY_HOPS` hanya sesuai jumlah proxy yang benar-benar dipercaya dan pastikan backend tidak bisa diakses langsung. Default 0 tidak memercayai header IP dari klien; semua pengunjung dapat terhitung sebagai IP proxy sampai konfigurasi ini disesuaikan.
+- Upload: maksimal 5 MB per gambar dan 16 megapiksel, diverifikasi dan dikodekan ulang tanpa metadata. GIF/WebP animasi disimpan sebagai gambar statis frame pertama. Total request dibatasi 20 MB.
+- Endpoint `GET /api/health` memeriksa database dan mengembalikan 200 atau 503 tanpa membocorkan detail koneksi.
+- Metadata, preview, dan sitemap memakai `NEXT_PUBLIC_SITE_URL`; default `https://v2.marshelportfolio.me`. Sitemap dinamis membutuhkan `BACKEND_INTERNAL_URL` yang dapat dijangkau server Next.js.
+- Tidak ada perubahan skema MySQL pada pembaruan ini. Backup, konfigurasi proxy/volume, monitoring, dan deployment tetap dilakukan pemilik server.
+
+## Pengujian lokal
+
+Backend menggunakan database SQLite sementara; pengujian tidak mengakses database operasional:
+
+```bash
+python -m pip install -r back_end/requirements.txt
+python -m unittest discover -s back_end/tests -v
+cd front_end
+npm ci
+npm run lint
+npm run build
+```

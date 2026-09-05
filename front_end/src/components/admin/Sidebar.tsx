@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/auth";
+import { useState } from "react";
+import { getApiErrorMessage } from "@/services/api";
 
 const menuItems = [
   { name: "Dashboard", path: "/admin" },
@@ -21,15 +23,22 @@ interface SidebarProps {
 export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [logoutError, setLogoutError] = useState("");
 
-  const handleLogout = () => {
-    logout();
-    onClose?.();
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      onClose?.();
+      router.replace("/login");
+      router.refresh();
+    } catch (error) {
+      setLogoutError(getApiErrorMessage(error, "Logout gagal. Silakan coba lagi."));
+    }
   };
 
   return (
     <aside className="my-0 ml-0 flex h-screen w-72 shrink-0 flex-col overflow-hidden rounded-none bg-editorial-inverse text-editorial-inverse-text shadow-2xl md:my-4 md:ml-4 md:h-[calc(100vh-32px)] md:rounded-3xl">
+      {logoutError && <p className="p-4" role="alert">{logoutError}</p>}
       <div className="relative border-b border-editorial-inverse-text/20 p-6 text-center text-2xl font-bold tracking-tighter">
         PORTOFOLIO
         {onClose && (

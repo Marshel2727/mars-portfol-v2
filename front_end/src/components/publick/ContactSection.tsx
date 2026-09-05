@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import Toast from "@/components/ui/Toast";
 import { createMessage } from "@/services/messages";
+import { getApiErrorMessage } from "@/services/api";
 
 import { useSiteContent } from "./SiteContentProvider";
 
@@ -53,6 +54,7 @@ export default function ContactSection() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSending) return;
     const nextErrors = validate(values, content);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
@@ -72,9 +74,9 @@ export default function ContactSection() {
       setValues(initialValues);
       setStatus("success");
       setToast({ isVisible: true, message: content.toast_success, type: "success" });
-    } catch {
+    } catch (error) {
       setStatus("error");
-      setToast({ isVisible: true, message: content.toast_error, type: "error" });
+      setToast({ isVisible: true, message: getApiErrorMessage(error, content.toast_error), type: "error" });
     } finally {
       setIsSending(false);
     }

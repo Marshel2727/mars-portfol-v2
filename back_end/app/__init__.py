@@ -1,5 +1,7 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify
+from werkzeug.middleware.proxy_fix import ProxyFix
+from sqlalchemy import text
 from .config import Config,db_connection
 from  flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,7 +12,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 
-def create_app():
+def create_app(test_config=None):
      app = Flask(__name__)
      # Accept both /resource and /resource/ so reverse proxies never emit
      # redirects that expose an internal Docker hostname.
@@ -20,22 +22,48 @@ def create_app():
      CORS(app,
           origins=frontend_origins,
           supports_credentials=True,
-          allow_headers=["Content-Type", "Authorization"],
+          allow_headers=["Content-Type", "Authorization", "X-CSRF-TOKEN"],
           methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
 
      app.config.from_object(Config)
+     if test_config:
+          app.config.update(test_config)
+     app.config['LOGIN_ALLOWED_ORIGINS'] = frontend_origins
+     if app.config['TRUSTED_PROXY_HOPS']:
+          app.wsgi_app = ProxyFix(app.wsgi_app, x_for=app.config['TRUSTED_PROXY_HOPS'])
      app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
      #fungsi ini di panggil untuk test koneksi data base
-     db_connection()
+     if not app.testing:
+          db_connection()
 
      db.init_app(app)
      migrate.init_app(app, db)
      jwt.init_app(app)
+     from .utils.security import token_revoked
+     jwt.token_in_blocklist_loader(token_revoked)
+
+     @app.errorhandler(413)
+     def upload_too_large(_error):
+          return jsonify(status='error', message='Ukuran permintaan maksimal 20 MB.'), 413
+
+     @app.get('/api/health')
+     def health():
+          try:
+               db.session.execute(text('SELECT 1'))
+               return jsonify(status='ok')
+          except Exception:
+               db.session.rollback()
+               app.logger.exception('Database health check failed')
+               return jsonify(status='unavailable'), 503
+
+     @app.errorhandler(400)
+     def bad_request(error):
+          return jsonify(status='error', message=error.description), 400
 
      @app.after_request
      def prevent_sensitive_response_caching(response):
-          is_sensitive_path = request.path.startswith(('/api/auth', '/api/messages'))
-          is_authenticated = bool(request.headers.get('Authorization'))
+          is_sensitive_path = request.path.startswith(('/api/auth', '/api/messages', '/api/health'))
+          is_authenticated = bool(request.headers.get('Authorization') or request.cookies.get('admin_session'))
           is_mutation = request.method not in ('GET', 'HEAD', 'OPTIONS')
 
           if is_sensitive_path or is_authenticated or is_mutation:
@@ -43,6 +71,9 @@ def create_app():
                response.headers['Pragma'] = 'no-cache'
                response.headers['Expires'] = '0'
 
+          response.headers['X-Content-Type-Options'] = 'nosniff'
+          response.vary.add('Cookie')
+          response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
           return response
 
      from .models.project import Project
@@ -75,4 +106,6 @@ def create_app():
      from .routes.site_content_routes import site_content_bp
      app.register_blueprint(site_content_bp)
 
+     from .cli import create_admin
+     app.cli.add_command(create_admin)
      return app
