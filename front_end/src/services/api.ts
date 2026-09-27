@@ -1,5 +1,17 @@
 import axios from "axios";
 
+const normalizeApiPath = (url?: string) => {
+    if (!url || url === "/") {
+        return url;
+    }
+
+    const queryIndex = url.indexOf("?");
+    const path = queryIndex === -1 ? url : url.slice(0, queryIndex);
+    const query = queryIndex === -1 ? "" : url.slice(queryIndex);
+
+    return `${path.replace(/\/+$/, "")}${query}`;
+};
+
 const api = axios.create({
     baseURL: "/api",
     withCredentials: true,
@@ -13,6 +25,9 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
+        // Use a different URL from previously cached permanent redirects.
+        config.url = normalizeApiPath(config.url);
+
         if (config.data instanceof FormData) {
             delete config.headers['Content-Type']
         }

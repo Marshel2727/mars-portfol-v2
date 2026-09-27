@@ -1,4 +1,4 @@
-const CACHE_NAME = 'marshel-portfolio-cache-v2';
+const CACHE_NAME = 'marshel-portfolio-cache-v3';
 const urlsToCache = [
   '/manifest.json',
   '/icon-192.png',
@@ -77,6 +77,11 @@ self.addEventListener('fetch', (event) => {
     url.pathname.startsWith('/_next/static/') ||
     ['font', 'image', 'script', 'style'].includes(event.request.destination)
   );
+
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(fetch(event.request, { cache: 'no-store' }));
+    return;
+  }
 
   if (isPrivateRoute) {
     event.respondWith(fetch(event.request));
