@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TextScrambleProps {
   text: string;
@@ -25,7 +25,16 @@ export function TextScramble({
   const isScramblingRef = useRef(false);
   const frameRef = useRef<number | null>(null);
 
-  const startScramble = () => {
+  const stopScramble = useCallback(() => {
+    if (frameRef.current !== null) {
+      window.clearTimeout(frameRef.current);
+      frameRef.current = null;
+    }
+
+    isScramblingRef.current = false;
+  }, []);
+
+  const startScramble = useCallback(() => {
     if (isScramblingRef.current) return;
     isScramblingRef.current = true;
 
@@ -34,6 +43,7 @@ export function TextScramble({
 
     if (prefersReducedMotion) {
       setDisplayText(text);
+      isScramblingRef.current = false;
       return;
     }
 
@@ -64,19 +74,20 @@ export function TextScramble({
         frameRef.current = window.setTimeout(step, speed);
       } else {
         setDisplayText(text);
+        frameRef.current = null;
         isScramblingRef.current = false;
       }
     };
 
     step();
-  };
+  }, [characters, speed, text]);
 
   useEffect(() => {
+    stopScramble();
+    setDisplayText(text);
     startScramble();
-    return () => {
-      if (frameRef.current) clearTimeout(frameRef.current);
-    };
-  }, [text]);
+    return stopScramble;
+  }, [startScramble, stopScramble, text]);
 
   return (
     <Component
