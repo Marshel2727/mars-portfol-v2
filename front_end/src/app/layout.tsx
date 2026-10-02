@@ -6,6 +6,7 @@ import SWRProvider from "../components/SWRProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { THEME_COLORS, THEME_INIT_SCRIPT } from "@/lib/theme";
 import { siteUrl } from "@/lib/seo";
+import IntroGate from "@/components/intro/IntroGate";
 
 const newsreader = Newsreader({
   variable: "--font-newsreader",
@@ -42,6 +43,10 @@ export const metadata: Metadata = {
   creator: "Marshel",
   publisher: "Marshel",
   manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/brand/marshel-favicon-v1.png", sizes: "32x32", type: "image/png" }],
+    apple: [{ url: "/brand/marshel-apple-v1.png", sizes: "180x180", type: "image/png" }],
+  },
   openGraph: {
     title: "Marshel — Full-Stack, IoT & Systems Engineer",
     description:
@@ -86,7 +91,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <RegisterSW />
-          <SWRProvider>{children}</SWRProvider>
+          <SWRProvider><IntroGate>{children}</IntroGate></SWRProvider>
         </ThemeProvider>
       </body>
     </html>

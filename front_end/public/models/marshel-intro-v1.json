@@ -1,0 +1,25 @@
+{
+  "source": "Marshel_Logo_Berantakan_ke_Rapi.blend",
+  "source_sha256": "537e8ac234533c401b7a58ea5fa22ff2bfa44ebbfab33b86fab638b059188ffa",
+  "source_unchanged": true,
+  "frames": [
+    1,
+    192
+  ],
+  "fps": 24,
+  "playback_seconds": 4,
+  "glb_bytes": 4517304,
+  "nodes": 163,
+  "meshes": 160,
+  "animation_channels": 478,
+  "baked_images": [
+    "Brushed silver | face | baked color",
+    "Brushed silver | face | baked normal",
+    "Brushed copper | face | baked color",
+    "Brushed copper | face | baked normal",
+    "Typography | legible warm copper | baked color",
+    "Typography | legible warm copper | baked normal",
+    "Mars | procedural basalt, rust and craters | baked color",
+    "Mars | procedural basalt, rust and craters | baked normal"
+  ]
+}

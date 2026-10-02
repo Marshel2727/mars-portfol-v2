@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
@@ -38,8 +39,9 @@ export function PublicNavbar() {
     <header className="site-header">
       <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }} aria-hidden="true" />
       <div className="editorial-shell site-header__inner">
-        <Link className="brand" href="/" aria-label={content.global.brand_aria_label}>
-          {content.global.brand_name} <span className="brand--desktop">{content.global.brand_descriptor}</span>
+        <Link className="brand brand--with-logo" href="/" aria-label={content.global.brand_aria_label}>
+          <Image className="brand__logo" src="/brand/marshel-logo-v1.png" alt="" width={40} height={40} unoptimized />
+          <span className="brand__text">{content.global.brand_name} <span className="brand--desktop">{content.global.brand_descriptor}</span></span>
         </Link>
 
         <div className="site-header__actions">

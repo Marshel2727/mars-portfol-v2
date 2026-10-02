@@ -1,8 +1,10 @@
-const CACHE_NAME = 'marshel-portfolio-cache-v3';
+const CACHE_NAME = 'marshel-portfolio-cache-v4';
 const urlsToCache = [
   '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/brand/marshel-logo-v1.png',
+  '/brand/marshel-favicon-v1.png',
+  '/brand/marshel-icon-192-v1.png',
+  '/brand/marshel-icon-512-v1.png',
 ];
 
 const isCacheableResponse = (response) => (
@@ -114,8 +116,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: '/brand/marshel-icon-192-v1.png',
+    badge: '/brand/marshel-icon-192-v1.png',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/admin/messages'
