@@ -9,6 +9,7 @@ import useSWR from "swr";
 import ResumeModal from "./ResumeModal";
 import { SiteContentProvider, useSiteContent } from "./SiteContentProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { REPLAY_INTRO_EVENT } from "@/components/intro/IntroGate";
 import { getImageUrl } from "@/lib/utils";
 import { getAboutProfile } from "@/services/about";
 import { Project } from "@/types";
@@ -39,10 +40,20 @@ export function PublicNavbar() {
     <header className="site-header">
       <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }} aria-hidden="true" />
       <div className="editorial-shell site-header__inner">
-        <Link className="brand brand--with-logo" href="/" aria-label={content.global.brand_aria_label}>
-          <Image className="brand__logo" src="/brand/marshel-logo-v1.png" alt="" width={40} height={40} unoptimized />
-          <span className="brand__text">{content.global.brand_name} <span className="brand--desktop">{content.global.brand_descriptor}</span></span>
-        </Link>
+        <div className="brand-wrap">
+          <button
+            type="button"
+            className="brand__logo-btn"
+            aria-label="Putar animasi 3D logo"
+            title="Klik untuk memutar animasi 3D"
+            onClick={() => window.dispatchEvent(new Event(REPLAY_INTRO_EVENT))}
+          >
+            <Image className="brand__logo" src="/brand/marshel-logo-v1.png" alt="" width={40} height={40} unoptimized />
+          </button>
+          <Link className="brand brand--with-logo" href="/" aria-label={content.global.brand_aria_label}>
+            <span className="brand__text">{content.global.brand_name} <span className="brand--desktop">{content.global.brand_descriptor}</span></span>
+          </Link>
+        </div>
 
         <div className="site-header__actions">
           <nav className="site-nav" aria-label="Navigasi utama">

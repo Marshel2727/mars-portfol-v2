@@ -8,21 +8,39 @@ type Phase = "loading" | "playing" | "closing" | "done";
 const privatePath = (path: string) => path === "/login" || path.startsWith("/login/")
   || path === "/admin" || path.startsWith("/admin/");
 
+export const REPLAY_INTRO_EVENT = "marshel:replay-intro";
+
 export default function IntroGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [initialPath] = useState(pathname);
+  const [initialPath, setInitialPath] = useState(pathname);
+  const [runId, setRunId] = useState(0);
   const [phase, setPhase] = useState<Phase>(privatePath(pathname) ? "done" : "loading");
   const [enabled, setEnabled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
   const finishRef = useRef<() => void>(() => undefined);
+  const manualRef = useRef(false);
   const visible = phase !== "done" && pathname === initialPath && !privatePath(pathname);
   const skip = useCallback(() => finishRef.current(), []);
 
   useEffect(() => {
+    const replay = () => {
+      if (privatePath(window.location.pathname)) return;
+      manualRef.current = true;
+      setInitialPath(window.location.pathname);
+      setPhase("loading");
+      setRunId((id) => id + 1);
+    };
+    window.addEventListener(REPLAY_INTRO_EVENT, replay);
+    return () => window.removeEventListener(REPLAY_INTRO_EVENT, replay);
+  }, []);
+
+  useEffect(() => {
     if (privatePath(initialPath)) return;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reducedMotion.matches) {
+    const manual = manualRef.current;
+    manualRef.current = false;
+    if (reducedMotion.matches && !manual) {
       setPhase("done");
       return;
     }
@@ -98,7 +116,7 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
       window.removeEventListener("pagehide", pageHidden);
       finishRef.current = () => undefined;
     };
-  }, [initialPath]);
+  }, [initialPath, runId]);
 
   useEffect(() => {
     if (pathname !== initialPath) finishRef.current();
