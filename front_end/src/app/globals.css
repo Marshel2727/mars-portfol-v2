@@ -3611,3 +3611,36 @@ html[data-theme-transition="true"] *::after {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---- Polish: scroll reveal, reading width, consistent card visuals ---- */
+[data-reveal="hidden"] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  transition: opacity 600ms ease, transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lede,
+.about-bio-text p,
+.project-card__description {
+  max-width: 68ch;
+}
+
+.project-card__visual { aspect-ratio: 16 / 9; }
+.project-card__visual img { transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1); }
+.project-card:hover .project-card__visual img { transform: scale(1.05); }
+.project-card:focus-within { border-color: var(--accent-strong); }
+
+.tag, .tag--technical { white-space: nowrap; }
+
+.button, .site-nav a { min-height: 44px; }
+.button:focus-visible, .site-nav a:focus-visible, .project-card a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html { scroll-padding-top: 88px; }
+body { overflow-x: clip; }

@@ -11,6 +11,7 @@ import { useSiteContent } from "./SiteContentProvider";
 import TelemetryWidget from "./TelemetryWidget";
 import TextScramble from "@/components/ui/TextScramble";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
+import Reveal from "@/components/ui/Reveal";
 
 export default function EditorialHome({
   profile,
@@ -87,7 +88,7 @@ export default function EditorialHome({
         </div>
       </section>
 
-      <section className="selected-work section-block section-block--subtle" aria-labelledby="selected-work-title">
+      <Reveal as="section" className="selected-work section-block section-block--subtle" aria-labelledby="selected-work-title">
         <div className="editorial-shell">
           <header className="section-header">
             <div className="section-header__copy">
@@ -109,9 +110,9 @@ export default function EditorialHome({
             <FeedbackState title="Belum ada project" message="Project terpilih akan tampil di bagian ini setelah datanya tersedia." />
           )}
         </div>
-      </section>
+      </Reveal>
 
-      <section className="section-block about-section" id="profil" aria-labelledby="profile-title">
+      <Reveal as="section" className="section-block about-section" id="profil" aria-labelledby="profile-title">
         <div className="editorial-shell">
           <header className="section-header" style={{ marginBottom: 36 }}>
             <div className="section-header__copy">
@@ -211,9 +212,9 @@ export default function EditorialHome({
             </div>
           </div>
         </div>
-      </section>
+      </Reveal>
 
-      <section className="section-block section-block--inverse" aria-labelledby="process-title">
+      <Reveal as="section" className="section-block section-block--inverse" aria-labelledby="process-title">
         <div className="editorial-shell">
           <header className="section-header">
             <div className="section-header__copy">
@@ -235,9 +236,9 @@ export default function EditorialHome({
             ))}
           </div>
         </div>
-      </section>
+      </Reveal>
 
-      <section className="section-block" aria-labelledby="home-contact-title">
+      <Reveal as="section" className="section-block" aria-labelledby="home-contact-title">
         <div className="editorial-shell home-contact">
           <div className="about-copy">
             <p className="eyebrow">{content.contact_eyebrow}</p>
@@ -286,7 +287,7 @@ export default function EditorialHome({
             </Link>
           </div>
         </div>
-      </section>
+      </Reveal>
     </main>
   );
 }

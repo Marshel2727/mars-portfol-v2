@@ -44,6 +44,14 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
       setPhase("done");
       return;
     }
+    if (!manual) {
+      try {
+        if (sessionStorage.getItem("marshel:intro-seen")) {
+          setPhase("done");
+          return;
+        }
+      } catch { /* storage unavailable: play intro */ }
+    }
     const container = containerRef.current;
     if (!container) return;
     const controller = new AbortController();
@@ -65,6 +73,7 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
     const dismiss = (fade = true) => {
       if (closing || controller.signal.aborted) return;
       closing = true;
+      try { sessionStorage.setItem("marshel:intro-seen", "1"); } catch { /* ignore */ }
       clearTimeout(loadTimer);
       if (fade) setPhase("closing");
       closeTimer = setTimeout(() => {
