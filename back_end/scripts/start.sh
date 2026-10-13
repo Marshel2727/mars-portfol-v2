@@ -3,7 +3,7 @@ set -eu
 
 UPLOAD_ROOT="/app/app/static/uploads"
 
-mkdir -p "$UPLOAD_ROOT/projects" "$UPLOAD_ROOT/about" "$UPLOAD_ROOT/skills"
+mkdir -p "$UPLOAD_ROOT/projects" "$UPLOAD_ROOT/about" "$UPLOAD_ROOT/skills" "$UPLOAD_ROOT/cv"
 
 if [ -d /app/seed_assets/projects ]; then
   cp -Rn /app/seed_assets/projects/. "$UPLOAD_ROOT/projects/"

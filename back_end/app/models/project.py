@@ -18,6 +18,9 @@ class Project(db.Model):
     image_url = db.Column(db.String(150), nullable=False)
     demo_url = db.Column(db.String(150))
     github_url = db.Column(db.String(150))
+    video_url = db.Column(db.String(500))
+    is_featured = db.Column(db.Boolean, nullable=False, default=False, server_default='0')
+    sort_order = db.Column(db.Integer, nullable=False, default=0, server_default='0')
     category = db.Column(db.String(100), nullable=False, default='Lainnya')
     tech_tags = db.Column(db.JSON, nullable=False, default=list)
     architecture_steps = db.Column(db.JSON, nullable=False, default=list)
@@ -44,6 +47,9 @@ class Project(db.Model):
             'image_url': self.image_url,
             'demo_url': self.demo_url,
             'github_url': self.github_url,
+            'video_url': self.video_url,
+            'is_featured': bool(self.is_featured),
+            'sort_order': self.sort_order or 0,
             'category': self.category,
             'tech_tags': self.tech_tags or [],
             'architecture_steps': self.architecture_steps or [],

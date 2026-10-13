@@ -8,6 +8,7 @@ import { createMessage } from "@/services/messages";
 import { getApiErrorMessage } from "@/services/api";
 
 import { useSiteContent } from "./SiteContentProvider";
+import SocialLinks from "./SocialLinks";
 
 type FormValues = { name: string; email: string; content: string };
 type FormErrors = Partial<Record<keyof FormValues, string>>;
@@ -28,11 +29,12 @@ export default function ContactSection() {
   const content = siteContent.contact;
   const projectTypes = siteContent.home.project_types || [];
   const searchParams = useSearchParams();
-  const [values, setValues] = useState<FormValues>(initialValues);
+  const brief = searchParams.get("brief")?.trim() || "";
+  const [values, setValues] = useState<FormValues>(() => ({ ...initialValues, content: brief }));
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSending, setIsSending] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-  const [selectedBriefType, setSelectedBriefType] = useState<string | null>(null);
+  const [selectedBriefType, setSelectedBriefType] = useState<string | null>(() => searchParams.get("type")?.trim() || null);
   const [toast, setToast] = useState<{ isVisible: boolean; message: string; type: "success" | "error" }>({
     isVisible: false,
     message: "",
@@ -41,10 +43,9 @@ export default function ContactSection() {
 
   useEffect(() => {
     const typeParam = searchParams.get("type");
-    if (typeParam) {
-      setSelectedBriefType(typeParam);
-    }
-  }, [searchParams]);
+    setSelectedBriefType(typeParam?.trim() || null);
+    if (brief) setValues((current) => current.content ? current : { ...current, content: brief });
+  }, [searchParams, brief]);
 
   const updateField = (field: keyof FormValues, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -90,19 +91,7 @@ export default function ContactSection() {
         <p className="lede">{content.description}</p>
         <p className="availability">{content.availability_label}</p>
 
-        <div className="quick-contact-pills" aria-label="Jalur Kontak Cepat">
-          <a
-            href="https://github.com/Marshel2727"
-            target="_blank"
-            rel="noreferrer"
-            className="quick-contact-pill"
-          >
-            <svg style={{ width: 16, height: 16 }} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-            </svg>
-            GitHub @Marshel2727
-          </a>
-        </div>
+        <SocialLinks />
       </section>
 
       <form className="contact-form" onSubmit={handleSubmit} noValidate>
@@ -128,12 +117,19 @@ export default function ContactSection() {
                 key={type.id}
                 type="button"
                 className={`contact-brief-pill${selectedBriefType === type.label ? " contact-brief-pill--active" : ""}`}
+                aria-pressed={selectedBriefType === type.label}
                 onClick={() => setSelectedBriefType(selectedBriefType === type.label ? null : type.label)}
               >
                 {type.label}
               </button>
             ))}
           </div>
+          {selectedBriefType && !projectTypes.some((type) => type.label === selectedBriefType) && (
+            <p className="brief-intake-badge" role="status">
+              <span className="brief-intake-badge__pulse" aria-hidden="true" />
+              {content.prefill_focus_label}: {selectedBriefType}
+            </p>
+          )}
         </div>
 
         <p className="eyebrow eyebrow--technical" style={{ color: "var(--ink)", margin: 0 }}>

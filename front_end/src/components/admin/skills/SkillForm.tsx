@@ -1,7 +1,10 @@
 "use client";
 
+import { useAdminToast } from "@/components/admin/AdminToastProvider";
+import { getApiErrorMessage } from "@/services/api";
+
 import { useState, useEffect } from "react";
-import { createSkill, updateSkill } from "@/services/Skils";
+import { createSkill, updateSkill } from "@/services/skills";
 import { getAllProjects } from "@/services/project";
 import { Project, Skill } from "@/types";
 import { getImageUrl } from "@/lib/utils";
@@ -13,6 +16,7 @@ interface SkillFormProps {
 }
 
 export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFormProps) {
+  const notify = useAdminToast();
   const [name, setName] = useState("");
   const [level, setLevel] = useState("intermediate");
   const [category, setCategory] = useState("");
@@ -76,9 +80,9 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!skillToEdit && !image) {
-      alert("Icon/logo wajib diunggah untuk skill baru!");
+      notify("Icon/logo wajib diunggah untuk skill baru!", "error");
       return;
     }
 
@@ -100,13 +104,14 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
         await updateSkill(skillToEdit.id, formData);
       } else {
         await createSkill(formData);
-        alert("Skill baru berhasil ditambahkan!");
+
       }
 
+      notify(skillToEdit ? "Skill berhasil diperbarui!" : "Skill berhasil ditambahkan!");
       onSuccess();
     } catch (error) {
       console.error("Gagal menyimpan skill", error);
-      alert("Terjadi kesalahan saat menyimpan skill.");
+      notify(getApiErrorMessage(error, "Terjadi kesalahan saat menyimpan skill."), "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -141,11 +146,11 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
               <label className="mb-1.5 block text-sm font-semibold text-editorial-technical">
                 Nama Skill / Teknologi *
               </label>
-              <input 
-                type="text" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                required 
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
                 placeholder="Contoh: ESP32, Next.js, Python"
                 className="w-full rounded-lg border border-editorial-line-strong bg-editorial-surface p-2.5 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               />
@@ -156,9 +161,9 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
               <label className="mb-1.5 block text-sm font-semibold text-editorial-technical">
                 Tingkat Kemahiran / Level *
               </label>
-              <select 
-                value={level} 
-                onChange={(e) => setLevel(e.target.value)} 
+              <select
+                value={level}
+                onChange={(e) => setLevel(e.target.value)}
                 className="w-full rounded-lg border border-editorial-line-strong bg-editorial-surface p-2.5 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               >
                 <option value="expert">Core Stack (Expert / Rekayasa Utama)</option>

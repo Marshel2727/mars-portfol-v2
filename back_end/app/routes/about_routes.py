@@ -6,6 +6,7 @@ from app.service.about_service import get_about_profile, update_about_profile
 from app.utils.about_upload import delete_profile_image, save_profile_image
 from app.utils.response import error_response, success_response
 from app.utils.cache import public_cache
+from app.utils.cv_upload import save_cv, delete_cv
 
 
 about_bp = Blueprint('about_bp', __name__, url_prefix='/api/about')
@@ -44,20 +45,43 @@ def edit_about_profile():
         return error_response(message='Nama atau headline terlalu panjang.', status_code=400)
     if data.get('cv_url'):
         parsed_cv_url = urlparse(data['cv_url'])
-        if parsed_cv_url.scheme not in ('http', 'https') or not parsed_cv_url.netloc:
+        is_existing_upload = data['cv_url'] == current_profile.get('cv_url') and data['cv_url'].startswith('/static/uploads/cv/')
+        if not is_existing_upload and (parsed_cv_url.scheme not in ('http', 'https') or not parsed_cv_url.netloc):
             return error_response(message='Tautan CV harus menggunakan http atau https.', status_code=400)
+
+    cv_file = request.files.get('cv_file')
+    new_cv_url = save_cv(cv_file) if cv_file and cv_file.filename else None
+    if new_cv_url:
+        data['cv_url'] = new_cv_url
 
     image_file = request.files.get('profile_image')
     if image_file and image_file.filename:
-        image_url = save_profile_image(image_file)
+        try:
+            image_url = save_profile_image(image_file)
+        except Exception:
+            if new_cv_url:
+                delete_cv(new_cv_url)
+            raise
         if not image_url:
+            if new_cv_url:
+                delete_cv(new_cv_url)
             return error_response(message='Gunakan foto berformat png, jpg, jpeg, atau webp.', status_code=400)
         data['profile_image_url'] = image_url
 
-    updated_profile = update_about_profile(data)
+    try:
+        updated_profile = update_about_profile(data)
+    except Exception:
+        if new_cv_url:
+            delete_cv(new_cv_url)
+        if data.get('profile_image_url'):
+            delete_profile_image(data['profile_image_url'])
+        raise
 
     old_image_url = current_profile.get('profile_image_url')
     if data.get('profile_image_url') and old_image_url:
         delete_profile_image(old_image_url)
+
+    if 'cv_url' in data and data['cv_url'] != current_profile.get('cv_url'):
+        delete_cv(current_profile.get('cv_url'))
 
     return success_response(data=updated_profile, message='Profil About berhasil diperbarui.')

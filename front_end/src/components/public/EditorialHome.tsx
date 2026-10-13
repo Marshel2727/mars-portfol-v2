@@ -26,7 +26,10 @@ export default function EditorialHome({
 }) {
   const siteContent = useSiteContent();
   const content = siteContent.home;
-  const selectedProjects = projects.slice(0, Math.max(0, content.selected_project_count));
+  const featuredProjects = projects.filter((project) => project.is_featured);
+  const selectedProjects = [...(featuredProjects.length ? featuredProjects : projects)]
+    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0) || b.id - a.id)
+    .slice(0, Math.max(0, content.selected_project_count));
   const fullName = profile?.full_name?.trim() || "Marshel";
   const headline = profile?.headline?.trim() || "Computer Engineering Student";
   const profileImage = profile?.profile_image_url?.trim();
@@ -109,6 +112,11 @@ export default function EditorialHome({
           ) : (
             <FeedbackState title="Belum ada project" message="Project terpilih akan tampil di bagian ini setelah datanya tersedia." />
           )}
+          <div className="hero__actions" style={{ marginTop: 24 }}>
+            <Link className="button button--secondary" href="/projects">
+              {content.all_projects_label}{!projectsLoading && !projectsError ? ` (${projects.length})` : ""} →
+            </Link>
+          </div>
         </div>
       </Reveal>
 
@@ -172,6 +180,10 @@ export default function EditorialHome({
               <div className="about-bio-text">
                 <p>{profile?.bio || content.profile_fallback_bio}</p>
               </div>
+              {profile?.current_focus?.trim() && <div className="about-quote-box">
+                <p className="eyebrow eyebrow--technical">{content.current_focus_label}</p>
+                <p>{profile.current_focus}</p>
+              </div>}
 
               <div className="about-quote-box">
                 <span className="about-quote-mark">“</span>
@@ -184,7 +196,7 @@ export default function EditorialHome({
                   Eksplorasi Skills & Specs →
                 </Link>
                 {profile?.cv_url && (
-                  <a className="button button--secondary" href={profile.cv_url} target="_blank" rel="noreferrer">
+                  <a className="button button--secondary" href={profile.cv_url.startsWith('/static/uploads/') ? getImageUrl(profile.cv_url) : profile.cv_url} target="_blank" rel="noreferrer">
                     {content.cv_action_label}
                   </a>
                 )}

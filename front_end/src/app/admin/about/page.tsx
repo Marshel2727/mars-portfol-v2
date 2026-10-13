@@ -1,11 +1,16 @@
 "use client";
 
+import { useAdminToast } from "@/components/admin/AdminToastProvider";
+import { getApiErrorMessage } from "@/services/api";
+
 import { useState } from "react";
 import useSWR from "swr";
 
 import { getImageUrl } from "@/lib/utils";
 import { getAboutProfile, updateAboutProfile } from "@/services/about";
 import { AboutProfile } from "@/types";
+import { useObjectUrl } from "@/hooks/useObjectUrl";
+import ImageFileInput from "@/components/admin/ImageFileInput";
 
 
 const buildInitialFields = (profile: AboutProfile) => ({
@@ -19,8 +24,11 @@ const buildInitialFields = (profile: AboutProfile) => ({
 });
 
 function AboutProfileForm({ profile, onSaved }: { profile: AboutProfile; onSaved: (profile: AboutProfile) => void }) {
+  const notify = useAdminToast();
   const [fields, setFields] = useState(() => buildInitialFields(profile));
   const [profileImage, setProfileImage] = useState<File | null>(null);
+  const imagePreview = useObjectUrl(profileImage);
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const setField = (key: keyof typeof fields) => (
@@ -41,14 +49,17 @@ function AboutProfileForm({ profile, onSaved }: { profile: AboutProfile; onSaved
       formData.append("current_focus", fields.currentFocus);
       formData.append("cv_url", fields.cvUrl);
       if (profileImage) formData.append("profile_image", profileImage);
+      if (cvFile) formData.append("cv_file", cvFile);
 
       const updatedProfile = await updateAboutProfile(formData);
       setProfileImage(null);
+      setCvFile(null);
+      setFields(buildInitialFields(updatedProfile));
       onSaved(updatedProfile);
-      alert("Profil About berhasil diperbarui.");
+      notify("Profil About berhasil diperbarui.");
     } catch (error) {
       console.error("Gagal memperbarui profil About", error);
-      alert("Profil About gagal diperbarui.");
+      notify(getApiErrorMessage(error, "Profil About gagal diperbarui."), "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -65,18 +76,12 @@ function AboutProfileForm({ profile, onSaved }: { profile: AboutProfile; onSaved
         </div>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           <img
-            src={profile.profile_image_url ? getImageUrl(profile.profile_image_url) : "/mars-porto-logo.png"}
+            src={imagePreview || (profile.profile_image_url ? getImageUrl(profile.profile_image_url) : "/mars-porto-logo.png")}
             alt="Preview foto profil"
             className="aspect-[4/5] w-36 rounded-lg border border-editorial-line bg-editorial-paper-deep object-cover"
           />
           <div className="min-w-0 flex-1">
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              onChange={(event) => setProfileImage(event.target.files?.[0] || null)}
-              className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-sm text-editorial-ink file:mr-4 file:rounded file:border-0 file:bg-editorial-action file:px-4 file:py-2 file:font-semibold file:text-editorial-on-action hover:file:bg-editorial-action-hover"
-            />
-            {profileImage && <p className="mt-2 truncate text-xs text-editorial-technical">{profileImage.name}</p>}
+            <ImageFileInput file={profileImage} onChange={setProfileImage} accept="image/png,image/jpeg,image/webp" />
           </div>
         </div>
       </section>
@@ -148,10 +153,16 @@ function AboutProfileForm({ profile, onSaved }: { profile: AboutProfile; onSaved
           <label className="block">
             <span className="mb-2 block text-sm font-semibold text-editorial-technical">Tautan CV</span>
             <input
-              type="url" value={fields.cvUrl} onChange={setField("cvUrl")}
+              type={fields.cvUrl.startsWith('/static/uploads/cv/') ? "text" : "url"} value={fields.cvUrl} onChange={setField("cvUrl")}
               placeholder="https://drive.google.com/..."
               className="w-full rounded border border-editorial-line-strong bg-editorial-surface px-3 py-2.5 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
             />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-editorial-technical">Unggah CV PDF (maksimal 10 MB)</span>
+            <input key={profile.updated_at || 'cv-upload'} type="file" accept="application/pdf,.pdf" onChange={(event) => setCvFile(event.target.files?.[0] || null)}
+              className="w-full text-sm text-editorial-ink" />
+            <p className="mt-2 text-xs text-editorial-muted">File PDF yang dipilih menggantikan tautan CV setelah disimpan.</p>
           </label>
         </div>
       </section>

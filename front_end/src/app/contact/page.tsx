@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
-import ContactSection from "@/components/publick/ContactSection";
-import { EditorialPage } from "@/components/publick/EditorialUI";
+import ContactSection from "@/components/public/ContactSection";
+import { EditorialPage } from "@/components/public/EditorialUI";
 
 export default function ContactPage() {
   return (

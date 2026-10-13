@@ -4,7 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { Skill } from "@/types";
 // PERBAIKAN: Pastikan ejaan nama file ini sesuai dengan yang ada di foldermu
-import { getAllSkill } from "@/services/Skils";
+import { getAllSkill } from "@/services/skills";
 import SkillForm from "@/components/admin/skills/SkillForm";
 import SkillList from "@/components/admin/skills/SkillList";
 

@@ -41,6 +41,29 @@ def _is_valid_http_url(value):
     return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
 
 
+def _presentation_fields(form):
+    data = {}
+    if 'video_url' in form:
+        value = _optional_text(form.get('video_url'))
+        if value and (len(value) > 500 or not _is_valid_http_url(value)):
+            raise ValueError('URL video harus menggunakan http atau https, maksimal 500 karakter.')
+        data['video_url'] = value
+    if 'is_featured' in form:
+        value = form.get('is_featured', '').lower()
+        if value not in ('true', 'false', '1', '0'):
+            raise ValueError('Pilihan proyek unggulan tidak valid.')
+        data['is_featured'] = value in ('true', '1')
+    if 'sort_order' in form:
+        try:
+            value = int(form['sort_order'])
+        except (ValueError, TypeError) as exc:
+            raise ValueError('Urutan proyek harus berupa bilangan bulat.') from exc
+        if not 0 <= value <= 100000:
+            raise ValueError('Urutan proyek harus antara 0 dan 100000.')
+        data['sort_order'] = value
+    return data
+
+
 def _validate_architecture_steps(steps):
     if len(steps) > 12:
         raise ValueError('Maksimal 12 langkah arsitektur per project.')
@@ -95,6 +118,7 @@ def add_project():
         return error_response(message='URL demo dan GitHub harus menggunakan http atau https.')
 
     try:
+        presentation = _presentation_fields(request.form)
         tech_tags = _parse_json_list(request.form.get('tech_tags'), 'tech_tags')
         skill_ids = _parse_json_list(request.form.get('skill_ids'), 'skill_ids')
         architecture_steps = _validate_architecture_steps(
@@ -124,6 +148,7 @@ def add_project():
         'tech_tags': tech_tags,
         'skill_ids': skill_ids,
         'architecture_steps': architecture_steps,
+        **presentation,
     }
     
     new_project = create_project(data)
@@ -168,6 +193,7 @@ def edit_project(id):
         data['category'] = (request.form.get('category') or '').strip() or 'Lainnya'
 
     try:
+        data.update(_presentation_fields(request.form))
         if 'tech_tags' in request.form:
             data['tech_tags'] = _parse_json_list(request.form.get('tech_tags'), 'tech_tags')
         if 'skill_ids' in request.form:

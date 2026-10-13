@@ -6,6 +6,12 @@ from app.models.site_content import SiteContent
 
 DEFAULT_SITE_CONTENT = {
     'global': {
+        'social_links': [
+            {'label': 'GitHub @Marshel2727', 'href': 'https://github.com/Marshel2727'},
+            {'label': 'LinkedIn', 'href': ''},
+            {'label': 'Email', 'href': ''},
+            {'label': 'Instagram', 'href': ''},
+        ],
         'brand_name': 'MARSHEL',
         'brand_descriptor': '/ SOFTWARE × HARDWARE',
         'brand_aria_label': 'Marshel Software dan Hardware, kembali ke beranda',
@@ -22,6 +28,8 @@ DEFAULT_SITE_CONTENT = {
         'availability_label': 'TERBUKA UNTUK KOLABORASI',
     },
     'home': {
+        'all_projects_label': 'Lihat Seluruh Katalog Proyek',
+        'current_focus_label': 'Fokus saat ini',
         'hero_eyebrow': 'FULL-STACK DEVELOPMENT / IoT / AI',
         'hero_title': 'Membangun software yang terhubung dengan dunia nyata.',
         'hero_description': 'Saya membangun aplikasi web, backend, dan sistem IoT—dari antarmuka pengguna hingga API, database, deployment, dan integrasi perangkat.',
@@ -99,6 +107,10 @@ DEFAULT_SITE_CONTENT = {
         'card_action_label': 'Lihat studi kasus',
     },
     'skills': {
+        'search_placeholder': 'Cari skill, kategori, atau teknologi...',
+        'all_category_label': 'Semua Kategori',
+        'no_results_title': 'Skill tidak ditemukan',
+        'no_results_message': 'Coba kata kunci atau kategori lain.',
         'hero_eyebrow': 'TECHNICAL EXPERTISE / INDEX',
         'hero_title': 'Kapabilitas & Spesifikasi Teknis',
         'hero_description': 'Membangun sistem digital yang andal, scalable, dan terintegrasi—dari arsitektur frontend modern, REST API backend, hingga komunikasi perangkat IoT dan hardware secara presisi.',
@@ -147,6 +159,8 @@ DEFAULT_SITE_CONTENT = {
         'message_required_message': 'Pesan wajib diisi.',
     },
     'project_detail': {
+        'video_title': 'Video Demo & Implementasi',
+        'video_action_label': 'Buka Video Demo ↗',
         'back_label': 'Projects & Skills',
         'demo_label': 'Live Demo',
         'github_label': 'GitHub',
@@ -163,6 +177,7 @@ DEFAULT_SITE_CONTENT = {
         'gallery_empty_message': 'Project ini belum memiliki dokumentasi visual tambahan.',
     },
     'resume': {
+        'unavailable_message': 'CV belum tersedia. Silakan hubungi saya untuk meminta versi terbaru.',
         'eyebrow': 'CURRICULUM VITAE / RESUME',
         'title_template': '{name} — Engineer Profile',
         'tag': 'FULL-STACK & IOT ENGINEER',
@@ -175,7 +190,7 @@ DEFAULT_SITE_CONTENT = {
         ],
         'download_label': 'Unduh CV (PDF) ↓',
         'close_label': 'Tutup',
-        'fallback_cv_url': '/Marshel_CV_Fullstack_IoT.pdf',
+        'fallback_cv_url': '',
         'download_filename': 'Marshel_CV_Engineer.pdf',
     },
 }

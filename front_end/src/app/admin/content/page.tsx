@@ -6,17 +6,25 @@ import useSWR from "swr";
 
 import { DEFAULT_SITE_CONTENT, mergeSiteContent, SiteContent } from "@/lib/siteContent";
 import { getSiteContent, updateSiteContent } from "@/services/siteContent";
+import ContentFields from "@/components/admin/ContentFields";
+import { useAdminToast } from "@/components/admin/AdminToastProvider";
 
-type TabKey = "hero" | "profile" | "brief" | "metrics";
+type TabKey = "hero" | "profile" | "brief" | "metrics" | "capabilities" | "timeline" | "resume" | "social" | "pages";
 
 const tabLabels: Record<TabKey, string> = {
   hero: "🚀 Hero & Ketersediaan",
   profile: "🎯 Profil & Filosofi",
   brief: "📋 Layanan & Brief Builder",
   metrics: "📊 Metrik Beranda",
+  capabilities: "Kapabilitas & Proses",
+  timeline: "Timeline / Pengalaman",
+  resume: "Resume / CV",
+  social: "Tautan Sosial",
+  pages: "Teks Halaman & Navigasi",
 };
 
 export default function AdminContentPage() {
+  const notify = useAdminToast();
   const { data, isLoading, error, mutate } = useSWR("/site-content/", getSiteContent);
   const [draft, setDraft] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
   const [activeTab, setActiveTab] = useState<TabKey>("hero");
@@ -38,9 +46,11 @@ export default function AdminContentPage() {
       setDraft(mergeSiteContent(updated.content));
       await mutate(updated, { revalidate: false });
       setNotice({ message: "Konten website berhasil disimpan dan diperbarui!", type: "success" });
+      notify("Konten website berhasil disimpan.");
     } catch (saveError) {
       console.error("Gagal menyimpan konten website", saveError);
       setNotice({ message: "Gagal menyimpan konten. Periksa koneksi API.", type: "error" });
+      notify("Gagal menyimpan konten. Periksa koneksi API.", "error");
     } finally {
       setIsSaving(false);
     }
@@ -439,6 +449,36 @@ export default function AdminContentPage() {
           )}
 
           {/* Sticky Bottom Actions Bar */}
+          {activeTab === "metrics" && <div className="mt-5"><ContentFields
+            value={{ selected_project_count: draft.home.selected_project_count }} schema={DEFAULT_SITE_CONTENT.home}
+            onChange={(next) => setDraft((current) => ({ ...current, home: { ...current.home, ...next as Partial<SiteContent['home']> } }))} /></div>}
+          {activeTab === "capabilities" && <ContentFields
+            value={{ capabilities: draft.home.capabilities, process_steps: draft.home.process_steps }}
+            schema={DEFAULT_SITE_CONTENT.home}
+            onChange={(next) => setDraft((current) => ({ ...current, home: { ...current.home, ...next as Partial<SiteContent['home']> } }))} />}
+          {activeTab === "timeline" && <ContentFields field="milestones" value={draft.skills.milestones}
+            schema={DEFAULT_SITE_CONTENT.skills.milestones}
+            onChange={(next) => setDraft((current) => ({ ...current, skills: { ...current.skills, milestones: next as SiteContent['skills']['milestones'] } }))} />}
+          {activeTab === "resume" && <div className="space-y-5">
+            <p className="text-sm text-editorial-muted">Unggah dokumen PDF di <Link className="underline" href="/admin/about">Profil & Biodata</Link>. Tautan cadangan di bawah dipakai jika profil belum memiliki CV.</p>
+            <ContentFields value={draft.resume} schema={DEFAULT_SITE_CONTENT.resume}
+              onChange={(next) => setDraft((current) => ({ ...current, resume: next as SiteContent['resume'] }))} />
+          </div>}
+          {activeTab === "social" && <div className="space-y-5">
+            <p className="text-sm text-editorial-muted">Isi URL profil atau mailto:nama@domain.com. Tautan yang kosong tidak ditampilkan.</p>
+            <ContentFields field="social_links" value={draft.global.social_links} schema={DEFAULT_SITE_CONTENT.global.social_links}
+              onChange={(next) => setDraft((current) => ({ ...current, global: { ...current.global, social_links: next as SiteContent['global']['social_links'] } }))} />
+          </div>}
+          {activeTab === "pages" && <div className="space-y-5">
+            <p className="text-sm text-editorial-muted">Atur teks, label navigasi, telemetri, dan pengaturan seluruh halaman.</p>
+            {(Object.keys(draft) as (keyof SiteContent)[]).filter((key) => key !== "resume").map((key) => (
+              <details key={key} className="rounded-lg border border-editorial-line p-4">
+                <summary className="cursor-pointer font-semibold text-editorial-technical">{{ global: 'Navigasi & Identitas', home: 'Beranda', projects: 'Katalog Proyek', skills: 'Skills & Specs', contact: 'Kontak', project_detail: 'Detail Proyek', resume: 'CV' }[key]}</summary>
+                <div className="mt-5"><ContentFields value={draft[key]} schema={DEFAULT_SITE_CONTENT[key]}
+                  onChange={(next) => setDraft((current) => ({ ...current, [key]: next }))} /></div>
+              </details>
+            ))}
+          </div>}
           <div className="sticky bottom-0 mt-8 flex flex-col items-center justify-between gap-3 border-t border-editorial-line bg-editorial-surface/95 pt-5 backdrop-blur sm:flex-row">
             {notice.message ? (
               <p

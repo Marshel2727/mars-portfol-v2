@@ -1,5 +1,5 @@
-import EditorialProjectDetail from "@/components/publick/EditorialProjectDetail";
-import { EditorialPage } from "@/components/publick/EditorialUI";
+import EditorialProjectDetail from "@/components/public/EditorialProjectDetail";
+import { EditorialPage } from "@/components/public/EditorialUI";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerProject } from "@/lib/serverProjects";

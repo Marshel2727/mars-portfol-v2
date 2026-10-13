@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { logout } from "@/services/auth";
 import { useState } from "react";
+import useSWR from "swr";
+import { getAllMessages } from "@/services/messages";
 import { getApiErrorMessage } from "@/services/api";
 
 const menuItems = [
@@ -24,6 +26,8 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [logoutError, setLogoutError] = useState("");
+  const { data: messages } = useSWR("/messages/", getAllMessages, { refreshInterval: 60000 });
+  const unreadCount = messages?.filter((message) => !message.is_read).length || 0;
 
   const handleLogout = async () => {
     try {
@@ -68,6 +72,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
               }`}
             >
               {item.name}
+              {item.path === "/admin/messages" && unreadCount > 0 && <span
+                className="ml-2 rounded-full bg-editorial-action px-2 py-0.5 text-xs text-editorial-on-action"
+                aria-label={`${unreadCount} pesan belum dibaca`}>{unreadCount}</span>}
             </Link>
           );
         })}

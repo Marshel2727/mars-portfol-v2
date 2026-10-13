@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 
 import ResumeModal from "./ResumeModal";
+import SocialLinks from "./SocialLinks";
 import { SiteContentProvider, useSiteContent } from "./SiteContentProvider";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { REPLAY_INTRO_EVENT } from "@/components/intro/IntroGate";
@@ -136,6 +137,7 @@ export function PublicFooter() {
       <div className="editorial-shell site-footer__inner">
         <p className="brand">{content.global.brand_name} {content.global.brand_descriptor}</p>
         <p>{content.global.footer_text} / © {new Date().getFullYear()}</p>
+        <SocialLinks />
       </div>
     </footer>
   );

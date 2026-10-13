@@ -3644,3 +3644,19 @@ html[data-theme-transition="true"] *::after {
 
 html { scroll-padding-top: 88px; }
 body { overflow-x: clip; }
+.project-demo-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 24px 0;
+  border: 1px solid var(--line);
+  background: var(--paper-deep);
+}
+
+.skills-filter-bar {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.skills-filter-bar input { width: 100%; }

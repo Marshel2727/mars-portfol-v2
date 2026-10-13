@@ -45,6 +45,9 @@ export interface Project {
   image_url: string;
   demo_url?: string;
   github_url?: string;
+  video_url?: string;
+  is_featured?: boolean;
+  sort_order?: number;
   category: string;
   tech_tags: string[];
   architecture_steps?: ArchitectureStep[];

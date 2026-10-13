@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { getAllProjects } from "@/services/project";
-import { getAllSkill } from "@/services/Skils";
+import { getAllSkill } from "@/services/skills";
 import { getAllMessages } from "@/services/messages";
 import StatCard from "@/components/ui/StatCard";
 import api, { getApiErrorMessage } from "@/services/api";

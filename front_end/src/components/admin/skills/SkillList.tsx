@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Skill } from "@/types";
-import { deleteSkill } from "@/services/Skils";
+import { deleteSkill } from "@/services/skills";
 import { getImageUrl } from "@/lib/utils";
 import ConfirmModal from "../ConfirmModal";
 

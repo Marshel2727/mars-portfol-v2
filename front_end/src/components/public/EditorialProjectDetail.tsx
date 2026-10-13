@@ -11,6 +11,7 @@ import type { Project } from "@/types";
 
 import { FeedbackState, ProjectVisual, TechTags } from "./EditorialUI";
 import { useSiteContent } from "./SiteContentProvider";
+import ProjectVideo from "./ProjectVideo";
 
 function descriptionParagraphs(description: string) {
   return description
@@ -126,6 +127,8 @@ export default function EditorialProjectDetail({ projectId, initialProject }: { 
             <ProjectVisual project={project} />
           </div>
         </section>
+
+        {project.video_url && <ProjectVideo url={project.video_url} title={project.title} />}
 
         {/* Key Technical Highlights Box */}
         <div className="editorial-shell">

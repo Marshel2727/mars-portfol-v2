@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { safePublicHref } from "@/lib/publicLinks";
+import { getImageUrl } from "@/lib/utils";
 
 import { useSiteContent } from "./SiteContentProvider";
 
@@ -47,7 +49,9 @@ export default function ResumeModal({ isOpen, onClose, cvUrl, fullName }: Resume
 
   if (!isOpen) return null;
 
-  const targetCvUrl = cvUrl || content.resume.fallback_cv_url;
+  const candidateCvUrl = cvUrl?.trim() || content.resume.fallback_cv_url.trim();
+  const validCvUrl = candidateCvUrl === "/Marshel_CV_Fullstack_IoT.pdf" ? undefined : safePublicHref(candidateCvUrl);
+  const targetCvUrl = validCvUrl?.startsWith("/static/uploads/") ? getImageUrl(validCvUrl) : validCvUrl;
   const modalTitle = content.resume.title_template.replace("{name}", fullName || "Marshel");
 
   return (
@@ -86,7 +90,7 @@ export default function ResumeModal({ isOpen, onClose, cvUrl, fullName }: Resume
         </div>
 
         <footer className="resume-modal-footer">
-          <a
+          {targetCvUrl ? <a
             className="button"
             href={targetCvUrl}
             target="_blank"
@@ -94,7 +98,7 @@ export default function ResumeModal({ isOpen, onClose, cvUrl, fullName }: Resume
             download={content.resume.download_filename}
           >
             {content.resume.download_label}
-          </a>
+          </a> : <p role="status">{content.resume.unavailable_message}</p>}
           <button type="button" className="button button--secondary" onClick={onClose}>
             {content.resume.close_label}
           </button>

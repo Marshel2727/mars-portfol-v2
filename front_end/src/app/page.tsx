@@ -1,24 +1,8 @@
-"use client";
+import HomeContent from "@/components/public/HomeContent";
+import PublicDataProvider from "@/components/public/PublicDataProvider";
+import { getPublicFallback } from "@/lib/serverPublicData";
 
-import useSWR from "swr";
-
-import EditorialHome from "@/components/publick/EditorialHome";
-import { EditorialPage } from "@/components/publick/EditorialUI";
-import { getAboutProfile } from "@/services/about";
-import { getAllProjects } from "@/services/project";
-
-export default function Home() {
-  const projectsRequest = useSWR("/projects/", getAllProjects);
-  const aboutRequest = useSWR("/about/", getAboutProfile);
-
-  return (
-    <EditorialPage>
-      <EditorialHome
-        profile={aboutRequest.data}
-        projects={Array.isArray(projectsRequest.data) ? projectsRequest.data : []}
-        projectsLoading={projectsRequest.isLoading}
-        projectsError={Boolean(projectsRequest.error)}
-      />
-    </EditorialPage>
-  );
+export default async function Page() {
+  const fallback = await getPublicFallback(['/projects/', '/about/', '/site-content/']);
+  return <PublicDataProvider fallback={fallback}><HomeContent /></PublicDataProvider>;
 }

@@ -9,8 +9,9 @@ dengan compositor EEVEE Blender.
 
 ## Perilaku
 
-- Tampil pada pembukaan dokumen atau refresh halaman publik, termasuk tautan
-  langsung ke `/projects`. Navigasi internal tidak memutar ulang intro.
+- Tampil sekali per sesi tab pada halaman publik, termasuk tautan langsung
+  ke `/projects`. Refresh dan navigasi internal melewati intro setelah selesai.
+  Tombol logo dapat memutar ulang intro secara manual.
 - `/login` dan `/admin/*` melewati intro. Pengguna reduced motion langsung
   melihat halaman dan tidak mengunduh model.
 - Halaman serta API dimuat di belakang intro. Durasi bukan indikator progres API.
@@ -22,7 +23,8 @@ dengan compositor EEVEE Blender.
   halaman tetap terbuka. Total waktu normal mencakup persiapan, playback 4 detik,
   dan fade 300 ms.
 - Setelah selesai, timer, observer, mixer, canvas, texture dan resource GPU
-  dibersihkan. Tidak ada flag session/localStorage untuk melewati refresh.
+  dibersihkan. Flag `sessionStorage` `marshel:intro-seen` melewati intro pada
+  refresh berikutnya dalam sesi tab yang sama.
 
 ## Aset
 

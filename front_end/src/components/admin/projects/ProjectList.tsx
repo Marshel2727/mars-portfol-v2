@@ -70,7 +70,11 @@ export default function ProjectList({ projects, isLoading, onRefresh, onEdit }: 
                       className="h-12 w-12 rounded border border-editorial-line-strong object-cover shadow-sm"
                     />
                   </td>
-                  <td className="max-w-xs break-words px-4 py-3 font-medium text-editorial-ink">{project.title}</td>
+                  <td className="max-w-xs break-words px-4 py-3 font-medium text-editorial-ink">
+                    {project.title}
+                    {project.is_featured && <span className="mt-1 block text-xs text-editorial-technical">★ Unggulan</span>}
+                    <span className="mt-1 block text-xs text-editorial-muted">Urutan: {project.sort_order || 0}</span>
+                  </td>
                   <td className="px-4 py-3">
                     <span className="mb-2 inline-block rounded bg-editorial-technical/10 px-2 py-1 text-xs font-semibold text-editorial-technical">
                       {project.category || "Lainnya"}

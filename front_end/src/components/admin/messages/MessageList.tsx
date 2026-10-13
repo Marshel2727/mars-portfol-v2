@@ -5,6 +5,7 @@ import { Message } from "@/types";
 import { deleteMessage, markMessageAsRead } from "@/services/messages";
 import Link from "next/link";
 import ConfirmModal from "../ConfirmModal";
+import { emailReplyHref } from "@/lib/publicLinks";
 
 interface MessageListProps {
   messages: Message[];
@@ -93,6 +94,7 @@ export default function MessagesList({ messages, isLoading, onRefresh }: Message
                   </td>
                   
                   <td className="px-4 py-3 text-center space-x-3">
+                    <a href={emailReplyHref(msg.email)} className="text-xs font-semibold text-editorial-technical">Balas via Email</a>
                     {!msg.is_read && (
                       <button 
                         onClick={() => handleMarkAsRead(msg.id)}

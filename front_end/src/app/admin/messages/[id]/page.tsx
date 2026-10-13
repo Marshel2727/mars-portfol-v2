@@ -6,10 +6,13 @@ import { getMessageById,markMessageAsRead, deleteMessage } from "@/services/mess
 import { Message } from "@/types";
 import Link from "next/link";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import { useSWRConfig } from "swr";
+import { emailReplyHref } from "@/lib/publicLinks";
 
 export default function MessageDetailPage() {
   const { id } = useParams(); // Mengambil ID dari URL
   const router = useRouter();
+  const { mutate } = useSWRConfig();
   const [message, setMessage] = useState<Message | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -24,6 +27,7 @@ export default function MessageDetailPage() {
         // Otomatis tandai sebagai sudah dibaca saat halaman dibuka
         if (!data.is_read) {
           await markMessageAsRead(Number(id));
+          await mutate("/messages/");
         }
       } catch (error) {
         console.error("Gagal memuat detail pesan:", error);
@@ -33,12 +37,13 @@ export default function MessageDetailPage() {
     };
 
     if (id) fetchDetail();
-  }, [id]);
+  }, [id, mutate]);
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
       await deleteMessage(Number(id));
+      await mutate("/messages/");
       router.push("/admin/messages"); // Balik ke inbox setelah hapus
     } catch {
       console.error("Gagal menghapus pesan.");
@@ -54,6 +59,7 @@ export default function MessageDetailPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Tombol Kembali */}
+      <a href={emailReplyHref(message.email)} className="inline-flex rounded-lg bg-editorial-action px-4 py-3 text-sm font-semibold text-editorial-on-action">Balas via Email ↗</a>
       <Link
         href="/admin/messages"
         className="mb-4 flex items-center gap-2 text-editorial-technical transition hover:text-editorial-accent-strong"

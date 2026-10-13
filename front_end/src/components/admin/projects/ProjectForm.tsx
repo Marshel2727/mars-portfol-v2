@@ -1,9 +1,15 @@
 "use client";
 
+import { useAdminToast } from "@/components/admin/AdminToastProvider";
+import { getApiErrorMessage } from "@/services/api";
+
 import { useState, useEffect } from "react";
 import { createProject, updateProject } from "@/services/project";
-import { getAllSkill } from "@/services/Skils";
+import { getAllSkill } from "@/services/skills";
 import { Project, Skill } from "@/types";
+import { useObjectUrl } from "@/hooks/useObjectUrl";
+import { getImageUrl } from "@/lib/utils";
+import ImageFileInput from "../ImageFileInput";
 
 interface ProjectFormProps {
   projectToEdit: Project | null;
@@ -19,6 +25,8 @@ const EMPTY_FORM = {
   description: "",
   demoUrl: "",
   githubUrl: "",
+  videoUrl: "",
+  sortOrder: "0",
   category: "",
   techTags: "",
   architectureSteps: "",
@@ -36,8 +44,11 @@ function parseArchitectureSteps(value: string) {
 }
 
 export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: ProjectFormProps) {
+  const notify = useAdminToast();
   const [fields, setFields] = useState(EMPTY_FORM);
+  const [isFeatured, setIsFeatured] = useState(false);
   const [image, setImage] = useState<File | null>(null);
+  const imagePreview = useObjectUrl(image) || (projectToEdit?.image_url ? getImageUrl(projectToEdit.image_url) : undefined);
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +66,8 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
         description: projectToEdit.description,
         demoUrl:     projectToEdit.demo_url || "",
         githubUrl:   projectToEdit.github_url || "",
+        videoUrl: projectToEdit.video_url || "",
+        sortOrder: String(projectToEdit.sort_order || 0),
         category:    projectToEdit.category || "",
         techTags:    projectToEdit.tech_tags?.join(", ") || "",
         architectureSteps: projectToEdit.architecture_steps?.map((step, index) =>
@@ -67,6 +80,7 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
       setSelectedSkillIds([]);
     }
     setImage(null);
+    setIsFeatured(Boolean(projectToEdit?.is_featured));
   }, [projectToEdit]);
 
   useEffect(() => {
@@ -87,7 +101,7 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
     e.preventDefault();
 
     if (!projectToEdit && !image) {
-      alert("Gambar wajib diunggah untuk project baru!");
+      notify("Gambar wajib diunggah untuk project baru!", "error");
       return;
     }
 
@@ -99,6 +113,9 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
       formData.append("description", fields.description);
       formData.append("demo_url", fields.demoUrl);
       formData.append("github_url", fields.githubUrl);
+      formData.append("video_url", fields.videoUrl);
+      formData.append("sort_order", fields.sortOrder || "0");
+      formData.append("is_featured", String(isFeatured));
       formData.append("category", fields.category.trim() || "Lainnya");
       formData.append(
         "tech_tags",
@@ -112,17 +129,18 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
         await updateProject(projectToEdit.id, formData);
       } else {
         await createProject(formData);
-        alert("Project berhasil ditambahkan!");
+
       }
 
       // ✅ DRY: Reset cukup sekali pakai konstanta EMPTY_FORM
       setFields(EMPTY_FORM);
       setImage(null);
       setSelectedSkillIds([]);
+      notify(projectToEdit ? "Project berhasil diperbarui!" : "Project berhasil ditambahkan!");
       onSuccess();
     } catch (error) {
       console.error("Gagal menyimpan proyek", error);
-      alert("Terjadi kesalahan saat menyimpan proyek.");
+      notify(getApiErrorMessage(error, "Terjadi kesalahan saat menyimpan proyek."), "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -155,6 +173,16 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex flex-wrap items-center gap-4 rounded border border-editorial-line p-3">
+            <label className="flex items-center gap-2 text-sm text-editorial-ink">
+              <input type="checkbox" checked={isFeatured} onChange={(event) => setIsFeatured(event.target.checked)} />
+              Tampilkan sebagai proyek unggulan di beranda
+            </label>
+            <label className="text-sm text-editorial-technical">Urutan (angka kecil lebih dahulu)
+              <input type="number" min={0} max={100000} step={1} value={fields.sortOrder} onChange={setField("sortOrder")}
+                className="ml-2 w-24 rounded border border-editorial-line-strong bg-editorial-surface p-2" />
+            </label>
+          </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-editorial-technical">Judul Proyek *</label>
@@ -191,12 +219,8 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
                   ? <span className="text-xs text-editorial-muted">(Abaikan jika tidak ganti)</span>
                   : "*"}
               </label>
-              <input
-                id="image-upload" type="file"
-                accept="image/png, image/jpeg, image/jpg, image/gif"
-                onChange={(e) => setImage(e.target.files?.[0] || null)}
-                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-1.5 text-editorial-ink file:mr-4 file:rounded file:border-0 file:bg-editorial-action file:px-4 file:py-1 file:text-editorial-on-action hover:file:bg-editorial-action-hover focus:outline-none"
-              />
+              <ImageFileInput file={image} onChange={setImage} accept="image/png,image/jpeg,image/gif" />
+              {imagePreview && <img src={imagePreview} alt="Pratinjau gambar sampul" className="mt-3 max-h-48 w-full rounded border border-editorial-line object-contain" />}
             </div>
             <div className="md:col-span-2">
               <label className="mb-1 block text-sm font-medium text-editorial-technical">Deskripsi Proyek *</label>
@@ -234,6 +258,11 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
                 className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink focus:border-editorial-technical focus:outline-none focus:ring-1 focus:ring-editorial-technical"
               />
             </div>
+            <label className="block md:col-span-2">
+              <span className="mb-1 block text-sm font-medium text-editorial-technical">Video demo (YouTube atau tautan MP4/WebM)</span>
+              <input type="url" maxLength={500} value={fields.videoUrl} onChange={setField("videoUrl")} placeholder="https://..."
+                className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink" />
+            </label>
             <div>
               <label className="mb-1 block text-sm font-medium text-editorial-technical">
                 GitHub URL <span className="text-xs text-editorial-muted">(Opsional)</span>

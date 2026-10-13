@@ -1,5 +1,8 @@
 "use client";
 
+import { useAdminToast } from "@/components/admin/AdminToastProvider";
+import { getApiErrorMessage } from "@/services/api";
+
 import { useState, useRef } from "react";
 import { Project } from "@/types";
 import { uploadProjectImage, deleteProjectImage } from "@/services/projectImages";
@@ -13,6 +16,7 @@ interface ProjectGalleryModalProps {
 }
 
 export default function ProjectGalleryModal({ project, onClose, onRefresh }: ProjectGalleryModalProps) {
+  const notify = useAdminToast();
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadCaption, setUploadCaption] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -33,10 +37,11 @@ export default function ProjectGalleryModal({ project, onClose, onRefresh }: Pro
       setUploadFile(null);
       setUploadCaption("");
       if (fileInputRef.current) fileInputRef.current.value = "";
+      notify("Foto berhasil diunggah.");
       onRefresh();
     } catch (error) {
       console.error("Gagal mengunggah foto", error);
-      alert("Gagal mengunggah foto.");
+      notify(getApiErrorMessage(error, "Gagal mengunggah foto."), "error");
     } finally {
       setIsUploading(false);
     }

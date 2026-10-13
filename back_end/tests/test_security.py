@@ -199,5 +199,111 @@ class SecurityTests(unittest.TestCase):
         self.assertFalse(image_path.exists())
 
 
+    def test_project_migration_preserves_existing_rows(self):
+        import importlib.util
+        import sqlalchemy as sa
+        from alembic.migration import MigrationContext
+        from alembic.operations import Operations
+        migration_path = Path(__file__).resolve().parents[1] / 'migrations/versions/a3b5c7d9e1f2_featured_projects_and_video.py'
+        spec = importlib.util.spec_from_file_location('project_migration', migration_path)
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+        engine = sa.create_engine('sqlite://')
+        with engine.begin() as connection:
+            connection.execute(sa.text('CREATE TABLE projects (id INTEGER PRIMARY KEY, title TEXT NOT NULL)'))
+            connection.execute(sa.text("INSERT INTO projects (id, title) VALUES (1, 'Existing')"))
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
+                migration.upgrade()
+                row = connection.execute(sa.text('SELECT title, is_featured, sort_order, video_url FROM projects')).one()
+                self.assertEqual(tuple(row), ('Existing', 0, 0, None))
+                migration.downgrade()
+            self.assertEqual([column['name'] for column in sa.inspect(connection).get_columns('projects')], ['id', 'title'])
+        engine.dispose()
+
+    def test_project_featured_order_and_video_round_trip(self):
+        self.login()
+        with patch('app.routes.project_routes.save_image', return_value='/static/uploads/projects/test.png'):
+            for title, order, featured in [('Later', '20', 'false'), ('Featured', '1', 'true')]:
+                response = self.client.post('/api/projects/', headers=self.csrf(), data={
+                    'title': title, 'description': 'Demo project', 'sort_order': order,
+                    'is_featured': featured, 'video_url': 'https://youtu.be/abcdefghijk',
+                    'image': (io.BytesIO(b'test'), 'test.png'),
+                })
+                self.assertEqual(response.status_code, 201, response.json)
+        projects = self.client.get('/api/projects/').json['data']
+        self.assertEqual([item['title'] for item in projects], ['Featured', 'Later'])
+        featured = projects[0]
+        self.assertTrue(featured['is_featured'])
+        self.assertEqual(featured['sort_order'], 1)
+        self.assertEqual(featured['video_url'], 'https://youtu.be/abcdefghijk')
+        response = self.client.put(f"/api/projects/{featured['id']}", headers=self.csrf(), data={
+            'is_featured': 'false', 'sort_order': '30', 'video_url': '',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json['data']['is_featured'])
+        self.assertIsNone(response.json['data']['video_url'])
+
+    def test_project_rejects_invalid_presentation_fields(self):
+        self.login()
+        for fields in ({'is_featured': 'yes'}, {'sort_order': '-1'}, {'sort_order': '1.5'}, {'video_url': 'javascript:alert(1)'}):
+            response = self.client.post('/api/projects/', headers=self.csrf(), data={
+                'title': 'Test', 'description': 'Test', **fields,
+            })
+            self.assertEqual(response.status_code, 400, fields)
+
+    def test_cv_upload_update_and_replacement(self):
+        self.login()
+        cv_folder = Path(self.temp.name) / 'cv'
+        fields = {'full_name': 'Marshel', 'headline': 'Engineer', 'bio': 'Profile'}
+        with patch('app.utils.cv_upload.UPLOAD_FOLDER', str(cv_folder)):
+            response = self.client.put('/api/about/', headers=self.csrf(), data={
+                **fields, 'cv_file': (io.BytesIO(b'%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF'), '../../resume.pdf'),
+            })
+            self.assertEqual(response.status_code, 200, response.json)
+            url = response.json['data']['cv_url']
+            self.assertTrue(url.startswith('/static/uploads/cv/'))
+            uploaded = cv_folder / url.rsplit('/', 1)[-1]
+            self.assertTrue(uploaded.is_file())
+            response = self.client.put('/api/about/', headers=self.csrf(), data={**fields, 'cv_url': url})
+            self.assertEqual(response.status_code, 200, response.json)
+            self.assertTrue(uploaded.exists())
+            response = self.client.put('/api/about/', headers=self.csrf(), data={**fields, 'cv_url': 'https://example.com/resume.pdf'})
+            self.assertEqual(response.status_code, 200, response.json)
+            self.assertFalse(uploaded.exists())
+
+    def test_cv_rejects_invalid_uploads_and_requires_admin(self):
+        fields = {'full_name': 'Marshel', 'headline': 'Engineer', 'bio': 'Profile'}
+        response = self.client.put('/api/about/', data=fields)
+        self.assertEqual(response.status_code, 401)
+        self.login()
+        with patch('app.utils.cv_upload.UPLOAD_FOLDER', str(Path(self.temp.name) / 'cv')):
+            for payload, filename in [(b'fake pdf', 'cv.pdf'), (b'%PDF-1.4\n%%EOF', 'cv.html')]:
+                response = self.client.put('/api/about/', headers=self.csrf(), data={
+                    **fields, 'cv_file': (io.BytesIO(payload), filename),
+                })
+                self.assertEqual(response.status_code, 400, response.json)
+            with patch('app.utils.cv_upload.MAX_CV_BYTES', 10):
+                response = self.client.put('/api/about/', headers=self.csrf(), data={
+                    **fields, 'cv_file': (io.BytesIO(b'%PDF-1.4\n' + b'x' * 20 + b'\n%%EOF'), 'cv.pdf'),
+                })
+                self.assertEqual(response.status_code, 400)
+
+    def test_new_cms_controls_survive_save(self):
+        self.login()
+        content = self.client.get('/api/site-content/').json['data']['content']
+        content['global']['social_links'] = [{'label': 'Email', 'href': 'mailto:test@example.com'}]
+        content['home']['selected_project_count'] = 4
+        content['skills']['milestones'] = [{'period': '2026', 'role': 'Engineer', 'description': 'Testing'}]
+        content['resume']['fallback_cv_url'] = 'https://example.com/resume.pdf'
+        response = self.client.put('/api/site-content/', headers=self.csrf(), json={'content': content})
+        self.assertEqual(response.status_code, 200, response.json)
+        saved = self.client.get('/api/site-content/').json['data']['content']
+        self.assertEqual(saved['home']['selected_project_count'], 4)
+        self.assertEqual(saved['global']['social_links'], content['global']['social_links'])
+        self.assertEqual(saved['skills']['milestones'], content['skills']['milestones'])
+        self.assertEqual(saved['resume']['fallback_cv_url'], content['resume']['fallback_cv_url'])
+
+
 if __name__ == '__main__':
     unittest.main()

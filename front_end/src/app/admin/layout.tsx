@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Sidebar from "@/components/admin/Sidebar";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { AdminToastProvider } from "@/components/admin/AdminToastProvider";
 
 export default function AdminLayout({
   children,
@@ -12,7 +13,7 @@ export default function AdminLayout({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col bg-editorial-paper text-editorial-ink md:flex-row">
+    <AdminToastProvider><div className="flex min-h-screen flex-col bg-editorial-paper text-editorial-ink md:flex-row">
       {/* Mobile Top Bar */}
       <div className="sticky top-0 z-20 flex items-center justify-between border-b border-editorial-inverse-text/20 bg-editorial-inverse p-4 text-editorial-inverse-text shadow-md md:hidden">
         <span className="font-bold tracking-tighter text-xl">PORTOFOLIO</span>
@@ -58,6 +59,6 @@ export default function AdminLayout({
       <main className="flex-1 min-w-0 p-6 md:p-8">
         {children}
       </main>
-    </div>
+    </div></AdminToastProvider>
   );
 }

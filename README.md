@@ -88,6 +88,22 @@ Set `FRONTEND_URL` backend ke domain production frontend, misalnya `https://mars
 - Metadata, preview, dan sitemap memakai `NEXT_PUBLIC_SITE_URL`; default `https://v2.marshelportfolio.me`. Sitemap dinamis membutuhkan `BACKEND_INTERNAL_URL` yang dapat dijangkau server Next.js.
 - Tidak ada perubahan skema MySQL pada pembaruan ini. Backup, konfigurasi proxy/volume, monitoring, dan deployment tetap dilakukan pemilik server.
 
+## Pengaturan portfolio dari admin
+
+- `/admin/projects`: pilih proyek unggulan, atur urutan (angka kecil lebih dahulu), dan tambahkan URL video YouTube atau MP4/WebM. Beranda menampilkan proyek yang ditandai unggulan; jika belum ada pilihan, beranda memakai daftar proyek sesuai urutan.
+- `/admin/content`: atur jumlah proyek di tab Metrik, kapabilitas, proses kerja, timeline, pengaturan Resume/CV, tautan sosial, serta teks dan navigasi halaman. Isi tautan sosial dengan URL profil atau `mailto:alamat@email.com`; tautan kosong tidak ditampilkan.
+- `/admin/about`: unggah CV PDF maksimal 10 MB atau isi tautan CV. Dokumen yang diunggah menggantikan tautan CV setelah disimpan. Foto profil dan sampul proyek menampilkan pratinjau sebelum disimpan dan menerima pilihan file maupun seret-lepas.
+- Halaman kontak memakai parameter `type` dan `brief` dari tautan diskusi. Halaman Skills mendukung pencarian dan filter kategori pada grid maupun tabel. Kotak masuk menyediakan tautan balasan email dan indikator pesan belum dibaca.
+- Beranda, katalog proyek, dan Skills mengambil data awal di server melalui `BACKEND_INTERNAL_URL`, lalu memperbaruinya dengan SWR. Jika API sementara tidak tersedia, browser tetap dapat mencoba memuat ulang data.
+
+Pembaruan fitur ini membutuhkan migrasi `a3b5c7d9e1f2` untuk kolom `is_featured`, `sort_order`, dan `video_url`. Startup container backend menjalankan `flask db upgrade` otomatis. Untuk backend yang dijalankan langsung, jalankan dari folder `back_end` sebelum memakai kode baru:
+
+```bash
+flask --app main db upgrade
+```
+
+CV asli dan URL sosial harus diisi oleh pemilik. Saat belum ada CV, modal menampilkan informasi ketersediaan tanpa tautan PDF yang hilang. Upload CV disimpan dalam volume upload backend yang sama dengan gambar.
+
 ## Pengujian lokal
 
 Backend menggunakan database SQLite sementara; pengujian tidak mengakses database operasional:

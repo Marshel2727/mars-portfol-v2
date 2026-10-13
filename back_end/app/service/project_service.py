@@ -55,7 +55,7 @@ def _get_skills(skill_ids):
 
 def get_all_projects():
     
-    projects = Project.query.all()
+    projects = Project.query.order_by(Project.sort_order.asc(), Project.id.desc()).all()
 
     return [project.to_dict() for project in projects]
 
@@ -76,6 +76,9 @@ def create_project(data):
         image_url = data.get('image_url'),
         demo_url = data.get('demo_url'),
         github_url = data.get('github_url'),
+        video_url = data.get('video_url'),
+        is_featured = data.get('is_featured', False),
+        sort_order = data.get('sort_order', 0),
         category = data.get('category') or 'Lainnya',
         tech_tags = _normalize_tags(data.get('tech_tags', [])),
         architecture_steps = _normalize_architecture_steps(data.get('architecture_steps', []))
@@ -106,6 +109,9 @@ def update_project(project_id, data):
         project.demo_url = data['demo_url']
     if 'github_url' in data:
         project.github_url = data['github_url']
+    for field in ('video_url', 'is_featured', 'sort_order'):
+        if field in data:
+            setattr(project, field, data[field])
     if 'category' in data:
         project.category = data['category'] or 'Lainnya'
     if 'tech_tags' in data:
