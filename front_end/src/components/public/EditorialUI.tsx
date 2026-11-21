@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 
+import NetworkBackground from "./NetworkBackground";
 import ResumeModal from "./ResumeModal";
 import SocialLinks from "./SocialLinks";
 import { SiteContentProvider, useSiteContent } from "./SiteContentProvider";
@@ -260,6 +261,7 @@ export function EditorialPage({ children }: { children: React.ReactNode }) {
   return (
     <SiteContentProvider>
       <div className="editorial-page">
+        <NetworkBackground />
         <PublicNavbar />
         {children}
         <PublicFooter />
