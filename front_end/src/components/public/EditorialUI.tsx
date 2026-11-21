@@ -260,7 +260,7 @@ export function FeedbackState({
 export function EditorialPage({ children }: { children: React.ReactNode }) {
   return (
     <SiteContentProvider>
-      <div className="editorial-page">
+      <div className="editorial-page" style={{ position: "relative", isolation: "isolate" }}>
         <NetworkBackground />
         <PublicNavbar />
         {children}

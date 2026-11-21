@@ -9,6 +9,7 @@ const privatePath = (path: string) => path === "/login" || path.startsWith("/log
   || path === "/admin" || path.startsWith("/admin/");
 
 export const REPLAY_INTRO_EVENT = "marshel:replay-intro";
+export const INTRO_DONE_EVENT = "marshel:intro-done";
 
 export default function IntroGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -130,6 +131,16 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (pathname !== initialPath) finishRef.current();
   }, [pathname, initialPath]);
+
+  useEffect(() => {
+    document.documentElement.dataset.introActive = visible ? "true" : "false";
+    if (!visible) {
+      window.dispatchEvent(new Event(INTRO_DONE_EVENT));
+    }
+    return () => {
+      delete document.documentElement.dataset.introActive;
+    };
+  }, [visible]);
 
   return (
     <>

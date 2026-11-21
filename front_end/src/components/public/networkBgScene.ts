@@ -203,6 +203,9 @@ export function createNetworkBgScene(
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.setClearColor(0x000000, 0);
   renderer.domElement.setAttribute("aria-hidden", "true");
+  renderer.domElement.style.width = "100%";
+  renderer.domElement.style.height = "100%";
+  renderer.domElement.style.display = "block";
   container.appendChild(renderer.domElement);
 
   const scene = new Scene();
@@ -285,8 +288,11 @@ export function createNetworkBgScene(
   lineSegments.frustumCulled = false;
   rootGroup.add(lineSegments);
 
-  let viewportWidth = Math.max(container.clientWidth || window.innerWidth, 1);
-  let viewportHeight = Math.max(container.clientHeight || window.innerHeight, 1);
+  let viewportWidth = Math.min(Math.max(window.innerWidth || 1, 1), 3840);
+  let viewportHeight = Math.min(Math.max(window.innerHeight || 1, 1), 2160);
+  let lastWidth = 0;
+  let lastHeight = 0;
+  let lastPixelRatio = 0;
   let activeNodes: LatticeNode[] =
     viewportWidth >= MOBILE_BREAKPOINT ? desktopLattice : mobileLattice;
   let spanX = 180;
@@ -310,10 +316,21 @@ export function createNetworkBgScene(
   let reducedMotion = motionQuery.matches;
 
   const updateViewportMetrics = () => {
-    const rect = container.getBoundingClientRect();
-    viewportWidth = Math.max(rect.width || window.innerWidth, 1);
-    viewportHeight = Math.max(rect.height || window.innerHeight, 1);
+    viewportWidth = Math.min(Math.max(window.innerWidth || 1, 1), 3840);
+    viewportHeight = Math.min(Math.max(window.innerHeight || 1, 1), 2160);
     pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+
+    if (
+      viewportWidth === lastWidth &&
+      viewportHeight === lastHeight &&
+      pixelRatio === lastPixelRatio
+    ) {
+      return;
+    }
+
+    lastWidth = viewportWidth;
+    lastHeight = viewportHeight;
+    lastPixelRatio = pixelRatio;
 
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(viewportWidth, viewportHeight, false);
@@ -477,7 +494,11 @@ export function createNetworkBgScene(
     lineColorAttr.needsUpdate = true;
     lineAlphaAttr.needsUpdate = true;
 
-    renderer.render(scene, camera);
+    try {
+      renderer.render(scene, camera);
+    } catch {
+      stopLoop();
+    }
   };
 
   const renderStaticFrame = () => {
@@ -486,12 +507,12 @@ export function createNetworkBgScene(
     stepScene(0, false);
   };
 
-  const stopLoop = () => {
+  function stopLoop() {
     if (frameId !== 0) {
       cancelAnimationFrame(frameId);
       frameId = 0;
     }
-  };
+  }
 
   const loop = (now: number) => {
     if (disposed || contextLost || reducedMotion || document.visibilityState === "hidden") {
@@ -575,7 +596,7 @@ export function createNetworkBgScene(
     }
   };
 
-  const resizeObserver = new ResizeObserver(() => {
+  const onResize = () => {
     if (disposed) return;
     const prevCount = activeNodes.length;
     updateViewportMetrics();
@@ -585,12 +606,13 @@ export function createNetworkBgScene(
     if (reducedMotion) {
       renderStaticFrame();
     }
-  });
+  };
 
   updateViewportMetrics();
   syncDotSizes();
 
-  resizeObserver.observe(container);
+  window.addEventListener("resize", onResize, { passive: true });
+  window.addEventListener("orientationchange", onResize, { passive: true });
   window.addEventListener("pointermove", onPointerMove, { passive: true });
   window.addEventListener("touchmove", onTouchMove, { passive: true });
   window.addEventListener("touchend", resetPointer, { passive: true });
@@ -627,7 +649,8 @@ export function createNetworkBgScene(
       if (disposed) return;
       disposed = true;
       stopLoop();
-      resizeObserver.disconnect();
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", resetPointer);

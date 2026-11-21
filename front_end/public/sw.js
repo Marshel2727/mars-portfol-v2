@@ -1,4 +1,4 @@
-const CACHE_NAME = 'marshel-portfolio-cache-v4';
+const CACHE_NAME = 'marshel-portfolio-cache-v5';
 const urlsToCache = [
   '/manifest.json',
   '/brand/marshel-logo-v1.png',
