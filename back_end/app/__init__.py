@@ -62,7 +62,7 @@ def create_app(test_config=None):
 
      @app.after_request
      def prevent_sensitive_response_caching(response):
-          is_sensitive_path = request.path.startswith(('/api/auth', '/api/messages', '/api/health'))
+          is_sensitive_path = request.path.startswith(('/api/auth', '/api/messages', '/api/health', '/api/vps'))
           is_authenticated = bool(request.headers.get('Authorization') or request.cookies.get('admin_session'))
           is_mutation = request.method not in ('GET', 'HEAD', 'OPTIONS')
 
@@ -109,6 +109,9 @@ def create_app(test_config=None):
 
      from .routes.certificate_routes import certificate_bp
      app.register_blueprint(certificate_bp)
+
+     from .routes.vps_routes import vps_bp
+     app.register_blueprint(vps_bp)
 
      from .cli import create_admin
      app.cli.add_command(create_admin)

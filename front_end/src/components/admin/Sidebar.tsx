@@ -17,6 +17,7 @@ const menuItems = [
   { name: "Keahlian & Stack", path: "/admin/skills" },
   { name: "Sertifikat & Lisensi", path: "/admin/certificates" },
   { name: "Pesan Masuk", path: "/admin/messages" },
+  { name: "Monitoring VPS", path: "/admin/vps" },
 ];
 
 interface SidebarProps {

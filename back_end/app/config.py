@@ -38,6 +38,11 @@ class Config():
     VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY')
     VAPID_CLAIM_EMAIL = os.getenv('VAPID_CLAIM_EMAIL', 'mailto:marshelportfolio@gmail.com')
 
+    # Read-only VPS host monitor agent configuration
+    VPS_MONITOR_URL = os.getenv('VPS_MONITOR_URL', '').strip()
+    VPS_MONITOR_TOKEN = os.getenv('VPS_MONITOR_TOKEN', '').strip()
+    VPS_MONITOR_TIMEOUT = float(os.getenv('VPS_MONITOR_TIMEOUT', '8'))
+
 #untuk mengecek apakah data base sudah terkoneksi
 def db_connection():
     uri = Config.SQLALCHEMY_DATABASE_URI

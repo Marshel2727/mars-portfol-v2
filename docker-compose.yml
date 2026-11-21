@@ -45,6 +45,10 @@ services:
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       VAPID_CLAIM_EMAIL: ${VAPID_CLAIM_EMAIL:-mailto:marshelportfolio@gmail.com}
+      VPS_MONITOR_URL: ${VPS_MONITOR_URL:-}
+      VPS_MONITOR_TOKEN: ${VPS_MONITOR_TOKEN:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - backend_uploads:/app/app/static/uploads
       - backend_security:/var/lib/mars-security

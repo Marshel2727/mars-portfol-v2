@@ -111,3 +111,100 @@ export interface Certificate {
   created_at?: string | null;
   updated_at?: string | null;
 }
+
+export interface VpsSwapDevice {
+  name: string;
+  type: string;
+  size_bytes: number;
+  used_bytes: number;
+  priority: number;
+}
+
+export interface VpsDockerDiskItem {
+  type: string;
+  total_count: string;
+  active: string;
+  size: string;
+  reclaimable: string;
+}
+
+export interface VpsContainerMetric {
+  id: string;
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+  cpu_pct: number;
+  mem_usage_text: string;
+  mem_used_bytes: number;
+  mem_limit_bytes: number;
+  mem_pct: number;
+  net_io: string;
+  block_io: string;
+  pids: string;
+}
+
+export interface VpsProcessMetric {
+  pid: number;
+  command: string;
+  cpu_pct: number;
+  mem_pct: number;
+}
+
+export interface VpsMetrics {
+  collected_at: string;
+  host: {
+    hostname: string;
+    os: string;
+    kernel: string;
+    architecture: string;
+    uptime_seconds: number;
+    cpu_model: string;
+    cpu_cores: number;
+  };
+  cpu: {
+    cores: number;
+    usage_pct: number;
+    load_1m: number;
+    load_5m: number;
+    load_15m: number;
+    load_1m_pct: number;
+    load_5m_pct: number;
+    load_15m_pct: number;
+  };
+  memory: {
+    total_bytes: number;
+    used_bytes: number;
+    available_bytes: number;
+    free_bytes: number;
+    cached_bytes: number;
+    used_pct: number;
+  };
+  swap: {
+    total_bytes: number;
+    used_bytes: number;
+    free_bytes: number;
+    used_pct: number;
+    devices: VpsSwapDevice[];
+  };
+  disk: {
+    mount: string;
+    total_bytes: number;
+    used_bytes: number;
+    free_bytes: number;
+    used_pct: number;
+  };
+  docker: {
+    available: boolean;
+    running_count: number;
+    stopped_count: number;
+    total_count: number;
+    disk_usage: VpsDockerDiskItem[];
+    containers: VpsContainerMetric[];
+  };
+  top_processes: VpsProcessMetric[];
+  health: {
+    status: "healthy" | "warning" | "critical";
+    alerts: string[];
+  };
+}

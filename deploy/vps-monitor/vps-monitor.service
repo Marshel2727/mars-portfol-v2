@@ -1,0 +1,19 @@
+[Unit]
+Description=Mars Portfolio Read-Only VPS Monitor Agent
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=marshel2727
+Group=docker
+WorkingDirectory=/home/marshel2727/apps/mars-portfol/deploy/vps-monitor
+EnvironmentFile=/etc/vps-monitor.env
+ExecStart=/usr/bin/python3 /home/marshel2727/apps/mars-portfol/deploy/vps-monitor/vps_monitor_agent.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
