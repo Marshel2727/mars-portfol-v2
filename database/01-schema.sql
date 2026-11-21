@@ -35,6 +35,27 @@ CREATE TABLE `alembic_version` (
   PRIMARY KEY (`version_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `certificates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `certificates` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(200) NOT NULL,
+  `issuer` varchar(150) NOT NULL,
+  `issue_date` varchar(50) DEFAULT NULL,
+  `category` varchar(100) NOT NULL DEFAULT 'Lainnya',
+  `credential_id` varchar(120) DEFAULT NULL,
+  `credential_url` varchar(500) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `file_url` varchar(255) NOT NULL,
+  `file_type` varchar(20) NOT NULL DEFAULT 'image',
+  `is_featured` tinyint(1) NOT NULL DEFAULT '0',
+  `display_order` int NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `messages`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;

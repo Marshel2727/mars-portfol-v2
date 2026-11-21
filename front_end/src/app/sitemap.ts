@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projects = await getSitemapProjects();
   return [
-    ...["", "/projects", "/skills", "/contact"].map((path) => ({ url: `${siteUrl}${path}` })),
+    ...["", "/projects", "/skills", "/certificates", "/contact"].map((path) => ({ url: `${siteUrl}${path}` })),
     ...projects.filter((project) => Number.isSafeInteger(project.id) && project.id > 0)
       .map((project) => ({ url: `${siteUrl}/projects/${project.id}` })),
   ];

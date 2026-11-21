@@ -13,10 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from PIL import Image
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequest
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_csrf_token
 from app import create_app, db
 from app.models.user import User
 from app.models.message import Message
+from app.models.site_content import SiteContent
 from app.utils.image_storage import save_validated_image, delete_stored_image
 from app.utils.security import consume_limits
 
@@ -303,6 +304,392 @@ class SecurityTests(unittest.TestCase):
         self.assertEqual(saved['global']['social_links'], content['global']['social_links'])
         self.assertEqual(saved['skills']['milestones'], content['skills']['milestones'])
         self.assertEqual(saved['resume']['fallback_cv_url'], content['resume']['fallback_cv_url'])
+
+    def _image_bytes(self, image_format='PNG'):
+        stream = io.BytesIO()
+        Image.new('RGB', (10, 10)).save(stream, format=image_format)
+        return stream.getvalue()
+
+    def _pdf_bytes(self, body=b'1 0 obj\n<<>>\nendobj\n'):
+        return b'%PDF-1.4\n' + body + b'%%EOF'
+
+    def test_certificate_auth_csrf_and_role_rejection(self):
+        cert_folder = str(Path(self.temp.name) / 'certificates')
+        with patch('app.utils.certificate_upload.UPLOAD_FOLDER', cert_folder):
+            public_list = self.client.get('/api/certificates/')
+            self.assertEqual(public_list.status_code, 200)
+            self.assertEqual(public_list.json['data'], [])
+            self.assertIn('public', public_list.headers['Cache-Control'])
+            self.assertEqual(self.client.get('/api/certificates/999').status_code, 404)
+
+            payload = {
+                'title': 'Cloud Architect',
+                'issuer': 'Provider',
+                'file': (io.BytesIO(self._image_bytes()), 'cert.png'),
+            }
+            self.assertEqual(self.client.post('/api/certificates/', data=payload).status_code, 401)
+            self.assertEqual(self.client.put('/api/certificates/1', data={'title': 'Updated'}).status_code, 401)
+            self.assertEqual(self.client.delete('/api/certificates/1').status_code, 401)
+
+            user_token = create_access_token(identity='reader', additional_claims={'role': 'user'})
+            user_csrf = {'X-CSRF-TOKEN': get_csrf_token(user_token)}
+            self.client.set_cookie('admin_session', user_token)
+            self.assertEqual(
+                self.client.post(
+                    '/api/certificates/',
+                    headers=user_csrf,
+                    data={'title': 'Cloud', 'issuer': 'Provider', 'file': (io.BytesIO(self._image_bytes()), 'cert.png')},
+                ).status_code,
+                403,
+            )
+            self.assertEqual(
+                self.client.put('/api/certificates/1', headers=user_csrf, data={'title': 'Updated'}).status_code,
+                403,
+            )
+            self.assertEqual(self.client.delete('/api/certificates/1', headers=user_csrf).status_code, 403)
+
+            self.login()
+            self.assertEqual(
+                self.client.post(
+                    '/api/certificates/',
+                    data={'title': 'Cloud', 'issuer': 'Provider', 'file': (io.BytesIO(self._image_bytes()), 'cert.png')},
+                ).status_code,
+                401,
+            )
+            self.assertEqual(self.client.put('/api/certificates/1', data={'title': 'Updated'}).status_code, 401)
+            self.assertEqual(self.client.delete('/api/certificates/1').status_code, 401)
+
+    def test_certificate_create_png_webp_and_pdf_with_defaults(self):
+        self.login()
+        cert_folder = Path(self.temp.name) / 'certificates'
+        with patch('app.utils.certificate_upload.UPLOAD_FOLDER', str(cert_folder)):
+            png_res = self.client.post(
+                '/api/certificates/',
+                headers=self.csrf(),
+                data={
+                    'title': 'Full-Stack Foundations',
+                    'issuer': 'Dicoding',
+                    'category': '   ',
+                    'issue_date': '',
+                    'credential_id': '',
+                    'credential_url': '',
+                    'description': '',
+                    'file': (io.BytesIO(self._image_bytes('PNG') + b'UNTRUSTED_TRAILER'), 'cert.png'),
+                },
+            )
+            self.assertEqual(png_res.status_code, 201, png_res.json)
+            png_data = png_res.json['data']
+            self.assertEqual(png_data['file_type'], 'image')
+            self.assertEqual(png_data['category'], 'Lainnya')
+            self.assertIsNone(png_data['issue_date'])
+            self.assertIsNone(png_data['credential_id'])
+            self.assertIsNone(png_data['credential_url'])
+            self.assertIsNone(png_data['description'])
+            self.assertFalse(png_data['is_featured'])
+            self.assertEqual(png_data['display_order'], 0)
+            self.assertTrue(png_data['file_url'].startswith('/static/uploads/certificates/'))
+            self.assertIsNotNone(png_data['created_at'])
+            self.assertIsNotNone(png_data['updated_at'])
+            stored_png = cert_folder / png_data['file_url'].rsplit('/', 1)[-1]
+            self.assertTrue(stored_png.is_file())
+            self.assertNotIn(b'UNTRUSTED_TRAILER', stored_png.read_bytes())
+
+            webp_res = self.client.post(
+                '/api/certificates/',
+                headers=self.csrf(),
+                data={
+                    'title': 'WebP Cert',
+                    'issuer': 'Cloud Org',
+                    'file': (io.BytesIO(self._image_bytes('WEBP')), 'cert.webp'),
+                },
+            )
+            self.assertEqual(webp_res.status_code, 201, webp_res.json)
+            self.assertEqual(webp_res.json['data']['file_type'], 'image')
+
+            pdf_res = self.client.post(
+                '/api/certificates/',
+                headers=self.csrf(),
+                data={
+                    'title': 'AWS Certified Developer',
+                    'issuer': 'AWS',
+                    'issue_date': 'Agu 2026',
+                    'category': 'Cloud & Backend',
+                    'credential_id': 'AWS-12345',
+                    'credential_url': 'https://verify.example.com/aws-12345',
+                    'description': 'Sertifikasi cloud architecture & serverless.',
+                    'is_featured': '1',
+                    'display_order': '5',
+                    'file': (io.BytesIO(self._pdf_bytes()), '../../aws.PDF'),
+                },
+            )
+            self.assertEqual(pdf_res.status_code, 201, pdf_res.json)
+            pdf_data = pdf_res.json['data']
+            self.assertEqual(pdf_data['file_type'], 'pdf')
+            self.assertTrue(pdf_data['file_url'].startswith('/static/uploads/certificates/'))
+            self.assertTrue(pdf_data['file_url'].endswith('.pdf'))
+            self.assertTrue(pdf_data['is_featured'])
+            self.assertEqual(pdf_data['display_order'], 5)
+            self.assertEqual(pdf_data['credential_url'], 'https://verify.example.com/aws-12345')
+            self.assertTrue((cert_folder / pdf_data['file_url'].rsplit('/', 1)[-1]).is_file())
+
+            detail_res = self.client.get(f"/api/certificates/{pdf_data['id']}")
+            self.assertEqual(detail_res.status_code, 200)
+            self.assertEqual(detail_res.json['data']['title'], 'AWS Certified Developer')
+
+    def test_certificate_ordering_featured_display_order_and_id_desc(self):
+        self.login()
+        cert_folder = str(Path(self.temp.name) / 'certificates')
+        with patch('app.utils.certificate_upload.UPLOAD_FOLDER', cert_folder):
+            specs = [
+                ('Regular Older', 'false', '1'),
+                ('Regular Newer', 'false', '1'),
+                ('Featured Order 10', 'true', '10'),
+                ('Featured Order 2', 'true', '2'),
+            ]
+            for title, featured, order in specs:
+                res = self.client.post(
+                    '/api/certificates/',
+                    headers=self.csrf(),
+                    data={
+                        'title': title,
+                        'issuer': 'Issuer',
+                        'is_featured': featured,
+                        'display_order': order,
+                        'file': (io.BytesIO(self._image_bytes('PNG')), 'cert.png'),
+                    },
+                )
+                self.assertEqual(res.status_code, 201, res.json)
+
+        items = self.client.get('/api/certificates/').json['data']
+        self.assertEqual(
+            [item['title'] for item in items],
+            ['Featured Order 2', 'Featured Order 10', 'Regular Newer', 'Regular Older'],
+        )
+
+    def test_certificate_update_replace_file_and_delete(self):
+        self.login()
+        cert_folder = Path(self.temp.name) / 'certificates'
+        with patch('app.utils.certificate_upload.UPLOAD_FOLDER', str(cert_folder)):
+            created = self.client.post(
+                '/api/certificates/',
+                headers=self.csrf(),
+                data={
+                    'title': 'Initial Cert',
+                    'issuer': 'Initial Issuer',
+                    'category': 'Web Development',
+                    'credential_url': 'https://example.com/verify/1',
+                    'file': (io.BytesIO(self._image_bytes('PNG')), 'initial.png'),
+                },
+            ).json['data']
+            old_path = cert_folder / created['file_url'].rsplit('/', 1)[-1]
+            self.assertTrue(old_path.is_file())
+
+            meta_update = self.client.put(
+                f"/api/certificates/{created['id']}",
+                headers=self.csrf(),
+                data={
+                    'title': 'Updated Cert',
+                    'category': '',
+                    'credential_url': '',
+                    'is_featured': 'true',
+                    'display_order': '3',
+                },
+            )
+            self.assertEqual(meta_update.status_code, 200, meta_update.json)
+            meta_data = meta_update.json['data']
+            self.assertEqual(meta_data['title'], 'Updated Cert')
+            self.assertEqual(meta_data['issuer'], 'Initial Issuer')
+            self.assertEqual(meta_data['category'], 'Lainnya')
+            self.assertIsNone(meta_data['credential_url'])
+            self.assertTrue(meta_data['is_featured'])
+            self.assertEqual(meta_data['display_order'], 3)
+            self.assertEqual(meta_data['file_url'], created['file_url'])
+            self.assertTrue(old_path.is_file())
+
+            replace_res = self.client.put(
+                f"/api/certificates/{created['id']}",
+                headers=self.csrf(),
+                data={'file': (io.BytesIO(self._pdf_bytes()), 'replacement.pdf')},
+            )
+            self.assertEqual(replace_res.status_code, 200, replace_res.json)
+            replaced = replace_res.json['data']
+            new_path = cert_folder / replaced['file_url'].rsplit('/', 1)[-1]
+            self.assertEqual(replaced['file_type'], 'pdf')
+            self.assertNotEqual(replaced['file_url'], created['file_url'])
+            self.assertFalse(old_path.exists())
+            self.assertTrue(new_path.is_file())
+
+            with patch('app.routes.certificate_routes.update_certificate', side_effect=RuntimeError('db fail')):
+                with self.assertRaises(RuntimeError):
+                    self.client.put(
+                        f"/api/certificates/{created['id']}",
+                        headers=self.csrf(),
+                        data={'file': (io.BytesIO(self._image_bytes('PNG')), 'orphan.png')},
+                    )
+            self.assertTrue(new_path.is_file())
+            self.assertEqual(len(list(cert_folder.iterdir())), 1)
+
+            self.assertEqual(
+                self.client.put('/api/certificates/9999', headers=self.csrf(), data={'title': 'Missing'}).status_code,
+                404,
+            )
+
+            del_res = self.client.delete(f"/api/certificates/{created['id']}", headers=self.csrf())
+            self.assertEqual(del_res.status_code, 200)
+            self.assertFalse(new_path.exists())
+            self.assertEqual(self.client.get(f"/api/certificates/{created['id']}").status_code, 404)
+            self.assertEqual(self.client.delete('/api/certificates/9999', headers=self.csrf()).status_code, 404)
+
+    def test_certificate_rejects_invalid_uploads_and_fields(self):
+        self.login()
+        cert_folder = Path(self.temp.name) / 'certificates'
+        with patch('app.utils.certificate_upload.UPLOAD_FOLDER', str(cert_folder)):
+            missing_file = self.client.post(
+                '/api/certificates/',
+                headers=self.csrf(),
+                data={'title': 'No File', 'issuer': 'Issuer'},
+            )
+            self.assertEqual(missing_file.status_code, 400)
+
+            bad_files = [
+                (b'<script>bad</script>', 'fake.png'),
+                (self._image_bytes('PNG'), 'mismatch.jpg'),
+                (b'not a pdf', 'fake.pdf'),
+                (b'%PDF-1.4\nno eof marker', 'incomplete.pdf'),
+                (b'<svg></svg>', 'vector.svg'),
+            ]
+            for payload, filename in bad_files:
+                res = self.client.post(
+                    '/api/certificates/',
+                    headers=self.csrf(),
+                    data={'title': 'Cert', 'issuer': 'Issuer', 'file': (io.BytesIO(payload), filename)},
+                )
+                self.assertEqual(res.status_code, 400, (filename, res.json))
+
+            with patch('app.utils.certificate_upload.MAX_PDF_BYTES', 10):
+                oversized = self.client.post(
+                    '/api/certificates/',
+                    headers=self.csrf(),
+                    data={
+                        'title': 'Large PDF',
+                        'issuer': 'Issuer',
+                        'file': (io.BytesIO(self._pdf_bytes(b'x' * 30)), 'big.pdf'),
+                    },
+                )
+                self.assertEqual(oversized.status_code, 400)
+
+            bad_fields = [
+                {'title': '   ', 'issuer': 'Issuer'},
+                {'title': 'x' * 201, 'issuer': 'Issuer'},
+                {'title': 'Cert', 'issuer': ''},
+                {'title': 'Cert', 'issuer': 'x' * 151},
+                {'title': 'Cert', 'issuer': 'Issuer', 'credential_url': 'javascript:alert(1)'},
+                {'title': 'Cert', 'issuer': 'Issuer', 'credential_url': 'ftp://example.com/cert'},
+                {'title': 'Cert', 'issuer': 'Issuer', 'credential_url': 'not-a-url'},
+                {'title': 'Cert', 'issuer': 'Issuer', 'credential_url': 'https://example.com/' + 'a' * 500},
+                {'title': 'Cert', 'issuer': 'Issuer', 'is_featured': 'yes'},
+                {'title': 'Cert', 'issuer': 'Issuer', 'display_order': '-1'},
+                {'title': 'Cert', 'issuer': 'Issuer', 'display_order': '10000'},
+                {'title': 'Cert', 'issuer': 'Issuer', 'display_order': '1.5'},
+            ]
+            for fields in bad_fields:
+                res = self.client.post(
+                    '/api/certificates/',
+                    headers=self.csrf(),
+                    data={**fields, 'file': (io.BytesIO(self._image_bytes('PNG')), 'cert.png')},
+                )
+                self.assertEqual(res.status_code, 400, fields)
+
+            created = self.client.post(
+                '/api/certificates/',
+                headers=self.csrf(),
+                data={'title': 'Valid', 'issuer': 'Issuer', 'file': (io.BytesIO(self._image_bytes('PNG')), 'cert.png')},
+            ).json['data']
+            stored_file = cert_folder / created['file_url'].rsplit('/', 1)[-1]
+            for bad_put in ({'title': '  '}, {'issuer': ''}, {'credential_url': 'javascript:alert(1)'}):
+                res = self.client.put(f"/api/certificates/{created['id']}", headers=self.csrf(), data=bad_put)
+                self.assertEqual(res.status_code, 400, bad_put)
+                self.assertTrue(stored_file.exists())
+
+    def test_certificate_migration_is_idempotent(self):
+        import importlib.util
+        import sqlalchemy as sa
+        from alembic.migration import MigrationContext
+        from alembic.operations import Operations
+
+        migration_path = Path(__file__).resolve().parents[1] / 'migrations/versions/c9d8e7f6a5b4_add_certificates_table.py'
+        spec = importlib.util.spec_from_file_location('certificate_migration', migration_path)
+        migration = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migration)
+
+        self.assertEqual(migration.revision, 'c9d8e7f6a5b4')
+        self.assertEqual(migration.down_revision, 'a3b5c7d9e1f2')
+
+        engine = sa.create_engine('sqlite://')
+        with engine.begin() as connection:
+            with Operations.context(MigrationContext.configure(connection)):
+                migration.upgrade()
+                migration.upgrade()
+                inspector = sa.inspect(connection)
+                self.assertTrue(inspector.has_table('certificates'))
+                columns = {column['name'] for column in inspector.get_columns('certificates')}
+                self.assertEqual(
+                    columns,
+                    {
+                        'id', 'title', 'issuer', 'issue_date', 'category',
+                        'credential_id', 'credential_url', 'description',
+                        'file_url', 'file_type', 'is_featured', 'display_order',
+                        'created_at', 'updated_at',
+                    },
+                )
+                connection.execute(
+                    sa.text("INSERT INTO certificates (title, issuer, file_url) VALUES ('Cert', 'Issuer', '/static/uploads/certificates/a.png')")
+                )
+                row = connection.execute(
+                    sa.text('SELECT category, file_type, is_featured, display_order FROM certificates')
+                ).one()
+                self.assertEqual(tuple(row), ('Lainnya', 'image', 0, 0))
+                migration.downgrade()
+                migration.downgrade()
+                self.assertFalse(sa.inspect(connection).has_table('certificates'))
+        engine.dispose()
+
+    def test_site_content_includes_certificates_defaults_and_injects_nav_link(self):
+        default_res = self.client.get('/api/site-content/')
+        self.assertEqual(default_res.status_code, 200)
+        default_content = default_res.json['data']['content']
+        self.assertIn('certificates', default_content)
+        self.assertEqual(
+            [item['href'] for item in default_content['global']['nav_links']],
+            ['/', '/skills', '/projects', '/certificates', '/contact'],
+        )
+        for key in (
+            'hero_eyebrow', 'hero_title', 'hero_description', 'filter_label',
+            'search_placeholder', 'all_category_label', 'index_eyebrow',
+            'index_title', 'displayed_suffix', 'verify_action_label',
+            'preview_action_label',
+        ):
+            self.assertIn(key, default_content['certificates'])
+
+        db.session.add(SiteContent(id=1, content={
+            'global': {
+                'nav_links': [
+                    {'label': 'Beranda', 'href': '/'},
+                    {'label': 'Project', 'href': '/projects'},
+                    {'label': 'Kontak', 'href': '/contact'},
+                ],
+            },
+        }))
+        db.session.commit()
+
+        legacy_res = self.client.get('/api/site-content/')
+        self.assertEqual(legacy_res.status_code, 200)
+        nav_links = legacy_res.json['data']['content']['global']['nav_links']
+        self.assertEqual(
+            [item['href'] for item in nav_links],
+            ['/', '/projects', '/certificates', '/contact'],
+        )
+        self.assertEqual(nav_links[2], {'label': 'Sertifikat', 'href': '/certificates'})
 
 
 if __name__ == '__main__':

@@ -19,6 +19,7 @@ DEFAULT_SITE_CONTENT = {
             {'label': 'Beranda / Tentang', 'href': '/'},
             {'label': 'Skills', 'href': '/skills'},
             {'label': 'Project', 'href': '/projects'},
+            {'label': 'Sertifikat', 'href': '/certificates'},
             {'label': 'Kontak', 'href': '/contact'},
         ],
         'resume_button_label': 'Resume // CV',
@@ -193,16 +194,59 @@ DEFAULT_SITE_CONTENT = {
         'fallback_cv_url': '',
         'download_filename': 'Marshel_CV_Engineer.pdf',
     },
+    'certificates': {
+        'hero_eyebrow': 'CREDENTIALS & CERTIFICATIONS / INDEX',
+        'hero_title': 'Sertifikasi, Lisensi & Kredensial Teknis',
+        'hero_description': 'Dokumentasi sertifikasi kompetensi, pelatihan teknis, dan penghargaan di bidang pengembangan web, IoT, cloud, serta kompetisi rekayasa.',
+        'filter_label': 'FILTER KATEGORI',
+        'search_placeholder': 'Cari sertifikat, penerbit, atau kredensial...',
+        'all_category_label': 'Semua Kategori',
+        'index_eyebrow': 'VERIFIED CREDENTIALS',
+        'index_title': 'Katalog Sertifikat & Lisensi',
+        'displayed_suffix': 'DITAMPILKAN',
+        'verify_action_label': 'Verifikasi Kredensial ↗',
+        'preview_action_label': 'Lihat Dokumen',
+    },
 }
+
+
+def _ensure_certificates_nav_link(content):
+    global_section = content.get('global')
+    if not isinstance(global_section, dict):
+        return content
+
+    nav_links = global_section.get('nav_links')
+    if not isinstance(nav_links, list):
+        return content
+
+    if any(isinstance(item, dict) and item.get('href') == '/certificates' for item in nav_links):
+        return content
+
+    cert_link = {'label': 'Sertifikat', 'href': '/certificates'}
+    updated_links = list(nav_links)
+    contact_index = next(
+        (idx for idx, item in enumerate(updated_links) if isinstance(item, dict) and item.get('href') == '/contact'),
+        None,
+    )
+    if contact_index is not None:
+        updated_links.insert(contact_index, cert_link)
+    else:
+        updated_links.append(cert_link)
+
+    global_section['nav_links'] = updated_links
+    return content
 
 
 def _merge_with_defaults(defaults, saved):
     if isinstance(defaults, dict):
         saved_dict = saved if isinstance(saved, dict) else {}
-        return {
+        merged = {
             key: _merge_with_defaults(value, saved_dict.get(key))
             for key, value in defaults.items()
         }
+        if defaults is DEFAULT_SITE_CONTENT:
+            return _ensure_certificates_nav_link(merged)
+        return merged
     if isinstance(defaults, list):
         return saved if isinstance(saved, list) else deepcopy(defaults)
     return saved if saved is not None else deepcopy(defaults)

@@ -7,6 +7,7 @@ export const DEFAULT_SITE_CONTENT = {
       { label: "Beranda", href: "/" },
       { label: "Skills & Specs", href: "/skills" },
       { label: "Proyek", href: "/projects" },
+      { label: "Sertifikat", href: "/certificates" },
       { label: "Kontak", href: "/contact" },
     ],
     resume_button_label: "Resume // CV",
@@ -126,6 +127,19 @@ export const DEFAULT_SITE_CONTENT = {
     projects_action_label: "Lihat Studi Kasus Proyek →",
     contact_action_label: "Hubungi Saya",
   },
+  certificates: {
+    hero_eyebrow: "CREDENTIALS & CERTIFICATIONS / INDEX",
+    hero_title: "Sertifikasi, Lisensi & Kredensial Teknis",
+    hero_description: "Dokumentasi sertifikasi kompetensi, pelatihan teknis, dan penghargaan di bidang pengembangan web, IoT, cloud, serta kompetisi rekayasa.",
+    filter_label: "FILTER KATEGORI",
+    search_placeholder: "Cari sertifikat, penerbit, atau kredensial...",
+    all_category_label: "Semua Kategori",
+    index_eyebrow: "VERIFIED CREDENTIALS",
+    index_title: "Katalog Sertifikat & Lisensi",
+    displayed_suffix: "DITAMPILKAN",
+    verify_action_label: "Verifikasi Kredensial ↗",
+    preview_action_label: "Lihat Dokumen",
+  },
   contact: {
     eyebrow: "COMMUNICATION & INTAKE",
     title: "Mulai Percakapan & Kolaborasi",
@@ -198,9 +212,35 @@ export interface SiteContentRecord {
   updated_at?: string;
 }
 
+function ensureCertificatesNavLink(
+  navLinks: SiteContent["global"]["nav_links"]
+): SiteContent["global"]["nav_links"] {
+  if (navLinks.some((item) => item.href === "/certificates")) {
+    return navLinks;
+  }
+
+  const next = [...navLinks];
+  const certLink = { label: "Sertifikat", href: "/certificates" };
+  const contactIndex = next.findIndex((item) => item.href === "/contact");
+  if (contactIndex >= 0) {
+    next.splice(contactIndex, 0, certLink);
+  } else {
+    next.push(certLink);
+  }
+  return next;
+}
+
 export function mergeSiteContent(content?: Partial<SiteContent>): SiteContent {
+  const mergedGlobal = { ...DEFAULT_SITE_CONTENT.global, ...content?.global };
+  const rawNavLinks = Array.isArray(mergedGlobal.nav_links)
+    ? mergedGlobal.nav_links
+    : DEFAULT_SITE_CONTENT.global.nav_links;
+
   return {
-    global: { ...DEFAULT_SITE_CONTENT.global, ...content?.global },
+    global: {
+      ...mergedGlobal,
+      nav_links: ensureCertificatesNavLink(rawNavLinks),
+    },
     home: {
       ...DEFAULT_SITE_CONTENT.home,
       ...content?.home,
@@ -211,6 +251,7 @@ export function mergeSiteContent(content?: Partial<SiteContent>): SiteContent {
     },
     projects: { ...DEFAULT_SITE_CONTENT.projects, ...content?.projects },
     skills: { ...DEFAULT_SITE_CONTENT.skills, ...content?.skills },
+    certificates: { ...DEFAULT_SITE_CONTENT.certificates, ...content?.certificates },
     contact: { ...DEFAULT_SITE_CONTENT.contact, ...content?.contact },
     project_detail: { ...DEFAULT_SITE_CONTENT.project_detail, ...content?.project_detail },
     resume: { ...DEFAULT_SITE_CONTENT.resume, ...content?.resume },

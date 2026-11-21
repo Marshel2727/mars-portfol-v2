@@ -84,6 +84,7 @@ def create_app(test_config=None):
      from .models.push_subscription import PushSubscription
      from .models.about_profile import AboutProfile
      from .models.site_content import SiteContent
+     from .models.certificate import Certificate
 
      from .routes.project_routes import project_bp
      app.register_blueprint(project_bp)
@@ -105,6 +106,9 @@ def create_app(test_config=None):
 
      from .routes.site_content_routes import site_content_bp
      app.register_blueprint(site_content_bp)
+
+     from .routes.certificate_routes import certificate_bp
+     app.register_blueprint(certificate_bp)
 
      from .cli import create_admin
      app.cli.add_command(create_admin)

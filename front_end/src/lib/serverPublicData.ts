@@ -9,7 +9,7 @@ export async function getPublicFallback(resources: string[]): Promise<Record<str
       if (!response.ok) return null;
       const payload = await response.json();
       const data = payload.data;
-      const valid = resource === "/projects/" || resource === "/skills/"
+      const valid = resource === "/projects/" || resource === "/skills/" || resource === "/certificates/"
         ? Array.isArray(data)
         : resource === "/about/" ? typeof data?.full_name === "string" : Boolean(data?.content);
       return valid ? [resource, data] as const : null;

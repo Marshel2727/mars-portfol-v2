@@ -473,7 +473,7 @@ export default function AdminContentPage() {
             <p className="text-sm text-editorial-muted">Atur teks, label navigasi, telemetri, dan pengaturan seluruh halaman.</p>
             {(Object.keys(draft) as (keyof SiteContent)[]).filter((key) => key !== "resume").map((key) => (
               <details key={key} className="rounded-lg border border-editorial-line p-4">
-                <summary className="cursor-pointer font-semibold text-editorial-technical">{{ global: 'Navigasi & Identitas', home: 'Beranda', projects: 'Katalog Proyek', skills: 'Skills & Specs', contact: 'Kontak', project_detail: 'Detail Proyek', resume: 'CV' }[key]}</summary>
+                <summary className="cursor-pointer font-semibold text-editorial-technical">{{ global: 'Navigasi & Identitas', home: 'Beranda', projects: 'Katalog Proyek', skills: 'Skills & Specs', certificates: 'Katalog Sertifikat', contact: 'Kontak', project_detail: 'Detail Proyek', resume: 'CV' }[key]}</summary>
                 <div className="mt-5"><ContentFields value={draft[key]} schema={DEFAULT_SITE_CONTENT[key]}
                   onChange={(next) => setDraft((current) => ({ ...current, [key]: next }))} /></div>
               </details>

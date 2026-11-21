@@ -94,3 +94,20 @@ export interface AboutProfile {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface Certificate {
+  id: number;
+  title: string;
+  issuer: string;
+  issue_date?: string | null;
+  category: string;
+  credential_id?: string | null;
+  credential_url?: string | null;
+  description?: string | null;
+  file_url: string;
+  file_type: "image" | "pdf";
+  is_featured: boolean;
+  display_order: number;
+  created_at?: string | null;
+  updated_at?: string | null;
+}

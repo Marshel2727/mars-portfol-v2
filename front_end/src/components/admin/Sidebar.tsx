@@ -15,6 +15,7 @@ const menuItems = [
   { name: "Konten Website", path: "/admin/content" },
   { name: "Daftar Proyek", path: "/admin/projects" },
   { name: "Keahlian & Stack", path: "/admin/skills" },
+  { name: "Sertifikat & Lisensi", path: "/admin/certificates" },
   { name: "Pesan Masuk", path: "/admin/messages" },
 ];
 

@@ -12,7 +12,7 @@
 
 LOCK TABLES `alembic_version` WRITE;
 /*!40000 ALTER TABLE `alembic_version` DISABLE KEYS */;
-INSERT INTO `alembic_version` (`version_num`) VALUES ('f2a4c6e8b0d1');
+INSERT INTO `alembic_version` (`version_num`) VALUES ('c9d8e7f6a5b4');
 /*!40000 ALTER TABLE `alembic_version` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

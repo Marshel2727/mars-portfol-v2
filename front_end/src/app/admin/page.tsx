@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { getAllProjects } from "@/services/project";
 import { getAllSkill } from "@/services/skills";
+import { getAllCertificates } from "@/services/certificates";
 import { getAllMessages } from "@/services/messages";
 import StatCard from "@/components/ui/StatCard";
 import api, { getApiErrorMessage } from "@/services/api";
@@ -24,13 +25,15 @@ function urlBase64ToUint8Array(base64String: string) {
 export default function AdminDashboard() {
   const { data: rawProjects, isLoading: loadingProjects } = useSWR("/projects/", () => getAllProjects());
   const { data: rawSkills, isLoading: loadingSkills } = useSWR("/skills/", () => getAllSkill());
+  const { data: rawCertificates, isLoading: loadingCertificates } = useSWR("/certificates/", () => getAllCertificates());
   const { data: rawMessages, isLoading: loadingMessages } = useSWR("/messages/", () => getAllMessages());
 
   const projects = Array.isArray(rawProjects) ? rawProjects : [];
   const skills = Array.isArray(rawSkills) ? rawSkills : [];
+  const certificates = Array.isArray(rawCertificates) ? rawCertificates : [];
   const messages = Array.isArray(rawMessages) ? rawMessages : [];
 
-  const isLoading = loadingProjects || loadingSkills || loadingMessages;
+  const isLoading = loadingProjects || loadingSkills || loadingCertificates || loadingMessages;
 
   // State for notifications
   const [notificationStatus, setNotificationStatus] = useState<"default" | "granted" | "denied" | "unsupported">("default");
@@ -101,9 +104,10 @@ export default function AdminDashboard() {
     <div>
       <h1 className="mb-2 text-center text-3xl font-bold text-editorial-ink">Dashboard Overview</h1>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Proyek" value={projects.length} isLoading={isLoading} />
         <StatCard title="Total Skill" value={skills.length} isLoading={isLoading} />
+        <StatCard title="Total Sertifikat" value={certificates.length} isLoading={isLoading} />
         <StatCard title="Pesan Masuk" value={messages.length} isLoading={isLoading} />
       </div>
 
