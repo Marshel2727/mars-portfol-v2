@@ -16,7 +16,7 @@ DEFAULT_SITE_CONTENT = {
         'brand_descriptor': '/ SOFTWARE × HARDWARE',
         'brand_aria_label': 'Marshel Software dan Hardware, kembali ke beranda',
         'nav_links': [
-            {'label': 'Beranda / Tentang', 'href': '/'},
+            {'label': 'Beranda', 'href': '/'},
             {'label': 'Skills', 'href': '/skills'},
             {'label': 'Project', 'href': '/projects'},
             {'label': 'Sertifikat', 'href': '/certificates'},
@@ -219,19 +219,23 @@ def _ensure_certificates_nav_link(content):
     if not isinstance(nav_links, list):
         return content
 
-    if any(isinstance(item, dict) and item.get('href') == '/certificates' for item in nav_links):
-        return content
+    updated_links = [
+        {**item, 'label': 'Beranda'}
+        if isinstance(item, dict) and item.get('href') == '/' and item.get('label') == 'Beranda / Tentang'
+        else item
+        for item in nav_links
+    ]
 
-    cert_link = {'label': 'Sertifikat', 'href': '/certificates'}
-    updated_links = list(nav_links)
-    contact_index = next(
-        (idx for idx, item in enumerate(updated_links) if isinstance(item, dict) and item.get('href') == '/contact'),
-        None,
-    )
-    if contact_index is not None:
-        updated_links.insert(contact_index, cert_link)
-    else:
-        updated_links.append(cert_link)
+    if not any(isinstance(item, dict) and item.get('href') == '/certificates' for item in updated_links):
+        cert_link = {'label': 'Sertifikat', 'href': '/certificates'}
+        contact_index = next(
+            (idx for idx, item in enumerate(updated_links) if isinstance(item, dict) and item.get('href') == '/contact'),
+            None,
+        )
+        if contact_index is not None:
+            updated_links.insert(contact_index, cert_link)
+        else:
+            updated_links.append(cert_link)
 
     global_section['nav_links'] = updated_links
     return content
