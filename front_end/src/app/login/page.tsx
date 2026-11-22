@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { login } from "@/services/auth";
 import { getApiErrorMessage } from "@/services/api";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import NetworkBackground from "@/components/public/NetworkBackground";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,7 +40,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-editorial-paper p-4 pt-20 sm:p-6 sm:pt-20">
+    <div className="relative isolate flex min-h-screen items-center justify-center bg-editorial-paper p-4 pt-20 sm:p-6 sm:pt-20" style={{ position: "relative", isolation: "isolate" }}>
+      <NetworkBackground />
       <ThemeToggle className="absolute right-4 top-4 sm:right-6 sm:top-6" />
       <div className="w-full max-w-md rounded-2xl border border-editorial-line bg-editorial-surface p-8 text-editorial-ink shadow-[var(--shadow-editorial)] transition-all duration-300 hover:-translate-y-1 hover:border-editorial-line-strong">
         <h2 className="mb-6 text-center text-2xl font-bold">
