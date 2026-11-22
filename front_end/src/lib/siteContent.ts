@@ -215,11 +215,17 @@ export interface SiteContentRecord {
 function ensureCertificatesNavLink(
   navLinks: SiteContent["global"]["nav_links"]
 ): SiteContent["global"]["nav_links"] {
-  if (navLinks.some((item) => item.href === "/certificates")) {
-    return navLinks;
+  const normalized = navLinks.map((item) =>
+    item.href === "/" && item.label === "Beranda / Tentang"
+      ? { ...item, label: "Beranda" }
+      : item
+  );
+
+  if (normalized.some((item) => item.href === "/certificates")) {
+    return normalized;
   }
 
-  const next = [...navLinks];
+  const next = [...normalized];
   const certLink = { label: "Sertifikat", href: "/certificates" };
   const contactIndex = next.findIndex((item) => item.href === "/contact");
   if (contactIndex >= 0) {
