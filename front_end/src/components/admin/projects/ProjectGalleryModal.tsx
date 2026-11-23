@@ -8,6 +8,12 @@ import { Project } from "@/types";
 import { uploadProjectImage, deleteProjectImage } from "@/services/projectImages";
 // ✅ DRY: Mengimpor getImageUrl dari lib/utils.ts, menghapus definisi lokal
 import { getImageUrl } from "@/lib/utils";
+import {
+  compressImageForUpload,
+  formatFileSize,
+  MAX_SOURCE_IMAGE_BYTES,
+  MAX_UPLOAD_IMAGE_BYTES,
+} from "@/lib/imageCompress";
 
 interface ProjectGalleryModalProps {
   project: Project;
@@ -20,7 +26,55 @@ export default function ProjectGalleryModal({ project, onClose, onRefresh }: Pro
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadCaption, setUploadCaption] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const compressRequestRef = useRef(0);
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const requestId = ++compressRequestRef.current;
+    const selected = event.target.files?.[0] || null;
+    if (!selected) {
+      setIsCompressing(false);
+      setUploadFile(null);
+      return;
+    }
+
+    if (!["image/png", "image/jpeg", "image/gif", "image/webp"].includes(selected.type)) {
+      notify("Format gambar harus PNG, JPG, GIF, atau WebP.", "error");
+      event.target.value = "";
+      setUploadFile(null);
+      return;
+    }
+
+    if (selected.size > MAX_SOURCE_IMAGE_BYTES) {
+      notify("Ukuran gambar sumber maksimal 20 MB.", "error");
+      event.target.value = "";
+      setUploadFile(null);
+      return;
+    }
+
+    setIsCompressing(true);
+    try {
+      const optimized = await compressImageForUpload(selected, {
+        maxDimension: 1920,
+        quality: 0.82,
+      });
+      if (requestId !== compressRequestRef.current) return;
+
+      if (optimized.size > MAX_UPLOAD_IMAGE_BYTES) {
+        notify("Ukuran gambar masih melebihi 5 MB setelah kompresi.", "error");
+        event.target.value = "";
+        setUploadFile(null);
+        return;
+      }
+
+      setUploadFile(optimized);
+    } finally {
+      if (requestId === compressRequestRef.current) {
+        setIsCompressing(false);
+      }
+    }
+  };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,12 +142,20 @@ export default function ProjectGalleryModal({ project, onClose, onRefresh }: Pro
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-editorial-technical">Tambah Foto Baru</h4>
             <form onSubmit={handleUpload} className="flex flex-col gap-4 sm:flex-row sm:items-end">
               <div className="w-full sm:flex-1">
-                <label className="mb-1 block text-xs text-editorial-muted">File Gambar *</label>
+                <label className="mb-1 block text-xs text-editorial-muted">File Gambar * (otomatis dikompres ke WebP)</label>
                 <input
-                  ref={fileInputRef} type="file" accept="image/*" required
-                  onChange={(e) => setUploadFile(e.target.files ? e.target.files[0] : null)}
+                  ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" required
+                  onChange={(e) => { void handleFileSelect(e); }}
                   className="w-full rounded border border-editorial-line-strong bg-editorial-surface p-1.5 text-editorial-ink file:mr-4 file:rounded file:border-0 file:bg-editorial-action file:px-4 file:py-1 file:text-editorial-on-action hover:file:bg-editorial-action-hover focus:outline-none"
                 />
+                {isCompressing && (
+                  <p className="mt-1 text-xs text-editorial-muted">Mengompres gambar ke WebP...</p>
+                )}
+                {!isCompressing && uploadFile && (
+                  <p className="mt-1 truncate text-xs text-editorial-technical">
+                    {uploadFile.name} ({formatFileSize(uploadFile.size)})
+                  </p>
+                )}
               </div>
               <div className="w-full sm:flex-1">
                 <label className="mb-1 block text-xs text-editorial-muted">Caption (Opsional)</label>
@@ -105,7 +167,7 @@ export default function ProjectGalleryModal({ project, onClose, onRefresh }: Pro
                 />
               </div>
               <button
-                type="submit" disabled={isUploading || !uploadFile}
+                type="submit" disabled={isUploading || isCompressing || !uploadFile}
                 className="min-h-11 w-full rounded bg-editorial-action px-6 py-2 text-sm font-medium text-editorial-on-action transition hover:bg-editorial-action-hover disabled:opacity-50 sm:w-auto sm:text-base"
               >
                 {isUploading ? "Mengunggah..." : "Upload"}

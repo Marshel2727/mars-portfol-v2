@@ -40,7 +40,7 @@ def upload_project_gallery():
     image_url = save_image(image_file)
 
     if not image_url:
-        return error_response(message='Format gambar tidak valid! Gunakan png, jpg, jpeg, atau gif')
+        return error_response(message='Format gambar tidak valid! Gunakan png, jpg, jpeg, gif, atau webp')
     
     normalized_caption = (caption or '').strip() or None
     if normalized_caption and len(normalized_caption) > 255:

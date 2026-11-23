@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAdminToast } from "@/components/admin/AdminToastProvider";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
+import {
+  compressImageForUpload,
+  formatFileSize,
+  MAX_SOURCE_IMAGE_BYTES,
+  MAX_UPLOAD_IMAGE_BYTES,
+} from "@/lib/imageCompress";
 import { getImageUrl } from "@/lib/utils";
 import { getApiErrorMessage } from "@/services/api";
 import { createCertificate, updateCertificate } from "@/services/certificates";
@@ -25,7 +31,6 @@ const CATEGORY_OPTIONS = [
 
 const ALLOWED_IMAGE_MIME = new Set(["image/png", "image/jpeg", "image/webp"]);
 const ALLOWED_IMAGE_EXT = new Set(["png", "jpg", "jpeg", "webp"]);
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 
 function buildInitialFields(certificate: Certificate | null) {
@@ -73,6 +78,8 @@ export default function CertificateForm({
   const [isFeatured, setIsFeatured] = useState(() => Boolean(certificateToEdit?.is_featured));
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const compressRequestRef = useRef(0);
 
   const objectUrl = useObjectUrl(file);
 
@@ -91,9 +98,12 @@ export default function CertificateForm({
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setFields((prev) => ({ ...prev, [key]: event.target.value }));
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = event.target.files?.[0] || null;
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const requestId = ++compressRequestRef.current;
+    const input = event.target;
+    const selected = input.files?.[0] || null;
     if (!selected) {
+      setIsCompressing(false);
       setFile(null);
       return;
     }
@@ -103,23 +113,46 @@ export default function CertificateForm({
 
     if (!pdf && !image) {
       notify("Format file harus PNG, JPG, WebP, atau PDF.", "error");
-      event.target.value = "";
+      input.value = "";
       return;
     }
 
-    if (pdf && selected.size > MAX_PDF_BYTES) {
-      notify("Ukuran file PDF sertifikat maksimal 10 MB.", "error");
-      event.target.value = "";
+    if (pdf) {
+      if (selected.size > MAX_PDF_BYTES) {
+        notify("Ukuran file PDF sertifikat maksimal 10 MB.", "error");
+        input.value = "";
+        return;
+      }
+      setFile(selected);
       return;
     }
 
-    if (image && selected.size > MAX_IMAGE_BYTES) {
-      notify("Ukuran gambar sertifikat maksimal 5 MB.", "error");
-      event.target.value = "";
+    if (selected.size > MAX_SOURCE_IMAGE_BYTES) {
+      notify("Ukuran gambar sumber maksimal 20 MB.", "error");
+      input.value = "";
       return;
     }
 
-    setFile(selected);
+    setIsCompressing(true);
+    try {
+      const optimized = await compressImageForUpload(selected, {
+        maxDimension: 1920,
+        quality: 0.85,
+      });
+      if (requestId !== compressRequestRef.current) return;
+
+      if (optimized.size > MAX_UPLOAD_IMAGE_BYTES) {
+        notify("Ukuran gambar sertifikat masih melebihi 5 MB setelah kompresi.", "error");
+        input.value = "";
+        return;
+      }
+
+      setFile(optimized);
+    } finally {
+      if (requestId === compressRequestRef.current) {
+        setIsCompressing(false);
+      }
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -447,12 +480,19 @@ export default function CertificateForm({
                 id="certificate-file-upload"
                 type="file"
                 accept="image/png,image/jpeg,image/webp,application/pdf"
-                onChange={handleFileChange}
+                onChange={(event) => {
+                  void handleFileChange(event);
+                }}
                 className="w-full rounded-lg border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink file:mr-4 file:rounded-md file:border-0 file:bg-editorial-action file:px-4 file:py-1.5 file:text-xs file:font-bold file:text-editorial-on-action hover:file:bg-editorial-action-hover focus:outline-none"
               />
               <p className="mt-1 text-xs text-editorial-muted">
-                Gambar maksimal 5 MB (PNG/JPG/WebP) atau dokumen PDF maksimal 10 MB.
+                Gambar (PNG/JPG/WebP) otomatis dikompres ke WebP, atau dokumen PDF maksimal 10 MB.
               </p>
+              {isCompressing && (
+                <p className="mt-1.5 text-xs text-editorial-technical">
+                  Mengompres gambar sertifikat ke WebP...
+                </p>
+              )}
 
               {hasPreview && (
                 <div className="mt-3 rounded-lg border border-editorial-line bg-editorial-paper-deep/60 p-3">
@@ -497,7 +537,9 @@ export default function CertificateForm({
                             {previewFilename}
                           </p>
                           <p className="text-xs text-editorial-muted">
-                            {file ? "Gambar siap diunggah" : "Gambar sertifikat tersimpan"}
+                            {file
+                              ? `Gambar siap diunggah (${formatFileSize(file.size)})`
+                              : "Gambar sertifikat tersimpan"}
                           </p>
                         </div>
                       </div>
@@ -519,7 +561,7 @@ export default function CertificateForm({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCompressing}
               className="min-h-11 rounded-lg bg-editorial-action px-6 py-2.5 font-semibold text-editorial-on-action shadow-md transition hover:bg-editorial-action-hover disabled:opacity-50"
             >
               {isSubmitting

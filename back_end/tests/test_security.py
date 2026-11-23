@@ -199,6 +199,86 @@ class SecurityTests(unittest.TestCase):
         delete_stored_image(url, str(folder))
         self.assertFalse(image_path.exists())
 
+    def test_image_compression_webp_resize_alpha_and_exif(self):
+        from app.utils import about_upload, icon_upload, upload as project_upload
+
+        folder = Path(self.temp.name) / 'projects'
+
+        # 1. Oversized photo-like PNG is resized proportionally and compressed into WebP
+        from PIL import ImageFilter
+        raw_stream = io.BytesIO()
+        photo = Image.merge('RGB', (
+            Image.effect_noise((2400, 1200), 50).filter(ImageFilter.GaussianBlur(2)),
+            Image.effect_noise((2400, 1200), 60).filter(ImageFilter.GaussianBlur(2)),
+            Image.effect_noise((2400, 1200), 40).filter(ImageFilter.GaussianBlur(2)),
+        ))
+        photo.save(raw_stream, format='PNG')
+        raw_png_bytes = raw_stream.getvalue()
+
+        url = save_validated_image(
+            FileStorage(stream=io.BytesIO(raw_png_bytes), filename='hero.png'),
+            str(folder),
+            {'png'},
+            max_dimension=1920,
+            quality=82,
+        )
+        self.assertTrue(url.endswith('.webp'))
+        stored = folder / url.rsplit('/', 1)[-1]
+        self.assertLess(stored.stat().st_size, len(raw_png_bytes))
+        with Image.open(stored) as opened:
+            self.assertEqual(opened.format, 'WEBP')
+            self.assertEqual(opened.size, (1920, 960))
+            self.assertEqual(opened.mode, 'RGB')
+
+        # 2. Small image is never upscaled and alpha transparency is preserved
+        alpha_stream = io.BytesIO()
+        transparent = Image.new('RGBA', (100, 80), (200, 80, 50, 128))
+        transparent.save(alpha_stream, format='PNG')
+        alpha_url = save_validated_image(
+            FileStorage(stream=io.BytesIO(alpha_stream.getvalue()), filename='icon.png'),
+            str(folder),
+            {'png'},
+            max_dimension=512,
+        )
+        with Image.open(folder / alpha_url.rsplit('/', 1)[-1]) as opened:
+            self.assertEqual(opened.format, 'WEBP')
+            self.assertEqual(opened.size, (100, 80))
+            self.assertEqual(opened.mode, 'RGBA')
+
+        # 3. EXIF orientation tag (6 = 90deg CW) is transposed before stripping metadata
+        exif_stream = io.BytesIO()
+        exif = Image.Exif()
+        exif[274] = 6  # Orientation = Rotate 90 CW
+        Image.new('RGB', (20, 10), (10, 20, 30)).save(exif_stream, format='JPEG', exif=exif.tobytes())
+        exif_url = save_validated_image(
+            FileStorage(stream=io.BytesIO(exif_stream.getvalue()), filename='photo.jpg'),
+            str(folder),
+            {'jpg'},
+        )
+        with Image.open(folder / exif_url.rsplit('/', 1)[-1]) as opened:
+            self.assertEqual(opened.format, 'WEBP')
+            self.assertEqual(opened.size, (10, 20))
+            self.assertEqual(len(opened.getexif()), 0)
+
+        # 4. Upload wrappers accept WebP and enforce per-type max dimensions
+        big_webp = io.BytesIO()
+        Image.new('RGB', (2200, 1100), (40, 80, 120)).save(big_webp, format='WEBP')
+        big_webp_bytes = big_webp.getvalue()
+
+        with patch.object(project_upload, 'UPLOAD_FOLDER', str(Path(self.temp.name) / 'p_wrap')), \
+             patch.object(about_upload, 'UPLOAD_FOLDER', str(Path(self.temp.name) / 'a_wrap')), \
+             patch.object(icon_upload, 'UPLOAD_FOLDER', str(Path(self.temp.name) / 'i_wrap')):
+            p_url = project_upload.save_image(FileStorage(stream=io.BytesIO(big_webp_bytes), filename='proj.webp'))
+            a_url = about_upload.save_profile_image(FileStorage(stream=io.BytesIO(big_webp_bytes), filename='me.webp'))
+            i_url = icon_upload.save_image(FileStorage(stream=io.BytesIO(big_webp_bytes), filename='skill.webp'))
+
+            with Image.open(Path(self.temp.name) / 'p_wrap' / p_url.rsplit('/', 1)[-1]) as img:
+                self.assertEqual(img.size, (1920, 960))
+            with Image.open(Path(self.temp.name) / 'a_wrap' / a_url.rsplit('/', 1)[-1]) as img:
+                self.assertEqual(img.size, (800, 400))
+            with Image.open(Path(self.temp.name) / 'i_wrap' / i_url.rsplit('/', 1)[-1]) as img:
+                self.assertEqual(img.size, (512, 256))
+
 
     def test_project_migration_preserves_existing_rows(self):
         import importlib.util

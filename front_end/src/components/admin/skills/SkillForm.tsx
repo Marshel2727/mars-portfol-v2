@@ -3,11 +3,18 @@
 import { useAdminToast } from "@/components/admin/AdminToastProvider";
 import { getApiErrorMessage } from "@/services/api";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createSkill, updateSkill } from "@/services/skills";
 import { getAllProjects } from "@/services/project";
 import { Project, Skill } from "@/types";
 import { getImageUrl } from "@/lib/utils";
+import { useObjectUrl } from "@/hooks/useObjectUrl";
+import {
+  compressImageForUpload,
+  formatFileSize,
+  MAX_SOURCE_IMAGE_BYTES,
+  MAX_UPLOAD_IMAGE_BYTES,
+} from "@/lib/imageCompress";
 
 interface SkillFormProps {
   skillToEdit: Skill | null;
@@ -25,10 +32,14 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
   const [yearsExperience, setYearsExperience] = useState("");
   const [displayOrder, setDisplayOrder] = useState("0");
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [savedIconUrl, setSavedIconUrl] = useState<string | null>(null);
   const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
   const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const compressRequestRef = useRef(0);
+  const uploadedPreviewUrl = useObjectUrl(image);
+  const imagePreview = uploadedPreviewUrl || savedIconUrl;
 
   useEffect(() => {
     if (skillToEdit) {
@@ -41,7 +52,7 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
       setDisplayOrder(skillToEdit.display_order?.toString() || "0");
       setSelectedProjectIds(skillToEdit.projects?.map((project) => project.id) || []);
       setImage(null);
-      setImagePreview(skillToEdit.icon_url ? getImageUrl(skillToEdit.icon_url) : null);
+      setSavedIconUrl(skillToEdit.icon_url ? getImageUrl(skillToEdit.icon_url) : null);
     } else {
       setName("");
       setLevel("intermediate");
@@ -52,7 +63,7 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
       setDisplayOrder("0");
       setSelectedProjectIds([]);
       setImage(null);
-      setImagePreview(null);
+      setSavedIconUrl(null);
     }
   }, [skillToEdit]);
 
@@ -62,11 +73,49 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
       .catch((error) => console.error("Gagal memuat daftar project", error));
   }, []);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setImage(file);
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const requestId = ++compressRequestRef.current;
+    const selected = e.target.files?.[0] || null;
+    if (!selected) {
+      setIsCompressing(false);
+      setImage(null);
+      return;
+    }
+
+    if (!["image/png", "image/jpeg", "image/gif", "image/webp"].includes(selected.type)) {
+      notify("Format ikon harus PNG, JPG, GIF, atau WebP.", "error");
+      e.target.value = "";
+      setImage(null);
+      return;
+    }
+
+    if (selected.size > MAX_SOURCE_IMAGE_BYTES) {
+      notify("Ukuran ikon sumber maksimal 20 MB.", "error");
+      e.target.value = "";
+      setImage(null);
+      return;
+    }
+
+    setIsCompressing(true);
+    try {
+      const optimized = await compressImageForUpload(selected, {
+        maxDimension: 512,
+        quality: 0.85,
+      });
+      if (requestId !== compressRequestRef.current) return;
+
+      if (optimized.size > MAX_UPLOAD_IMAGE_BYTES) {
+        notify("Ukuran ikon masih melebihi 5 MB setelah kompresi.", "error");
+        e.target.value = "";
+        setImage(null);
+        return;
+      }
+
+      setImage(optimized);
+    } finally {
+      if (requestId === compressRequestRef.current) {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -256,13 +305,23 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
                     <img src={imagePreview} alt="Preview" className="h-full w-full object-contain" />
                   </div>
                 )}
-                <input
-                  id="skill-image-upload"
-                  type="file"
-                  accept="image/png, image/jpeg, image/jpg, image/svg+xml, image/webp"
-                  onChange={handleImageChange}
-                  className="w-full rounded-lg border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink file:mr-4 file:rounded-md file:border-0 file:bg-editorial-action file:px-4 file:py-1.5 file:text-xs file:font-bold file:text-editorial-on-action hover:file:bg-editorial-action-hover focus:outline-none"
-                />
+                <div className="min-w-0 flex-1">
+                  <input
+                    id="skill-image-upload"
+                    type="file"
+                    accept="image/png,image/jpeg,image/gif,image/webp"
+                    onChange={(event) => { void handleImageChange(event); }}
+                    className="w-full rounded-lg border border-editorial-line-strong bg-editorial-surface p-2 text-editorial-ink file:mr-4 file:rounded-md file:border-0 file:bg-editorial-action file:px-4 file:py-1.5 file:text-xs file:font-bold file:text-editorial-on-action hover:file:bg-editorial-action-hover focus:outline-none"
+                  />
+                  {isCompressing && (
+                    <p className="mt-1 text-xs text-editorial-muted">Mengompres ikon ke WebP...</p>
+                  )}
+                  {!isCompressing && image && (
+                    <p className="mt-1 truncate text-xs text-editorial-technical">
+                      {image.name} ({formatFileSize(image.size)})
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -314,7 +373,7 @@ export default function SkillForm({ skillToEdit, onSuccess, onCancel }: SkillFor
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCompressing}
               className="min-h-11 rounded-lg bg-editorial-action px-6 py-2.5 font-semibold text-editorial-on-action shadow-md transition hover:bg-editorial-action-hover disabled:opacity-50"
             >
               {isSubmitting ? "Menyimpan..." : skillToEdit ? "Simpan Perubahan" : "Simpan Skill Baru"}

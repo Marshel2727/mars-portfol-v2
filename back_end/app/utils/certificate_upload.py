@@ -31,7 +31,13 @@ def save_certificate_file(upload):
     if '.' in filename_lower:
         extension = filename_lower.rsplit('.', 1)[-1]
         if extension in ALLOWED_IMAGE_EXTENSIONS:
-            url = save_validated_image(upload, UPLOAD_FOLDER, ALLOWED_IMAGE_EXTENSIONS)
+            url = save_validated_image(
+                upload,
+                UPLOAD_FOLDER,
+                ALLOWED_IMAGE_EXTENSIONS,
+                max_dimension=1920,
+                quality=85,
+            )
             return url, 'image'
 
     raise BadRequest('Format file sertifikat tidak didukung. Gunakan PNG, JPG, WebP, atau PDF.')

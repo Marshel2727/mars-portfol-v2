@@ -219,7 +219,7 @@ export default function ProjectForm({ projectToEdit, onSuccess, onCancel }: Proj
                   ? <span className="text-xs text-editorial-muted">(Abaikan jika tidak ganti)</span>
                   : "*"}
               </label>
-              <ImageFileInput file={image} onChange={setImage} accept="image/png,image/jpeg,image/gif" />
+              <ImageFileInput file={image} onChange={setImage} accept="image/png,image/jpeg,image/gif,image/webp" maxDimension={1920} />
               {imagePreview && <img src={imagePreview} alt="Pratinjau gambar sampul" className="mt-3 max-h-48 w-full rounded border border-editorial-line object-contain" />}
             </div>
             <div className="md:col-span-2">

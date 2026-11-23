@@ -81,7 +81,7 @@ function AboutProfileForm({ profile, onSaved }: { profile: AboutProfile; onSaved
             className="aspect-[4/5] w-36 rounded-lg border border-editorial-line bg-editorial-paper-deep object-cover"
           />
           <div className="min-w-0 flex-1">
-            <ImageFileInput file={profileImage} onChange={setProfileImage} accept="image/png,image/jpeg,image/webp" />
+            <ImageFileInput file={profileImage} onChange={setProfileImage} accept="image/png,image/jpeg,image/webp" maxDimension={800} />
           </div>
         </div>
       </section>
