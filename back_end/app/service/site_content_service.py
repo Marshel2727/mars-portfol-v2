@@ -11,6 +11,8 @@ DEFAULT_SITE_CONTENT = {
             {'label': 'LinkedIn', 'href': ''},
             {'label': 'Email', 'href': ''},
             {'label': 'Instagram', 'href': ''},
+            {'label': 'TikTok', 'href': ''},
+            {'label': 'WhatsApp', 'href': ''},
         ],
         'brand_name': 'MARSHEL',
         'brand_descriptor': '/ SOFTWARE × HARDWARE',

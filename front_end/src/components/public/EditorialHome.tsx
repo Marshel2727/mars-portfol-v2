@@ -8,6 +8,7 @@ import { AboutProfile, Project } from "@/types";
 
 import { FeedbackState, ProjectCard, ProjectSkeletons } from "./EditorialUI";
 import { useSiteContent } from "./SiteContentProvider";
+import { TelemetrySocialLinks } from "./SocialLinks";
 import TelemetryWidget from "./TelemetryWidget";
 import TextScramble from "@/components/ui/TextScramble";
 import AnimatedCounter from "@/components/ui/AnimatedCounter";
@@ -67,9 +68,12 @@ export default function EditorialHome({
         <aside className="engineering-note" aria-label="Status & telemetri sistem">
           <TelemetryWidget />
 
-          <div className="availability">
-            <span className="status-pulse-dot" aria-hidden="true" />
-            <span>{siteContent.global.availability_label}</span>
+          <div className="engineering-note__footer">
+            <div className="availability">
+              <span className="status-pulse-dot" aria-hidden="true" />
+              <span>{siteContent.global.availability_label}</span>
+            </div>
+            <TelemetrySocialLinks />
           </div>
         </aside>
       </section>

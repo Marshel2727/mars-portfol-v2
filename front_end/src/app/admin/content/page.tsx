@@ -465,7 +465,7 @@ export default function AdminContentPage() {
               onChange={(next) => setDraft((current) => ({ ...current, resume: next as SiteContent['resume'] }))} />
           </div>}
           {activeTab === "social" && <div className="space-y-5">
-            <p className="text-sm text-editorial-muted">Isi URL profil atau mailto:nama@domain.com. Tautan yang kosong tidak ditampilkan.</p>
+            <p className="text-sm text-editorial-muted">Isi URL profil (Instagram, TikTok, WhatsApp seperti <code className="rounded bg-editorial-paper-deep px-1 py-0.5 font-mono text-xs">https://wa.me/628...</code>) atau <code className="rounded bg-editorial-paper-deep px-1 py-0.5 font-mono text-xs">mailto:nama@domain.com</code>. Tautan yang kosong tidak ditampilkan di footer.</p>
             <ContentFields field="social_links" value={draft.global.social_links} schema={DEFAULT_SITE_CONTENT.global.social_links}
               onChange={(next) => setDraft((current) => ({ ...current, global: { ...current.global, social_links: next as SiteContent['global']['social_links'] } }))} />
           </div>}

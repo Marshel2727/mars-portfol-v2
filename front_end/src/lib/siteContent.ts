@@ -19,6 +19,8 @@ export const DEFAULT_SITE_CONTENT = {
       { label: "LinkedIn", href: "" },
       { label: "Email", href: "" },
       { label: "Instagram", href: "" },
+      { label: "TikTok", href: "" },
+      { label: "WhatsApp", href: "" },
     ],
     availability_label: "TERBUKA UNTUK KOLABORASI & PROYEK",
   },

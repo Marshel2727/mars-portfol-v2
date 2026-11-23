@@ -666,6 +666,70 @@ html[data-theme-transition="true"] *::after {
   font-size: 11px;
 }
 
+.engineering-note__footer {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+.engineering-note__footer .availability {
+  margin-top: 0;
+}
+
+.engineering-note__socials {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.engineering-note__social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  color: var(--muted);
+  transition: transform 160ms ease, color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.engineering-note__social-btn svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+
+.engineering-note__social-btn:hover,
+.engineering-note__social-btn:focus-visible {
+  transform: translateY(-2px);
+  color: var(--ink);
+  border-color: var(--technical);
+  background: var(--surface);
+}
+
+.engineering-note__social-btn--instagram:hover,
+.engineering-note__social-btn--instagram:focus-visible {
+  color: #e1306c;
+  border-color: color-mix(in srgb, #e1306c 55%, var(--line-strong));
+}
+
+.engineering-note__social-btn--tiktok:hover,
+.engineering-note__social-btn--tiktok:focus-visible {
+  color: var(--technical);
+  border-color: color-mix(in srgb, var(--technical) 65%, var(--line-strong));
+}
+
+.engineering-note__social-btn--whatsapp:hover,
+.engineering-note__social-btn--whatsapp:focus-visible {
+  color: #25d366;
+  border-color: color-mix(in srgb, #25d366 55%, var(--line-strong));
+}
+
 .availability {
   margin-top: auto;
   color: var(--success);
