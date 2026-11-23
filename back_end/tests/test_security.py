@@ -771,6 +771,11 @@ class SecurityTests(unittest.TestCase):
         )
         self.assertEqual(nav_links[2], {'label': 'Sertifikat', 'href': '/certificates'})
 
+    def test_webp_mime_type_registered_for_static_serving(self):
+        import mimetypes
+        mime_type, _ = mimetypes.guess_type('sample.webp')
+        self.assertEqual(mime_type, 'image/webp')
+
 
 if __name__ == '__main__':
     unittest.main()

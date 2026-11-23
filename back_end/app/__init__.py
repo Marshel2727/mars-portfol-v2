@@ -1,6 +1,9 @@
 import os
+import mimetypes
 from flask import Flask, request, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+mimetypes.add_type('image/webp', '.webp')
 from sqlalchemy import text
 from .config import Config,db_connection
 from  flask_sqlalchemy import SQLAlchemy
