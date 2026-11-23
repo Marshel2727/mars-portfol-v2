@@ -69,6 +69,13 @@ export function TelemetrySocialLinks() {
     <div className="engineering-note__socials" aria-label="Media sosial Instagram, TikTok, dan WhatsApp">
       {TELEMETRY_CHANNELS.map((channel) => {
         const href = findSocialHref(links, channel.labelPattern, channel.hostPattern);
+        const content = (
+          <>
+            <span className="engineering-note__social-icon">{channel.icon}</span>
+            <span className="engineering-note__social-label">{channel.name}</span>
+          </>
+        );
+
         if (href) {
           return (
             <a
@@ -77,10 +84,10 @@ export function TelemetrySocialLinks() {
               target="_blank"
               rel="noreferrer"
               aria-label={channel.name}
-              title={channel.name}
+              title={`Buka ${channel.name}`}
               className={`engineering-note__social-btn engineering-note__social-btn--${channel.id}`}
             >
-              {channel.icon}
+              {content}
             </a>
           );
         }
@@ -93,7 +100,7 @@ export function TelemetrySocialLinks() {
             title={`${channel.name} — isi tautan di Admin → Konten → Tautan Sosial`}
             className={`engineering-note__social-btn engineering-note__social-btn--${channel.id}`}
           >
-            {channel.icon}
+            {content}
           </Link>
         );
       })}
