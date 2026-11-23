@@ -679,8 +679,8 @@ html[data-theme-transition="true"] *::after {
 
 .engineering-note__socials {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
   padding-top: 14px;
   border-top: 1px dashed var(--line);
 }
@@ -693,21 +693,23 @@ html[data-theme-transition="true"] *::after {
   overflow: hidden;
   isolation: isolate;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
-  height: 40px;
-  padding: 0 10px;
-  border-radius: 9px;
+  height: 56px;
+  padding: 8px 4px;
+  border-radius: 10px;
   border: 1px solid var(--line-strong);
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   color: var(--ink);
   text-decoration: none;
   font-family: var(--font-mono-editorial);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
+  line-height: 1;
   white-space: nowrap;
   transition:
     transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -753,12 +755,13 @@ html[data-theme-transition="true"] *::after {
 }
 
 .engineering-note__social-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 19px;
+  height: 19px;
   display: block;
 }
 
 .engineering-note__social-label {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -785,11 +788,23 @@ html[data-theme-transition="true"] *::after {
 .engineering-note__social-btn:hover .engineering-note__social-icon,
 .engineering-note__social-btn:focus-visible .engineering-note__social-icon {
   color: var(--social-accent);
-  transform: scale(1.18) rotate(-6deg);
+  transform: scale(1.16) rotate(-5deg);
 }
 
 .engineering-note__social-btn:active {
   transform: translateY(-1px) scale(0.97);
+}
+
+.engineering-note__social-btn--github {
+  --social-accent: #24292f;
+  --social-tint: rgba(36, 41, 47, 0.16);
+  --social-glow: rgba(36, 41, 47, 0.34);
+}
+
+[data-theme="dark"] .engineering-note__social-btn--github {
+  --social-accent: #e6edf3;
+  --social-tint: rgba(230, 237, 243, 0.18);
+  --social-glow: rgba(230, 237, 243, 0.32);
 }
 
 .engineering-note__social-btn--instagram {
@@ -822,19 +837,19 @@ html[data-theme-transition="true"] *::after {
 
 @media (max-width: 420px) {
   .engineering-note__socials {
-    gap: 7px;
+    gap: 6px;
   }
 
   .engineering-note__social-btn {
-    height: 38px;
-    padding: 0 6px;
-    gap: 5px;
-    font-size: 10px;
+    height: 52px;
+    padding: 6px 2px;
+    gap: 4px;
+    font-size: 9.5px;
   }
 
   .engineering-note__social-icon svg {
-    width: 15px;
-    height: 15px;
+    width: 17px;
+    height: 17px;
   }
 }
 
