@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 
 import NetworkBackground from "./NetworkBackground";
@@ -16,31 +16,51 @@ import { getImageUrl } from "@/lib/utils";
 import { getAboutProfile } from "@/services/about";
 import { Project } from "@/types";
 
+function ScrollProgressBar() {
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let rafId = 0;
+
+    const update = () => {
+      rafId = 0;
+      const bar = barRef.current;
+      if (!bar) return;
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = totalHeight > 0 ? Math.min(1, Math.max(0, window.scrollY / totalHeight)) : 0;
+      bar.style.transform = `scaleX(${ratio})`;
+    };
+
+    const onScroll = () => {
+      if (!rafId) {
+        rafId = window.requestAnimationFrame(update);
+      }
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  return <div ref={barRef} className="scroll-progress-bar" aria-hidden="true" />;
+}
+
 export function PublicNavbar() {
   const content = useSiteContent();
   const { data: profile } = useSWR("/about/", getAboutProfile);
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isResumeOpen, setIsResumeOpen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
-        setScrollProgress((window.scrollY / totalHeight) * 100);
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <header className="site-header">
-      <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }} aria-hidden="true" />
+      <ScrollProgressBar />
       <div className="editorial-shell site-header__inner">
         <div className="brand-wrap">
           <button
@@ -50,7 +70,7 @@ export function PublicNavbar() {
             title="Klik untuk memutar animasi 3D"
             onClick={() => window.dispatchEvent(new Event(REPLAY_INTRO_EVENT))}
           >
-            <Image className="brand__logo" src="/brand/marshel-logo-v1.png" alt="" width={40} height={40} unoptimized />
+            <Image className="brand__logo" src="/brand/marshel-logo-sm-v1.webp" alt="" width={40} height={40} unoptimized />
           </button>
           <Link className="brand brand--with-logo" href="/" aria-label={content.global.brand_aria_label}>
             <span className="brand__text">{content.global.brand_name} <span className="brand--desktop">{content.global.brand_descriptor}</span></span>

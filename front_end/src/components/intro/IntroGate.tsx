@@ -5,8 +5,16 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 type Phase = "loading" | "playing" | "closing" | "done";
+type ConnectionInfo = { saveData?: boolean; effectiveType?: string };
 const privatePath = (path: string) => path === "/login" || path.startsWith("/login/")
   || path === "/admin" || path.startsWith("/admin/");
+
+const shouldSkipHeavyIntro = () => {
+  const conn = (navigator as Navigator & { connection?: ConnectionInfo }).connection;
+  if (!conn) return false;
+  if (conn.saveData) return true;
+  return conn.effectiveType === "slow-2g" || conn.effectiveType === "2g" || conn.effectiveType === "3g";
+};
 
 export const REPLAY_INTRO_EVENT = "marshel:replay-intro";
 export const INTRO_DONE_EVENT = "marshel:intro-done";
@@ -41,7 +49,7 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const manual = manualRef.current;
     manualRef.current = false;
-    if (reducedMotion.matches && !manual) {
+    if ((reducedMotion.matches || shouldSkipHeavyIntro()) && !manual) {
       setPhase("done");
       return;
     }
@@ -151,7 +159,7 @@ export default function IntroGate({ children }: { children: React.ReactNode }) {
         <div className="site-intro" data-phase={phase} role="dialog" aria-modal="true" aria-label="Animasi pembuka Marshel">
           <div className="site-intro__stage" ref={containerRef} />
           <div className="site-intro__poster" aria-hidden="true">
-            <Image src="/brand/marshel-logo-v1.png" alt="" width={512} height={512} unoptimized priority />
+            <Image src="/brand/marshel-logo-v1.webp" alt="" width={512} height={512} unoptimized priority />
           </div>
           <p className="site-intro__label">MARSHEL / SOFTWARE × HARDWARE</p>
           <button className="site-intro__skip" ref={skipRef} onClick={skip}>Lewati <span aria-hidden="true">→</span></button>

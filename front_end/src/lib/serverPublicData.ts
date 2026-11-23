@@ -5,7 +5,7 @@ const backend = (process.env.BACKEND_INTERNAL_URL || "http://127.0.0.1:5000").re
 export async function getPublicFallback(resources: string[]): Promise<Record<string, unknown>> {
   const entries = await Promise.all(resources.map(async (resource) => {
     try {
-      const response = await fetch(`${backend}/api${resource}`, { cache: "no-store", signal: AbortSignal.timeout(4000) });
+      const response = await fetch(`${backend}/api${resource}`, { next: { revalidate: 60 }, signal: AbortSignal.timeout(4000) });
       if (!response.ok) return null;
       const payload = await response.json();
       const data = payload.data;

@@ -35,16 +35,18 @@ export default function NetworkBackground() {
     let active = true;
     let started = false;
     let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+    let idleHandle: number | undefined;
+    let idleTimeout: ReturnType<typeof setTimeout> | undefined;
 
-    const boot = () => {
-      if (!active || started) return;
-      started = true;
-      window.removeEventListener(INTRO_DONE_EVENT, boot);
-      if (fallbackTimer !== undefined) {
-        clearTimeout(fallbackTimer);
-        fallbackTimer = undefined;
-      }
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const lowEndDevice = typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency <= 2;
+    if (reducedMotion || conn?.saveData || lowEndDevice) {
+      return;
+    }
 
+    const runImport = () => {
+      if (!active) return;
       const initialTheme: Theme =
         document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 
@@ -60,6 +62,22 @@ export default function NetworkBackground() {
         .catch(() => {
           // Silently degrade to plain editorial paper background if WebGL module fails.
         });
+    };
+
+    const boot = () => {
+      if (!active || started) return;
+      started = true;
+      window.removeEventListener(INTRO_DONE_EVENT, boot);
+      if (fallbackTimer !== undefined) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = undefined;
+      }
+
+      if (typeof window.requestIdleCallback === "function") {
+        idleHandle = window.requestIdleCallback(() => runImport(), { timeout: 1200 });
+      } else {
+        idleTimeout = setTimeout(runImport, 300);
+      }
     };
 
     const introActive =
@@ -78,6 +96,12 @@ export default function NetworkBackground() {
       window.removeEventListener(INTRO_DONE_EVENT, boot);
       if (fallbackTimer !== undefined) {
         clearTimeout(fallbackTimer);
+      }
+      if (idleHandle !== undefined && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleHandle);
+      }
+      if (idleTimeout !== undefined) {
+        clearTimeout(idleTimeout);
       }
       controllerRef.current?.dispose();
       controllerRef.current = null;

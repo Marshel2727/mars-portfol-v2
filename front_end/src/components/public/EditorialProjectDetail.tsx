@@ -239,7 +239,12 @@ export default function EditorialProjectDetail({ projectId, initialProject }: { 
                     onClick={() => setLightboxIndex(index)}
                     aria-label={`Buka gambar ${index + 1}: ${image.caption || project.title}`}
                   >
-                    <img src={getImageUrl(image.image_url)} alt={image.caption || `${project.title}, gambar ${index + 1}`} />
+                    <img
+                      src={getImageUrl(image.image_url)}
+                      alt={image.caption || `${project.title}, gambar ${index + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span>{image.caption || `Dokumentasi ${index + 1}`}</span>
                   </button>
                 ))}

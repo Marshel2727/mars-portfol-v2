@@ -1,3 +1,5 @@
+from sqlalchemy.orm import selectinload
+
 from app import db
 from app.models.project import Project
 from app.models.skill import Skill
@@ -55,13 +57,23 @@ def _get_skills(skill_ids):
 
 def get_all_projects():
     
-    projects = Project.query.order_by(Project.sort_order.asc(), Project.id.desc()).all()
+    projects = (
+        Project.query
+        .options(selectinload(Project.gallery), selectinload(Project.skills))
+        .order_by(Project.sort_order.asc(), Project.id.desc())
+        .all()
+    )
 
     return [project.to_dict() for project in projects]
 
 def get_project_by_id(project_id):
     
-    project = db.session.get(Project, project_id)
+    project = (
+        Project.query
+        .options(selectinload(Project.gallery), selectinload(Project.skills))
+        .filter_by(id=project_id)
+        .first()
+    )
 
     if project:
         return project.to_dict()
@@ -92,7 +104,12 @@ def create_project(data):
 
 def update_project(project_id, data):
 
-    project = db.session.get(Project, project_id)
+    project = (
+        Project.query
+        .options(selectinload(Project.gallery), selectinload(Project.skills))
+        .filter_by(id=project_id)
+        .first()
+    )
 
     if not project:
         return None
@@ -127,7 +144,12 @@ def update_project(project_id, data):
 
 def delete_project(project_id):
     
-    project = db.session.get(Project, project_id)
+    project = (
+        Project.query
+        .options(selectinload(Project.gallery), selectinload(Project.skills))
+        .filter_by(id=project_id)
+        .first()
+    )
 
     if project:
         db.session.delete(project)

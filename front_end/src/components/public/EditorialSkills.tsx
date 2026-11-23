@@ -316,6 +316,8 @@ function SkillsContent({ skills, loading, error }: { skills: Skill[]; loading: b
                                   src={getImageUrl(skill.icon_url)}
                                   alt=""
                                   aria-hidden="true"
+                                  loading="lazy"
+                                  decoding="async"
                                   style={{ width: 20, height: 20, objectFit: "contain", marginRight: 8, verticalAlign: "middle" }}
                                 />
                               )}
@@ -359,6 +361,8 @@ function SkillsContent({ skills, loading, error }: { skills: Skill[]; loading: b
                                   src={getImageUrl(skill.icon_url)}
                                   alt=""
                                   aria-hidden="true"
+                                  loading="lazy"
+                                  decoding="async"
                                   style={{ width: 22, height: 22, objectFit: "contain" }}
                                 />
                               )}

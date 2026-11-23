@@ -1,3 +1,5 @@
+from sqlalchemy.orm import selectinload
+
 from app import db
 from app.models.skill import Skill
 from app.models.project import Project
@@ -20,7 +22,12 @@ def _get_projects(project_ids):
 
 def get_all_skill():
     
-    skills = Skill.query.order_by(Skill.display_order.asc(), Skill.id.asc()).all()
+    skills = (
+        Skill.query
+        .options(selectinload(Skill.projects))
+        .order_by(Skill.display_order.asc(), Skill.id.asc())
+        .all()
+    )
 
     return [skill.to_dict() for skill in skills]
 

@@ -7,10 +7,10 @@ export default function SWRProvider({ children }: { children: React.ReactNode })
   return (
     <SWRConfig
       value={{
-        dedupingInterval: 30_000,
+        dedupingInterval: 60_000,
         errorRetryCount: 2,
         keepPreviousData: true,
-        revalidateOnFocus: true,
+        revalidateOnFocus: false,
         revalidateOnReconnect: true,
         shouldRetryOnError: true,
       }}

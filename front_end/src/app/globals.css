@@ -1913,10 +1913,13 @@ html[data-theme-transition="true"] *::after {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
   height: 3px;
   background: linear-gradient(90deg, var(--accent), var(--technical));
   z-index: 100;
-  transition: width 100ms ease-out;
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
 }
 
 /* Theme Toggle Icon Animation */

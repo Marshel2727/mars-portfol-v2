@@ -142,6 +142,8 @@ export default function EditorialHome({
                       className="about-avatar-img"
                       src={getImageUrl(profileImage)}
                       alt={`Foto profil ${fullName}`}
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="about-avatar-fallback">
