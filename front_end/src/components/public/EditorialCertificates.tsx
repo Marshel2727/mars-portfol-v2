@@ -19,6 +19,7 @@ function CertificatePreviewModal({
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -34,7 +35,13 @@ function CertificatePreviewModal({
     (focusable()[0] || dialog)?.focus();
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        } else {
+          onClose();
+        }
+      }
       if (e.key === "Tab") {
         const elements = focusable();
         const first = elements[0];
@@ -60,7 +67,7 @@ function CertificatePreviewModal({
       window.removeEventListener("keydown", handleKeyDown);
       previousFocus?.focus();
     };
-  }, [onClose]);
+  }, [onClose, isFullscreen]);
 
   const rawFileUrl = getImageUrl(cert.file_url);
   const fileUrl = rawFileUrl ? safePublicHref(rawFileUrl) : undefined;
@@ -70,175 +77,236 @@ function CertificatePreviewModal({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="resume-modal-overlay"
-      onClick={onClose}
+      className="resume-modal-overlay certificate-modal-overlay"
+      onClick={() => {
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        } else {
+          onClose();
+        }
+      }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="certificate-modal-title"
     >
-      <div
-        className="resume-modal-container"
-        style={{ maxWidth: 860, maxHeight: "90vh" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="resume-modal-header">
-          <div style={{ minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <p className="eyebrow eyebrow--technical" style={{ fontSize: 12 }}>
-                {cert.category || "SERTIFIKAT"}
-              </p>
-              {cert.is_featured && (
-                <span
-                  className="competency-level-badge competency-level-badge--core"
-                  style={{ fontSize: 10, padding: "2px 8px" }}
-                >
-                  ★ FEATURED
-                </span>
-              )}
-            </div>
-            <h3 id="certificate-modal-title" className="resume-modal-title">
-              {cert.title}
-            </h3>
-          </div>
+      {isFullscreen && fileUrl && cert.file_type === "image" ? (
+        <div
+          className="certificate-fullscreen-stage"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             type="button"
-            className="resume-modal-close"
-            onClick={onClose}
-            aria-label="Tutup modal pratinjau sertifikat"
+            className="resume-modal-close certificate-fullscreen-close"
+            onClick={() => setIsFullscreen(false)}
+            aria-label="Keluar dari tampilan layar penuh"
+            title="Keluar layar penuh (Esc)"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-        </header>
-
+          <img
+            src={fileUrl}
+            alt={`Tampilan penuh sertifikat ${cert.title}`}
+            className="certificate-fullscreen-img"
+            onClick={() => setIsFullscreen(false)}
+            style={{
+              maxWidth: "96vw",
+              maxHeight: "92vh",
+              width: "auto",
+              height: "auto",
+              objectFit: "contain",
+              display: "block",
+              borderRadius: 8,
+              cursor: "zoom-out",
+            }}
+          />
+        </div>
+      ) : (
         <div
-          className="resume-modal-body"
-          style={{ overflowY: "auto", display: "flex", flexDirection: "column", gap: 18 }}
+          className="resume-modal-container certificate-modal-container"
+          style={{ width: "min(1160px, 100%)", maxWidth: "none", maxHeight: "94vh" }}
+          onClick={(e) => e.stopPropagation()}
         >
-          {fileUrl && cert.file_type === "image" && (
-            <div
-              style={{
-                border: "1px solid var(--line)",
-                borderRadius: 8,
-                overflow: "hidden",
-                background: "var(--paper)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <img
-                src={fileUrl}
-                alt={`Pratinjau sertifikat ${cert.title}`}
-                style={{
-                  width: "100%",
-                  maxHeight: "52vh",
-                  objectFit: "contain",
-                  display: "block",
-                }}
-              />
+          <header className="resume-modal-header" style={{ padding: "14px 20px" }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <p className="eyebrow eyebrow--technical" style={{ fontSize: 12 }}>
+                  {cert.category || "SERTIFIKAT"}
+                </p>
+                {cert.is_featured && (
+                  <span
+                    className="competency-level-badge competency-level-badge--core"
+                    style={{ fontSize: 10, padding: "2px 8px" }}
+                  >
+                    ★ FEATURED
+                  </span>
+                )}
+              </div>
+              <h3 id="certificate-modal-title" className="resume-modal-title">
+                {cert.title}
+              </h3>
             </div>
-          )}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+              {fileUrl && cert.file_type === "image" && (
+                <button
+                  type="button"
+                  className="button button--secondary"
+                  style={{ minHeight: 36, padding: "6px 12px", fontSize: 12 }}
+                  onClick={() => setIsFullscreen(true)}
+                >
+                  Layar Penuh ⤢
+                </button>
+              )}
+              <button
+                type="button"
+                className="resume-modal-close"
+                onClick={onClose}
+                aria-label="Tutup modal pratinjau sertifikat"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </header>
 
-          {fileUrl && cert.file_type === "pdf" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <iframe
-                src={fileUrl}
-                title={`Dokumen PDF ${cert.title}`}
+          <div
+            className="resume-modal-body"
+            style={{ padding: "18px 20px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}
+          >
+            {fileUrl && cert.file_type === "image" && (
+              <div
+                className="certificate-modal-stage"
                 style={{
-                  width: "100%",
-                  height: "50vh",
-                  minHeight: 320,
                   border: "1px solid var(--line)",
                   borderRadius: 8,
+                  overflow: "hidden",
                   background: "var(--paper)",
-                }}
-              />
-              <div
-                style={{
+                  padding: 8,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  flexWrap: "wrap",
+                  justifyContent: "center",
                 }}
               >
-                <span className="project-card__meta">PDF DOCUMENT // VERIFIED</span>
-                <a
-                  href={fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
-                  className="table-action-link"
-                >
-                  Unduh / Buka PDF ↗
-                </a>
+                <img
+                  src={fileUrl}
+                  alt={`Pratinjau sertifikat ${cert.title}`}
+                  onClick={() => setIsFullscreen(true)}
+                  title="Klik untuk tampilan layar penuh"
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    maxHeight: "74vh",
+                    objectFit: "contain",
+                    display: "block",
+                    cursor: "zoom-in",
+                    borderRadius: 4,
+                  }}
+                />
               </div>
-            </div>
-          )}
-
-          <div className="resume-preview-card">
-            <div className="resume-preview-header">
-              <span className="resume-tag">{cert.category || "SERTIFIKAT"}</span>
-              <span className="resume-spec">
-                {cert.file_type === "pdf" ? "PDF DOCUMENT" : "IMAGE CERTIFICATE"}
-              </span>
-            </div>
-            {cert.description && (
-              <p className="resume-preview-desc">{cert.description}</p>
             )}
-            <div className="resume-preview-highlights">
-              <div>
-                <span>PENERBIT</span>
-                <strong>{cert.issuer}</strong>
+
+            {fileUrl && cert.file_type === "pdf" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <iframe
+                  src={fileUrl}
+                  title={`Dokumen PDF ${cert.title}`}
+                  style={{
+                    width: "100%",
+                    height: "74vh",
+                    minHeight: 460,
+                    border: "1px solid var(--line)",
+                    borderRadius: 8,
+                    background: "var(--paper)",
+                  }}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span className="project-card__meta">PDF DOCUMENT // VERIFIED</span>
+                  <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                    className="table-action-link"
+                  >
+                    Unduh / Buka PDF ↗
+                  </a>
+                </div>
               </div>
-              {cert.issue_date && (
-                <div>
-                  <span>TANGGAL TERBIT</span>
-                  <strong>{cert.issue_date}</strong>
-                </div>
+            )}
+
+            <div className="resume-preview-card">
+              <div className="resume-preview-header">
+                <span className="resume-tag">{cert.category || "SERTIFIKAT"}</span>
+                <span className="resume-spec">
+                  {cert.file_type === "pdf" ? "PDF DOCUMENT" : "IMAGE CERTIFICATE"}
+                </span>
+              </div>
+              {cert.description && (
+                <p className="resume-preview-desc">{cert.description}</p>
               )}
-              {cert.credential_id && (
+              <div className="resume-preview-highlights">
                 <div>
-                  <span>ID KREDENSIAL</span>
-                  <strong style={{ fontFamily: "var(--font-mono-editorial)", wordBreak: "break-all" }}>
-                    {cert.credential_id}
-                  </strong>
+                  <span>PENERBIT</span>
+                  <strong>{cert.issuer}</strong>
                 </div>
-              )}
+                {cert.issue_date && (
+                  <div>
+                    <span>TANGGAL TERBIT</span>
+                    <strong>{cert.issue_date}</strong>
+                  </div>
+                )}
+                {cert.credential_id && (
+                  <div>
+                    <span>ID KREDENSIAL</span>
+                    <strong style={{ fontFamily: "var(--font-mono-editorial)", wordBreak: "break-all" }}>
+                      {cert.credential_id}
+                    </strong>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <footer className="resume-modal-footer" style={{ flexWrap: "wrap" }}>
-          {fileUrl && (
-            <a
-              className="button"
-              href={fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              download
-            >
-              {cert.file_type === "pdf" ? "Unduh / Buka PDF ↗" : "Buka / Unduh Dokumen ↗"}
-            </a>
-          )}
-          {verifyHref && (
-            <a
-              className="button button--secondary"
-              href={verifyHref}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {verifyLabel}
-            </a>
-          )}
-          <button type="button" className="button button--secondary" onClick={onClose}>
-            Tutup
-          </button>
-        </footer>
-      </div>
+          <footer className="resume-modal-footer" style={{ padding: "12px 20px", flexWrap: "wrap" }}>
+            {fileUrl && (
+              <a
+                className="button"
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+              >
+                {cert.file_type === "pdf" ? "Unduh / Buka PDF ↗" : "Buka / Unduh Dokumen ↗"}
+              </a>
+            )}
+            {verifyHref && (
+              <a
+                className="button button--secondary"
+                href={verifyHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {verifyLabel}
+              </a>
+            )}
+            <button type="button" className="button button--secondary" onClick={onClose}>
+              Tutup
+            </button>
+          </footer>
+        </div>
+      )}
     </div>
   );
 }
@@ -336,6 +404,13 @@ function CertificateVisual({ cert }: { cert: Certificate }) {
       alt={`Sertifikat ${cert.title} dari ${cert.issuer}`}
       loading="lazy"
       decoding="async"
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+        objectPosition: "center",
+        display: "block",
+      }}
     />
   );
 }
@@ -518,23 +593,27 @@ export default function EditorialCertificates({
             />
           ) : filteredCertificates.length ? (
             viewMode === "grid" ? (
-              <div className="project-grid project-grid--catalog">
+              <div
+                className={`project-grid certificate-grid${filteredCertificates.length <= 2 ? " certificate-grid--compact" : ""}`}
+              >
                 {filteredCertificates.map((cert) => {
                   const verifyHref = cert.credential_url ? safePublicHref(cert.credential_url) : undefined;
                   return (
                     <article key={cert.id} className="project-card">
                       <button
                         type="button"
-                        className="project-card__visual"
+                        className="certificate-card__visual"
                         onClick={() => setSelectedCert(cert)}
                         aria-label={`${content.preview_action_label}: ${cert.title}`}
                         style={{
-                          border: "none",
-                          padding: 0,
+                          aspectRatio: "1.414 / 1",
                           width: "100%",
+                          padding: 6,
                           cursor: "pointer",
                           textAlign: "left",
-                          display: "block",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
                         <CertificateVisual cert={cert} />

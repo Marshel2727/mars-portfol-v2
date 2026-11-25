@@ -87,7 +87,7 @@ export default function CertificateList({
                       <img
                         src={getImageUrl(certificate.file_url)}
                         alt={certificate.title}
-                        className="h-12 w-16 rounded border border-editorial-line-strong bg-editorial-paper-deep object-cover shadow-sm"
+                        className="h-14 w-20 rounded border border-editorial-line-strong bg-editorial-paper p-0.5 object-contain shadow-sm"
                       />
                     )}
                   </td>
