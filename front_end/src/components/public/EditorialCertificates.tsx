@@ -129,7 +129,7 @@ function CertificatePreviewModal({
           style={{ width: "min(1160px, 100%)", maxWidth: "none", maxHeight: "94vh" }}
           onClick={(e) => e.stopPropagation()}
         >
-          <header className="resume-modal-header" style={{ padding: "14px 20px" }}>
+          <header className="resume-modal-header" style={{ padding: "14px 20px", flexShrink: 0 }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <p className="eyebrow eyebrow--technical" style={{ fontSize: 12 }}>
@@ -175,12 +175,21 @@ function CertificatePreviewModal({
 
           <div
             className="resume-modal-body"
-            style={{ padding: "18px 20px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 16 }}
+            style={{
+              flex: "1 1 auto",
+              minHeight: 0,
+              padding: "16px 20px",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+            }}
           >
             {fileUrl && cert.file_type === "image" && (
               <div
                 className="certificate-modal-stage"
                 style={{
+                  flexShrink: 0,
                   border: "1px solid var(--line)",
                   borderRadius: 8,
                   overflow: "hidden",
@@ -197,9 +206,10 @@ function CertificatePreviewModal({
                   onClick={() => setIsFullscreen(true)}
                   title="Klik untuk tampilan layar penuh"
                   style={{
-                    width: "100%",
+                    width: "auto",
                     height: "auto",
-                    maxHeight: "74vh",
+                    maxWidth: "100%",
+                    maxHeight: "65vh",
                     objectFit: "contain",
                     display: "block",
                     cursor: "zoom-in",
@@ -210,14 +220,14 @@ function CertificatePreviewModal({
             )}
 
             {fileUrl && cert.file_type === "pdf" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", gap: 10 }}>
                 <iframe
                   src={fileUrl}
                   title={`Dokumen PDF ${cert.title}`}
                   style={{
                     width: "100%",
-                    height: "74vh",
-                    minHeight: 460,
+                    height: "65vh",
+                    minHeight: 380,
                     border: "1px solid var(--line)",
                     borderRadius: 8,
                     background: "var(--paper)",
@@ -246,7 +256,7 @@ function CertificatePreviewModal({
               </div>
             )}
 
-            <div className="resume-preview-card">
+            <div className="resume-preview-card" style={{ flexShrink: 0 }}>
               <div className="resume-preview-header">
                 <span className="resume-tag">{cert.category || "SERTIFIKAT"}</span>
                 <span className="resume-spec">
@@ -279,7 +289,7 @@ function CertificatePreviewModal({
             </div>
           </div>
 
-          <footer className="resume-modal-footer" style={{ padding: "12px 20px", flexWrap: "wrap" }}>
+          <footer className="resume-modal-footer" style={{ padding: "12px 20px", flexWrap: "wrap", flexShrink: 0 }}>
             {fileUrl && (
               <a
                 className="button"
